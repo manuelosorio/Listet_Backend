@@ -6,6 +6,7 @@
 ## Angular ##
 # compiled output
 dist/
+src/environments
 tmp/
 server/**/*.js
 server/**/*.js.map
@@ -99,7 +100,7 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# dotenv environments variables file
 .env.test
 
 # parcel-bundler cache (https://parceljs.org/)

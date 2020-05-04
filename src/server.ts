@@ -1,25 +1,19 @@
 import express from 'express';
-import dotenv from "dotenv";
-import mysql from 'mysql';
+import userRoutes  from './routes/user';
+import {variables} from './environments/variables';
+import environment from './environments/environment';
 
-dotenv.config();
+const app = express();
+const port = variables.port;
 
-const server = express();
-const port = process.env.PORT;
+app.use(environment);
+app.use(userRoutes);
 
-const connection = mysql.createConnection({
-  host: process.env.DB_URL,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
-})
-
-
-server.get('/', (req, res) => {
+app.get('/', (req, res) => {
   res.send('Hello World');
 });
 
-server.listen(port, err => {
+app.listen(port, err => {
   if (err) {
     throw err;
   }
