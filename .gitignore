@@ -10,6 +10,7 @@ src/environments
 tmp/
 server/**/*.js
 server/**/*.js.map
+private/
 
 # dependencies
 node_modules/
@@ -114,10 +115,10 @@ jspm_packages/
 
 # rollup.js default build output
 
-# Uncomment the public line if your project uses Gatsby
+# Uncomment the private line if your project uses Gatsby
 # https://nextjs.org/blog/next-9-1#public-directory-support
 # https://create-react-server.dev/docs/using-the-public-folder/#docsNav
-# public
+# private
 
 # Storybook build outputs
 .out
