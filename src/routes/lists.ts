@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 
 const listRoutes = Router();
 const connection = db;
-const lists = "SELECT * FROM lists";
+const lists = "SELECT * FROM view_lists";
 
 
 listRoutes.use(bodyParser.json());
@@ -21,7 +21,7 @@ listRoutes.use((req, res, next) => {
 listRoutes.get('/lists', (req, res) =>  {
 
   connection.query(lists, (err, results, _fields) => {
-    const errorMessage = `we failed to query lists ${err}`;
+    const errorMessage = `We failed to query lists ${err}`;
     if (err) {
       res.sendStatus(500)
       throw errorMessage;
