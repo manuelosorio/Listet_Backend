@@ -2,6 +2,8 @@ import Router from 'express';
 import db from '../database/db';
 import bodyParser from 'body-parser';
 import {variables} from '../environments/variables';
+import {comparePassword, hashPassword} from '../middleware/bcrypt';
+import Bcrypt from 'bcrypt';
 
 const userRoutes = Router();
 const connection = db;
@@ -55,7 +57,8 @@ userRoutes.post('/new/user', (req, res, next) => {
   const lastName: string = req.body.lastName;
   const email: string = req.body.email;
   const username: string = req.body.username;
-  const password: string = req.body.password;
+  const password: any = hashPassword(req.body.password);
+
 
   connection.query(variables.postQuery, [firstName, lastName, email, username, password, 0, 0],
     (err, results, fields) => {
@@ -68,7 +71,18 @@ userRoutes.post('/new/user', (req, res, next) => {
       res.end();
     });
 });
+userRoutes.post('/login', (req, res, next) => {
+  const username = req.body.username;
+  const password = req.body.password;
 
+  connection.query("SELECT \`password\` FROM users WHERE username=" + `\"${username}\"`, (err, results) => {
+    if(err) throw err;
+    const hash = results.map((result) => {
+      return result.password;
+    });
+    comparePassword(password, hash[0]);
+  })
+});
 
 
 export default userRoutes;

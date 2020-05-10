@@ -3,6 +3,7 @@ import userRoutes  from './routes/user';
 import {variables} from './environments/variables';
 import environment from './environments/environment';
 import listRoutes from './routes/lists';
+import {comparePassword} from './middleware/bcrypt';
 
 const app = express();
 const port = variables.port;
@@ -19,6 +20,7 @@ app.listen(port, err => {
   if (err) {
     throw err;
   }
+
   return console.log(`server is listening on ${port}`);
 })
 
