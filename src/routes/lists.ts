@@ -1,9 +1,9 @@
 import Router from 'express';
-import db from '../database/db';
+import {Db} from '../database/db';
 import bodyParser from 'body-parser';
 
 const listRoutes = Router();
-const connection = db;
+const connection = Db.getConnection();
 const lists = "SELECT * FROM view_lists";
 
 
