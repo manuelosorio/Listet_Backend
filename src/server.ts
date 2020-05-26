@@ -1,19 +1,36 @@
 import express from 'express';
+import Flash from 'express-flash';
+import cookieParser from 'cookie-parser';
+const app = express();
+
 import userRoutes  from './routes/user';
 import {variables} from './environments/variables';
-import environment from './environments/environment';
 import listRoutes from './routes/lists';
-import {comparePassword} from './middleware/bcrypt';
+import environment from './environments/environment';
 
-const app = express();
+
+
 const port = variables.port;
 
+app.use(express.static('private'));
+
 app.use(environment);
+app.use(Flash());
 app.use(userRoutes);
 app.use(listRoutes);
 
 app.get('/', (req, res) => {
-  res.send('Hello World');
+  console.log("cookies: ", req.cookies);
+  if (!req.session) {
+    return res.send('There is no session')
+  }
+  if (!req.session.user) {
+    return res.send('You are not logged in')
+  } else {
+    const firstName = req.session.user.firstName
+    const lastName = req.session.user.lastName
+    return res.send(`Hello ${firstName} ${lastName}`);
+  }
 });
 
 app.listen(port, err => {
