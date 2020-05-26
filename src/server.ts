@@ -1,6 +1,5 @@
 import express from 'express';
 import Flash from 'express-flash';
-import cookieParser from 'cookie-parser';
 const app = express();
 
 import userRoutes  from './routes/user';
