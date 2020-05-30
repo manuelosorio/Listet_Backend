@@ -1,7 +1,8 @@
+import helmet from 'helmet';
 import express from 'express';
-import Flash from 'express-flash';
 const app = express();
 
+import Flash from 'express-flash';
 import userRoutes  from './routes/user';
 import {variables} from './environments/variables';
 import listRoutes from './routes/lists';
@@ -11,15 +12,14 @@ import environment from './environments/environment';
 
 const port = variables.port;
 
-app.use(express.static('private'));
 
 app.use(environment);
 app.use(Flash());
 app.use(userRoutes);
 app.use(listRoutes);
+// app.use(express.static('private'));
 
 app.get('/', (req, res) => {
-  console.log("cookies: ", req.cookies);
   if (!req.session) {
     return res.send('There is no session')
   }

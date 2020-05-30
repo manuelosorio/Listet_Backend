@@ -1,4 +1,4 @@
-import Router from 'express';
+import {Router} from 'express';
 import session from 'express-session';
 import bodyParser from 'body-parser';
 
@@ -14,12 +14,7 @@ const individualUser = "SELECT * FROM users WHERE username = ?";
 userRoutes.use(bodyParser.json());
 userRoutes.use(bodyParser.urlencoded({extended: false}))
 
-userRoutes.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  next();
-});
-
+// Display all users. Remove in preparation for production.
 userRoutes.get('/users', (req, res) => {
   connection.query(users, (err, results) => {
     const errorMessage = `we failed to query users ${err}`;
@@ -34,6 +29,7 @@ userRoutes.get('/users', (req, res) => {
     return users;
   });
 });
+
 userRoutes.get('/users/:username', (req, res) => {
   const userName = req.params.username;
   console.log("username: " + userName);
@@ -71,39 +67,50 @@ userRoutes.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   if (username === '') {
-    res.redirect("/login.html");
-    req.flash("Username is required.");
+    // res.redirect("/login.html");
     return console.error("Username is required.");
   }
   if (password === '') {
-    res.redirect("/login.html");
-    req.flash("Password is required.");
+    // res.redirect("/login.html");
     return console.error("Password is required.");
   }
   const passwordQuery = "SELECT id, username, password, firstName, lastName FROM users WHERE username=" + `\"${username}\"`;
-  connection.query(passwordQuery, (err, results) => {
-    if(err) return err;
-    const hash = results.map((result) => {
-      return result.password;
-    });
-    const userData = results.map((result) => {
-      return {
-        username: result.username,
-        firstName: result.firstName,
-        lastName: result.lastName
+    connection.query(passwordQuery, (err, results) => {
+      if (err) return err;
+      const hash = results.map((result) => {
+        return result.password;
+      });
+      const userData = results.map((result) => {
+        return {
+          username: result.username,
+          firstName: result.firstName,
+          lastName: result.lastName
+        }
+      });
+      try {
+        if (comparePassword(password, hash[0]) === false) {
+          res.status(403).send("Username or Password doesn't match!").end();
+        } else {
+          res.send(userSession(userData[0]))
+        }
+      } catch (e) {
+        res.status(403).send('Username or Password doesn\'t match!').end()
       }
-    });
-    if (comparePassword(password, hash[0]) === false) {
-      res.send("Password doesn't match!").status(500).end();
-    } else {
-      req.session.user = userData[0];
-      mySession(req.session.user)
-      res.send("Successful login!")
-    }
-  })
-  const mySession = (userSession) => {
-    console.log("Session: ");
-    return session(userSession);
+    })
+  const userSession = (sessionData: object) => {
+    return req.session.user = sessionData;
   };
 });
+userRoutes.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    err ? res.status(500).send('Could not logout.') :
+      res.status(200).send({});
+  })
+});
+
+userRoutes.get('/session', (req, res) => {
+  req.session.user ? res.status(200).send({authenticated: true})
+    : res.status(200).send({authenticated: false});
+})
+
 export default userRoutes;

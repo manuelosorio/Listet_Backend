@@ -1,4 +1,4 @@
-import Router from 'express';
+import {Router} from 'express';
 import {Db} from '../database/db';
 import bodyParser from 'body-parser';
 
