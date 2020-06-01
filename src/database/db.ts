@@ -1,15 +1,20 @@
 import mysql, {queryCallback} from 'mysql';
+import chalk from 'chalk';
 import {variables} from '../environments/variables';
+
+
 export class Db {
   static getConnection () {
-    const db = mysql.createConnection(variables.db);
-    db.connect((err) => {
-      if(err) throw err.message;
+    const db = mysql.createPool(variables.db);
+    db.getConnection((err) => {
+      const errMessage = "Connection to database base refused. " +
+        "Please check that connection details are correct and that the database is running."
+      if(err) return console.error(chalk.red(errMessage));
       console.log('Connected')
     });
     return db;
   }
-  static async getUsers (username: string, next: queryCallback) {
+  static async findUser (username: string, next: queryCallback) {
     console.log("Fetching User Data");
     let myResults: object;
     this.getConnection().query("Select * FROM users Where username=" + `\"${username}\"`, (err, rows, fields) => {
@@ -22,7 +27,7 @@ export class Db {
       next(null, rows)
       return rows;
     })
-    console.log(myResults)
+    console.log(myResults);
     return myResults;
   }
 }
