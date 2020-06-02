@@ -65,17 +65,21 @@ userRoutes.post('/login', async (req, res) => {
       console.log(err);
       return res.status(403).send(err).end()
     } else {
-      if (comparePassword(password, result[0].password) === false) {
-        res.status(403).send("Username or Password doesn't match!").end();
-      }
-      db.findUserFromUsername(username, (error, results) => {
-        if (error) {
-          console.log(error);
-          return res.status(403).send(error).end();
+      try {
+        if (comparePassword(password, result[0].password) === false) {
+          res.status(403).send("Username or Password doesn't match!").end();
         }
-        console.log(results)
-        res.send(db.userSession(req, results))
-      });
+        db.findUserFromUsername(username, (error, results) => {
+          if (error) {
+            console.log(error);
+            return res.status(403).send(error).end();
+          }
+          console.log(results)
+          res.send(db.userSession(req, results))
+        });
+      } catch (e) {
+        return (e);
+      }
     }
   })
   console.log(dbPassword)
