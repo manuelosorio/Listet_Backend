@@ -1,106 +1,86 @@
 import {Router} from 'express';
-import session from 'express-session';
 import bodyParser from 'body-parser';
 
 import {Db} from '../database/db';
 import {variables} from '../environments/variables';
 import {comparePassword, hashPassword} from '../middleware/bcrypt';
-
+import {User} from '../models/user'
+import mysql from 'mysql';
 const userRoutes = Router();
-const connection = Db.getConnection();
+const db = new Db(mysql.createPool(variables.db));
+const connection = db.getConnection();
 const users = "SELECT * FROM users";
-const individualUser = "SELECT * FROM users WHERE username = ?";
 
 userRoutes.use(bodyParser.json());
 userRoutes.use(bodyParser.urlencoded({extended: false}))
 
 // Display all users. Remove in preparation for production.
-userRoutes.get('/users', (req, res) => {
-  connection.query(users, (err, results) => {
-    const errorMessage = `we failed to query users ${err}`;
+userRoutes.get('/users', async(req, res) => {
+  await db.findAllUsers((err, results) => {
     if (err) {
+      const errorMessage = `we failed to query users ${err}`;
       res.sendStatus(500)
-      throw errorMessage;
+      return errorMessage;
     }
-    const allUsers = results.map((result) => {
-      return {firstName: result.firstName, lastName: result.lastName, username: result.username}
-    })
-    res.json(allUsers);
+    res.status(200).send(results).end();
     return users;
   });
 });
 
-userRoutes.get('/users/:username', (req, res) => {
+userRoutes.get("/user/:username", async (req, res) => {
   const userName = req.params.username;
-  console.log("username: " + userName);
-  res.status(302);
-  connection.query(individualUser, [userName], (err, results, ) => {
-    const errorMessage = `we failed to query user ${err}`;
-    if (err) {
-      res.sendStatus(500)
-      throw errorMessage;
-    }
-    const user = results.map((result) => {
-      return {firstName: result.firstName, lastName: result.lastName, username: result.username}
-    })
-    res.json(user);
-    return user;
+  await db.findUserFromUsername(userName, (err, results) => {
+    if (err) {console.log(err);return res.status(403).send(err).end()};
+    return res.status(200).send(results).end();
   })
-});
-userRoutes.post('/register', (req, res) => {
+})
+
+userRoutes.post('/register', async (req, res) => {
   console.log('new user');
-  const firstName: string = req.body.firstName;
-  const lastName: string = req.body.lastName;
-  const email: string = req.body.email;
-  const username: string = req.body.username;
-  const password: any = hashPassword(req.body.password);
-  connection.query(variables.postQuery, [firstName, lastName, email, username, password, 0, 0],
-    (err) => {
-      if (err) {
-        console.log(req);
-        throw err.message;
-      }
-      res.end();
-    });
+  const user: User = {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    email: req.body.email,
+    username: req.body.username,
+    password: hashPassword(req.body.password)
+  }
+  await db.newUser(user, (err, next) => {
+    return console.log(next);
+  });
 });
-userRoutes.post('/login', (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
+
+userRoutes.post('/login', async (req, res) => {
+  const username: string = req.body.username;
+  const password: string = req.body.password;
   if (username === '') {
-    // res.redirect("/login.html");
+    // res.redirect("/login");
     return console.error("Username is required.");
   }
   if (password === '') {
     // res.redirect("/login.html");
     return console.error("Password is required.");
   }
-  const passwordQuery = "SELECT id, username, password, firstName, lastName FROM users WHERE username=" + `\"${username}\"`;
-    connection.query(passwordQuery, (err, results) => {
-      if (err) return err;
-      const hash = results.map((result) => {
-        return result.password;
-      });
-      const userData = results.map((result) => {
-        return {
-          username: result.username,
-          firstName: result.firstName,
-          lastName: result.lastName
-        }
-      });
-      try {
-        if (comparePassword(password, hash[0]) === false) {
-          res.status(403).send("Username or Password doesn't match!").end();
-        } else {
-          res.send(userSession(userData[0]))
-        }
-      } catch (e) {
-        res.status(403).send('Username or Password doesn\'t match!').end()
+  const dbPassword = await db.getPassword(username, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.status(403).send(err).end()
+    } else {
+      if (comparePassword(password, result[0].password) === false) {
+        res.status(403).send("Username or Password doesn't match!").end();
       }
-    })
-  const userSession = (sessionData: object) => {
-    return req.session.user = sessionData;
-  };
+      db.findUserFromUsername(username, (error, results) => {
+        if (error) {
+          console.log(error);
+          return res.status(403).send(error).end();
+        }
+        console.log(results)
+        res.send(db.userSession(req, results))
+      });
+    }
+  })
+  console.log(dbPassword)
 });
+
 userRoutes.post('/logout', (req, res) => {
   req.session.destroy((err) => {
     err ? res.status(500).send('Could not logout.') :

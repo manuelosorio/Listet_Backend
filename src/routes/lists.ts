@@ -1,9 +1,12 @@
 import {Router} from 'express';
 import {Db} from '../database/db';
 import bodyParser from 'body-parser';
+import mysql from 'mysql';
+import {variables} from '../environments/variables';
 
 const listRoutes = Router();
-const connection = Db.getConnection();
+const db = new Db(mysql.createPool(variables.db))
+const connection = db.getConnection();
 const lists = "SELECT * FROM view_lists";
 
 

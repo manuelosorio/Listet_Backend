@@ -1,33 +1,58 @@
-import mysql, {queryCallback} from 'mysql';
+import {MysqlError, Pool, queryCallback} from 'mysql';
 import chalk from 'chalk';
 import {variables} from '../environments/variables';
+import {User} from '../models/user';
 
 
 export class Db {
-  static getConnection () {
-    const db = mysql.createPool(variables.db);
-    db.getConnection((err) => {
+  db: Pool;
+  constructor(db) {
+    this.db = db;
+  }
+
+  getConnection () {
+    this.db.getConnection((err: MysqlError) => {
       const errMessage = "Connection to database base refused. " +
         "Please check that connection details are correct and that the database is running."
       if(err) return console.error(chalk.red(errMessage));
       console.log('Connected')
     });
-    return db;
+    return this.db;
   }
-  static async findUser (username: string, next: queryCallback) {
+
+  async query(query: string, params: any | null, next: queryCallback) {
+    console.log("Fetching data");
+    if (!params) this.getConnection().query(query, next);
+    else this.getConnection().query(query, params, next)
+  }
+  async findAllUsers(next: queryCallback) {
+    await this.query('Select email, username, firstName, lastName FROM users', null, next);
+  }
+  async findUserFromUsername (username: string, next: queryCallback) {
+    await this.query('Select email, username, firstName, lastName FROM users Where username= ?', username, next)
+  }
+  async findUserFromEmail (email: string, next: queryCallback) {
+    await this.query('Select email, username, firstName, lastName FROM users Where email= ?', email, next);
+  }
+  async getPassword (username: string, next: queryCallback) {
     console.log("Fetching User Data");
-    let myResults: object;
-    this.getConnection().query("Select * FROM users Where username=" + `\"${username}\"`, (err, rows, fields) => {
-      if (err) {
-        console.log("Failed to get users data");
-        next(err, null);
-      }
-      console.log("Fetched Users Successfully");
-      myResults = Object.values(JSON.parse(JSON.stringify(rows)))
-      next(null, rows)
-      return rows;
-    })
-    console.log(myResults);
-    return myResults;
+    await this.query("Select password FROM users Where username= ?", username, next);
   }
+
+  async newUser (user: User, next: queryCallback) {
+    await this.query(variables.postUserQuery, [
+      user.firstName,
+      user.lastName,
+      user.email,
+      user.username,
+      user.password,
+      0,
+      0
+    ], next)
+  }
+
+  userSession(req, sessionData: object) {
+    return req.session.user = sessionData;
+  };
 }
+
