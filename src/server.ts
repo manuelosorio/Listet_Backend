@@ -1,7 +1,4 @@
-import helmet from 'helmet';
 import express from 'express';
-const app = express();
-
 import Flash from 'express-flash';
 import userRoutes  from './routes/user';
 import {variables} from './environments/variables';
@@ -9,7 +6,7 @@ import listRoutes from './routes/lists';
 import environment from './environments/environment';
 
 
-
+const app = express();
 const port = variables.port;
 
 
@@ -17,7 +14,7 @@ app.use(environment);
 app.use(Flash());
 app.use(userRoutes);
 app.use(listRoutes);
-// app.use(express.static('private'));
+
 
 app.get('/', (req, res) => {
   if (!req.session) {

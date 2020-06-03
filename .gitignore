@@ -6,7 +6,7 @@
 ## Angular ##
 # compiled output
 dist/
-src/environments
+src/environments/environment.prod.ts
 tmp/
 server/**/*.js
 server/**/*.js.map
