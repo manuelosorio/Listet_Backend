@@ -8,7 +8,9 @@
     "dev": "nodemon --watch src/ --exec \"tsc && npm start\" --verbose -e ts",
     "dev2": "concurrently -k -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold\" \"npm run watch-ts\" \"nodemon ./dist/app.js\"",
     "watch-ts": "tsc -w",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -40,7 +42,8 @@
     "express-mysql-session": "^2.1.4",
     "express-session": "^1.17.1",
     "helmet": "^3.22.0",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "snyk": "^1.334.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
@@ -57,5 +60,6 @@
     "nodemon": "^2.0.3",
     "tslint": "^6.1.2",
     "typescript": "^3.8.3"
-  }
+  },
+  "snyk": true
 }
