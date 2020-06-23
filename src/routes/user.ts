@@ -19,7 +19,7 @@ userRoutes.get('/users', async(req, res) => {
   await db.findAllUsers((err, results) => {
     if (err) {
       const errorMessage = `we failed to query users ${err}`;
-      res.sendStatus(500)
+      res.sendStatus(500).send(errorMessage)
       return errorMessage;
     }
     res.status(200).send(results).end();
@@ -45,7 +45,8 @@ userRoutes.post('/register', async (req, res) => {
     password: hashPassword(req.body.password)
   }
   await db.newUser(user, (err, next) => {
-    return console.log(next);
+    console.log(next);
+    return res.status(200).end();
   });
 });
 
@@ -83,7 +84,6 @@ userRoutes.post('/login', async (req, res) => {
       }
     }
   })
-  console.log(dbPassword)
 });
 
 userRoutes.post('/logout', (req, res) => {
