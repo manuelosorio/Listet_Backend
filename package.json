@@ -43,7 +43,7 @@
     "express-session": "^1.17.1",
     "helmet": "^3.22.0",
     "mysql": "^2.18.1",
-    "snyk": "^1.334.0"
+    "snyk": "^1.342.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
