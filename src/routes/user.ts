@@ -1,18 +1,13 @@
 import {Router} from 'express';
-import bodyParser from 'body-parser';
-
+import mysql from 'mysql';
 import {Db} from '../database/db';
 import {variables} from '../environments/variables';
 import {comparePassword, hashPassword} from '../middleware/bcrypt';
 import {User} from '../models/user'
-import mysql from 'mysql';
+
 const userRoutes = Router();
 const db = new Db(mysql.createPool(variables.db));
-const connection = db.getConnection();
-const users = "SELECT * FROM users";
 
-userRoutes.use(bodyParser.json());
-userRoutes.use(bodyParser.urlencoded({extended: false}))
 
 // Display all users. Remove in preparation for production.
 userRoutes.get('/users', async(req, res) => {
@@ -23,7 +18,7 @@ userRoutes.get('/users', async(req, res) => {
       return errorMessage;
     }
     res.status(200).send(results).end();
-    return users;
+    return results;
   });
 });
 
@@ -61,7 +56,7 @@ userRoutes.post('/login', async (req, res) => {
     // res.redirect("/login.html");
     return console.error("Password is required.");
   }
-  const dbPassword = await db.getPassword(username, (err, result) => {
+  await db.getPassword(username, (err, result) => {
     if (err) {
       console.log(err);
       return res.status(403).send(err).end()

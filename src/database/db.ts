@@ -23,7 +23,7 @@ export class Db {
     })
     return this.db;
   }
-
+  // User Queries
   async query(query: string, params: any | null, next: queryCallback) {
     console.log("Fetching data");
     if (!params) this.getConnection().query(query, next);
@@ -32,18 +32,17 @@ export class Db {
   async findAllUsers(next: queryCallback) {
     await this.query('Select email, username, firstName, lastName FROM users', null, next);
   }
-  async findUserFromUsername (username: string, next: queryCallback) {
+  async findUserFromUsername(username: string, next: queryCallback) {
     await this.query('Select email, username, firstName, lastName FROM users Where username= ?', username, next)
   }
-  async findUserFromEmail (email: string, next: queryCallback) {
+  async findUserFromEmail(email: string, next: queryCallback) {
     await this.query('Select email, username, firstName, lastName FROM users Where email= ?', email, next);
   }
   async getPassword (username: string, next: queryCallback) {
     console.log("Fetching User Data");
     await this.query("Select password FROM users Where username= ?", username, next);
   }
-
-  async newUser (user: User, next: queryCallback) {
+  async newUser(user: User, next: queryCallback) {
     await this.query(variables.postUserQuery, [
       user.firstName,
       user.lastName,
