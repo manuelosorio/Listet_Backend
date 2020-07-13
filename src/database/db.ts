@@ -9,7 +9,6 @@ export class Db {
   constructor(db) {
     this.db = db;
   }
-
   getConnection () {
     this.db.getConnection((err: MysqlError, connection: PoolConnection) => {
       const errMessage = "Connection to database base refused. " +
@@ -23,6 +22,7 @@ export class Db {
     })
     return this.db;
   }
+
   // User Queries
   async query(query: string, params: any | null, next: queryCallback) {
     console.log("Fetching data");
@@ -57,5 +57,19 @@ export class Db {
   userSession(req, sessionData: object) {
     return req.session.user = sessionData;
   };
+
+  // List Queries
+  async findAllLists(next: queryCallback) {
+    await this.query('SELECT * FROM view_lists', null, next);
+  }
+  async findList(listId, next: queryCallback) {
+    await this.query('Select * FROM view_lists where id= ?', listId, next);
+  }
+  async findListItems(listId, next: queryCallback) {
+    await this.query('Select * FROM list_items where list_id= ?', listId, next);
+  }
+  async findListComments(listId, next: queryCallback) {
+    await this.query('SELECT * FROM view_comments WHERE list_id= ?', listId, next);
+  }
 }
 
