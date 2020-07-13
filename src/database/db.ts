@@ -1,4 +1,4 @@
-import {MysqlError, Pool, queryCallback} from 'mysql';
+import {MysqlError, Pool, PoolConnection, queryCallback} from 'mysql';
 import chalk from 'chalk';
 import {variables} from '../environments/variables';
 import {User} from '../models/user';
@@ -11,12 +11,16 @@ export class Db {
   }
 
   getConnection () {
-    this.db.getConnection((err: MysqlError) => {
+    this.db.getConnection((err: MysqlError, connection: PoolConnection) => {
       const errMessage = "Connection to database base refused. " +
         "Please check that connection details are correct and that the database is running."
       if(err) return console.error(chalk.red(errMessage));
       console.log('Connected')
-    });
+      if (connection) {
+        connection.release();
+        console.log("Connection has been released!")
+      }
+    })
     return this.db;
   }
 
