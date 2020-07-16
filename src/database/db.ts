@@ -62,14 +62,14 @@ export class Db {
   async findAllLists(next: queryCallback) {
     await this.query('SELECT * FROM view_lists', null, next);
   }
-  async findList(listId, next: queryCallback) {
-    await this.query('Select * FROM view_lists where id= ?', listId, next);
+  async findList(query, next: queryCallback) {
+    await this.query('Select * FROM view_lists where username=? and slug= ?', [query.username, query.slug], next);
   }
-  async findListItems(listId, next: queryCallback) {
-    await this.query('Select * FROM list_items where list_id= ?', listId, next);
+  async findListItems(query, next: queryCallback) {
+    await this.query('Select * FROM view_list_items where username=? and slug= ?', [query.username, query.slug], next);
   }
-  async findListComments(listId, next: queryCallback) {
-    await this.query('SELECT * FROM view_comments WHERE list_id= ?', listId, next);
+  async findListComments(query, next: queryCallback) {
+    await this.query('SELECT * FROM view_comments where list_id=? and slug= ?', [query.list_id, query.slug], next);
   }
 }
 

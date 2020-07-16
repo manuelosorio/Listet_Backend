@@ -13,7 +13,7 @@ listRoutes.get('/lists', async (req, res) =>  {
     const errorMessage = `We failed to query lists ${err}`;
     if (err) {
       res.sendStatus(500)
-      throw errorMessage;
+      return console.log(err);
     }
     const updatedResults = results.map((result) => {
       const creationDate = new DateUtil(result.creation_date);
@@ -29,31 +29,32 @@ listRoutes.get('/lists', async (req, res) =>  {
   });
 });
 
-listRoutes.get('/list/:id', async (req, res) =>  {
-  await db.findList(req.params.id, (err, results) => {
+listRoutes.get('/list/:username/:slug', async (req, res) =>  {
+  const query = {'username': req.params.username, 'slug': req.params.slug}
+  await db.findList(query, (err, results) => {
     if (err) {
-      throw err.message;
+      return console.log(err);
     }
     return res.status(200).send(results).end();
   });
 })
-listRoutes.get('/list/:id/items', async (req, res) =>  {
-  const listId = req.params.id;
-  await db.findListItems(listId, (err, results) => {
+listRoutes.get('/list/:username/:slug/items', async (req, res) =>  {
+  const query = {'username': req.params.username, 'slug': req.params.slug}
+  await db.findListItems(query, (err, results) => {
     if (err) {
-      throw err.message;
+      return console.log(err);
     }
     return res.status(200).send(results).end();
   });
 })
 //
-listRoutes.get('/list/:id/comments', async  (req, res) =>  {
-  const listId = req.params.id;
-  await db.findListComments(listId, (err, results) => {
+listRoutes.get('/list/:list_id/:slug/comments', async  (req, res) =>  {
+  const query = {'list_id': req.params.list_id, 'slug': req.params.slug}
+  await db.findListComments(query, (err, results) => {
 
     if (err) {
       res.sendStatus(500)
-      throw err.message;
+      return console.log(err);
     }
     const updatedResults = results.map((result) => {
       const date = new DateUtil(result.creation_date);
