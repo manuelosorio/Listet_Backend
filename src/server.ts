@@ -15,7 +15,7 @@ app.use(Flash());
 app.use(userRoutes);
 app.use(listRoutes);
 
-
+// TODO: Delete functions for default path
 app.get('/', (req, res) => {
   if (!req.session) {
     return res.send('There is no session')
@@ -23,8 +23,11 @@ app.get('/', (req, res) => {
   if (!req.session.user) {
     return res.send('You are not logged in')
   } else {
-    const firstName = req.session.user.firstName
-    const lastName = req.session.user.lastName
+    const user = req.session.user.map(result => {
+      return {firstName: result.firstName, lastName: result.lastName};
+    });
+    const firstName = user[0].firstName;
+    const lastName = user[0].lastName
     return res.send(`Hello ${firstName} ${lastName}`);
   }
 });
