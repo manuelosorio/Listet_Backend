@@ -25,7 +25,10 @@ userRoutes.get('/users', async(req, res) => {
 userRoutes.get("/user/:username", async (req, res) => {
   const userName = req.params.username;
   await db.findUserFromUsername(userName, (err, results) => {
-    if (err) {console.log(err);return res.status(403).send(err).end()};
+    if (err) {
+      console.log(err);
+      return res.status(403).send(err).end()
+    }
     return res.status(200).send(results).end();
   })
 })
@@ -40,7 +43,6 @@ userRoutes.post('/register', async (req, res) => {
     password: hashPassword(req.body.password)
   }
   await db.newUser(user, (err, next) => {
-    console.log(next);
     return res.status(200).end();
   });
 });
@@ -49,11 +51,9 @@ userRoutes.post('/login', async (req, res) => {
   const username: string = req.body.username;
   const password: string = req.body.password;
   if (username === '') {
-    // res.redirect("/login");
     return console.error("Username is required.");
   }
   if (password === '') {
-    // res.redirect("/login.html");
     return console.error("Password is required.");
   }
   await db.getPassword(username, (err, result) => {
@@ -89,8 +89,10 @@ userRoutes.post('/logout', (req, res) => {
 });
 
 userRoutes.get('/session', (req, res) => {
-  req.session.user ? res.status(200).send({authenticated: true})
+  req.session.user ? res.status(200).send({authenticated: true, /*sessionData: req.session.user.map(result => {
+      return {username: result.username, firstName: result.firstName, lastName: result.lastName};
+    }), sessionID: req.session.id*/})
     : res.status(200).send({authenticated: false});
-})
+});
 
 export default userRoutes;
