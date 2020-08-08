@@ -47,16 +47,8 @@ userRoutes.post('/register', async (req, res) => {
     password: hashPassword(req.body.password)
   }
   // TODO: find a better way to test if email, username or password before attempting to create a new user.
-  // if (user.username === '') {
-  //   return res.status(400).send('Username is required').end();
-  // }
-  // if (user.email === '') {
-  //   return res.status(400).send('Email is required').end();
-  // }
-  // if (req.body.password === '') {
-  //   return res.status(400).send('Password is required').end();
-  // }
-  return user.username === '' ? res.status(400).send('Username is required').end() :
+  return user.firstName === '' ? res.status(400).send('First Name is required').end() :
+      user.username === '' ? res.status(400).send('Username is required').end() :
       user.email === '' ? res.status(400).send('Email is required').end() :
       req.params.password === '' ? res.status(400).send('Password is required').end() :
       await db.findUserFromUsername(user.username, (usernameErr, usernameRes) => {
