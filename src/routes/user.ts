@@ -1,13 +1,17 @@
 import {Router} from 'express';
 import mysql from 'mysql';
+import chalk from 'chalk';
 import {Db} from '../database/db';
 import {variables} from '../environments/variables';
 import {comparePassword, hashPassword} from '../middleware/bcrypt';
-import {User} from '../models/user'
+import {User} from '../models/user';
 
 const userRoutes = Router();
 const db = new Db(mysql.createPool(variables.db));
 
+const responseMessage = {
+  message: string
+};
 
 // Display all users. Remove in preparation for production.
 userRoutes.get('/users', async(req, res) => {
@@ -42,9 +46,38 @@ userRoutes.post('/register', async (req, res) => {
     username: req.body.username,
     password: hashPassword(req.body.password)
   }
-  await db.newUser(user, (err, next) => {
-    return res.status(200).end();
-  });
+  await db.findUserFromUsername(user.username, (usernameErr, usernameRes) => {
+
+    if (usernameErr) {
+      console.error(chalk.red('Find by Username Error: ') + usernameErr);
+      return res.status(500).send + usernameErr
+    }
+    if (!usernameRes.length) {
+      return db.findUserFromEmail(user.email, (emailErr, emailRes) => {
+        if (emailErr) {
+          console.error(chalk.red('Find by Email Error: ') + emailErr);
+        }
+        if (!emailRes.length) {
+          db.newUser(user, (err, results) => {
+            if (err) {
+              return err;
+            }
+            responseMessage.message = 'User Created Successfully';
+            console.log(responseMessage);
+            return res.status(201).send(responseMessage.message).end();
+          });
+        } else {
+          responseMessage.message = 'Email Already exists';
+          console.log(responseMessage.message);
+          return res.status(401).send(responseMessage.message).end();
+        }
+      })
+    } else {
+      responseMessage.message = 'Username already exists';
+      console.log(responseMessage);
+      return res.status(401).send(responseMessage).end();
+    }
+  })
 });
 
 userRoutes.post('/login', async (req, res) => {
@@ -59,7 +92,7 @@ userRoutes.post('/login', async (req, res) => {
   await db.getPassword(username, (err, result) => {
     if (err) {
       console.log(err);
-      return res.status(403).send(err).end()
+      return res.status(403).send(err).end();
     } else {
       try {
         if (comparePassword(password, result[0].password) === false) {
@@ -70,12 +103,12 @@ userRoutes.post('/login', async (req, res) => {
               console.log(error);
               return res.status(403).send(error).end();
             }
-            console.log(results)
-            res.send(db.userSession(req, results))
+            console.log(results);
+            res.send(db.userSession(req, results));
           });
         }
       } catch (e) {
-        return (e);
+        return e;
       }
     }
   })
