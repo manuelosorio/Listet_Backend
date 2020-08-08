@@ -49,44 +49,40 @@ userRoutes.post('/register', async (req, res) => {
   // TODO: find a better way to test if email, username or password before attempting to create a new user.
   if (user.username === '') {
     return res.status(400).send('Username is required').end();
-  } else if (user.email === '') {
-    return res.status(400).send('Email is required').end();
-  } else if (req.body.password === '') {
-    return res.status(400).send('Password is required').end();
-  } else {
-    await db.findUserFromUsername(user.username, (usernameErr, usernameRes) => {
-      if (usernameErr) {
-        console.error(chalk.red('Find by Username Error: ') + usernameErr);
-        return res.status(500).send(usernameErr.message).end();
-      }
-      if (!usernameRes.length) {
-        return db.findUserFromEmail(user.email, (emailErr, emailRes) => {
-          if (emailErr) {
-            console.error(chalk.red('Find by Email Error: ') + emailErr);
-            return res.status(500).send(emailErr.message).end();
-          }
-          if (!emailRes.length) {
-            db.newUser(user, (err, results) => {
-              if (err) {
-                return err;
-              }
-              responseMessage.message = 'User Created Successfully';
-              console.log(responseMessage);
-              return res.status(201).send(responseMessage.message).end();
-            });
-          } else {
-            responseMessage.message = 'Email Already exists';
-            console.log(responseMessage.message);
-            return res.status(401).send(responseMessage.message).end();
-          }
-        })
-      } else {
-        responseMessage.message = 'Username already exists';
-        console.log(responseMessage);
-        return res.status(401).send(responseMessage).end();
-      }
-    })
   }
+  if (user.email === '') {
+    return res.status(400).send('Email is required').end();
+  }
+  if (req.body.password === '') {
+    return res.status(400).send('Password is required').end();
+  }
+  await db.findUserFromUsername(user.username, (usernameErr, usernameRes) => {
+    if (usernameErr) {
+      console.error(chalk.red('Find by Username Error: ') + usernameErr.message);
+      return res.status(500).send(usernameErr.message).end();
+    }
+    if (!usernameRes.length) {
+      return db.findUserFromEmail(user.email, (emailErr, emailRes) => {
+        if (emailErr) {
+          console.error(chalk.red('Find by Email Error: ') + emailErr.message);
+          return res.status(500).send(emailErr.message).end();
+        }
+        if (!emailRes.length) {
+          db.newUser(user, (err, results) => {
+            if (err) {
+              return err;
+            }
+            responseMessage.message = 'User Created Successfully';
+            return res.status(201).send(responseMessage).end();
+          });
+        }
+        responseMessage.message = 'Email Already exists';
+        return res.status(401).send(responseMessage).end();
+      })
+    }
+    responseMessage.message = 'Username already exists';
+    return res.status(401).send(responseMessage).end();
+  })
 });
 
 userRoutes.post('/login', async (req, res) => {
@@ -112,8 +108,9 @@ userRoutes.post('/login', async (req, res) => {
               console.log(error);
               return res.status(403).send(error).end();
             }
-            console.log(results);
-            res.send(db.userSession(req, results));
+            db.userSession(req, results);
+            responseMessage.message = 'Login Successful';
+            return res.status(200).send(responseMessage).end();
           });
         }
       } catch (e) {
