@@ -7,7 +7,7 @@ import {comparePassword, hashPassword} from '../middleware/bcrypt';
 import {User} from '../models/user';
 
 const userRoutes = Router();
-const db = new Db(mysql.createPool(variables.db));
+const  db = new Db(mysql.createPool(variables.db));
 
 const responseMessage = {
   message: ''
@@ -18,24 +18,19 @@ userRoutes.get('/users', async(req, res) => {
   await db.findAllUsers((err, results) => {
     if (err) {
       const errorMessage = `we failed to query users ${err}`;
-      res.sendStatus(500).send(errorMessage)
-      return errorMessage;
+      return res.sendStatus(500).send(errorMessage).end();
     }
-    res.status(200).send(results).end();
-    return results;
+    return res.status(200).send(results).end();
   });
 });
 
 userRoutes.get("/user/:username", async (req, res) => {
   const userName = req.params.username;
   await db.findUserFromUsername(userName, (err, results) => {
-    if (err) {
-      console.log(err);
-      return res.status(403).send(err).end()
-    }
-    return res.status(200).send(results).end();
-  })
-})
+    return err ? res.status(403).send(err).end() :
+      !results.length ? res.status(404).send({message: 'User does not exist'}).end() : res.status(200).send(results).end();
+  });
+});
 
 userRoutes.post('/register', async (req, res) => {
   console.log('new user');
@@ -46,9 +41,8 @@ userRoutes.post('/register', async (req, res) => {
     username: req.body.username,
     password: hashPassword(req.body.password)
   }
-  // TODO: find a better way to test if email, username or password before attempting to create a new user.
   return user.firstName === '' ? res.status(400).send('First Name is required').end() :
-      user.username === '' ? res.status(400).send('Username is required').end() :
+    user.username === '' ? res.status(400).send('Username is required').end() :
       user.email === '' ? res.status(400).send('Email is required').end() :
       req.params.password === '' ? res.status(400).send('Password is required').end() :
       await db.findUserFromUsername(user.username, (usernameErr, usernameRes) => {
@@ -84,10 +78,10 @@ userRoutes.post('/login', async (req, res) => {
   const username: string = req.body.username;
   const password: string = req.body.password;
   if (username === '') {
-    return console.error("Username is required.");
+    return res.status(401).send("Username is required.").end();
   }
   if (password === '') {
-    return console.error("Password is required.");
+    return res.status(401).send("Password is required.");
   }
   await db.getPassword(username, (err, result) => {
     if (err) {
@@ -97,17 +91,16 @@ userRoutes.post('/login', async (req, res) => {
       try {
         if (comparePassword(password, result[0].password) === false) {
           return res.status(403).send("Username or Password doesn't match!").end();
-        } else {
-          db.findUserFromUsername(username, (error, results) => {
-            if (error) {
-              console.log(error);
-              return res.status(403).send(error).end();
-            }
-            db.userSession(req, results);
-            responseMessage.message = 'Login Successful';
-            return res.status(200).send(responseMessage).end();
-          });
         }
+        db.findUserFromUsername(username, (error, results) => {
+          if (error) {
+            console.log(error);
+            return res.status(403).send(error).end();
+          }
+          db.userSession(req, results);
+          responseMessage.message = 'Login Successful';
+          return res.status(200).send(responseMessage).end();
+        });
       } catch (e) {
         return e;
       }
