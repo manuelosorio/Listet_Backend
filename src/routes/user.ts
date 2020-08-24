@@ -41,10 +41,10 @@ userRoutes.post('/register', async (req, res) => {
     username: req.body.username,
     password: hashPassword(req.body.password)
   }
-  return user.firstName === '' ? res.status(400).send('First Name is required').end() :
-    user.username === '' ? res.status(400).send('Username is required').end() :
-      user.email === '' ? res.status(400).send('Email is required').end() :
-      req.params.password === '' ? res.status(400).send('Password is required').end() :
+  return user.firstName === '' ? res.status(400).send({message: 'First Name is required'}).end() :
+    user.username === '' ? res.status(400).send({message: 'Username is required'}).end() :
+      user.email === '' ? res.status(400).send({message: 'Email is required'}).end() :
+      req.params.password === '' ? res.status(400).send({message: 'Password is required'}).end() :
       await db.findUserFromUsername(user.username, (usernameErr, usernameRes) => {
         if (usernameErr) {
           console.error(chalk.red('Find by Username Error: ') + usernameErr.message);
@@ -70,7 +70,7 @@ userRoutes.post('/register', async (req, res) => {
           })
         }
         responseMessage.message = 'Username already exists';
-        return res.status(401).send(responseMessage).end();
+        return res.send(responseMessage).end();
       })
 });
 
@@ -78,10 +78,12 @@ userRoutes.post('/login', async (req, res) => {
   const username: string = req.body.username;
   const password: string = req.body.password;
   if (username === '') {
-    return res.status(401).send("Username is required.").end();
+    responseMessage.message = "Username is required.";
+    return res.status(401).send(responseMessage).end();
   }
   if (password === '') {
-    return res.status(401).send("Password is required.");
+    responseMessage.message = "Password is required.";
+    return res.status(401).send(responseMessage).end();
   }
   await db.getPassword(username, (err, result) => {
     if (err) {
@@ -90,7 +92,8 @@ userRoutes.post('/login', async (req, res) => {
     } else {
       try {
         if (comparePassword(password, result[0].password) === false) {
-          return res.status(403).send("Username or Password doesn't match!").end();
+          responseMessage.message = "Username or Password doesn't match!";
+          return res.status(403).send(responseMessage).end();
         }
         db.findUserFromUsername(username, (error, results) => {
           if (error) {
@@ -110,8 +113,8 @@ userRoutes.post('/login', async (req, res) => {
 
 userRoutes.post('/logout', (req, res) => {
   req.session.destroy((err) => {
-    err ? res.status(500).send('Could not logout.') :
-      res.status(200).send({});
+    err ? res.status(500).send({message: 'Could not logout.'}).end() :
+      res.status(200).send({}).end();
   })
 });
 
@@ -119,7 +122,7 @@ userRoutes.get('/session', (req, res) => {
   req.session.user ? res.status(200).send({authenticated: true, /*sessionData: req.session.user.map(result => {
       return {username: result.username, firstName: result.firstName, lastName: result.lastName};
     }), sessionID: req.session.id*/})
-    : res.status(200).send({authenticated: false});
+    : res.status(200).send({authenticated: false}).end();
 });
 
 export default userRoutes;
