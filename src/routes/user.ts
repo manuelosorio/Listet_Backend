@@ -50,27 +50,31 @@ userRoutes.post('/register', async (req, res) => {
           console.error(chalk.red('Find by Username Error: ') + usernameErr.message);
           return res.status(500).send(usernameErr.message).end();
         }
-        if (!usernameRes.length) {
-          return db.findUserFromEmail(user.email, (emailErr, emailRes) => {
-            if (emailErr) {
-              console.error(chalk.red('Find by Email Error: ') + emailErr.message);
-              return res.status(500).send(emailErr.message).end();
-            }
-            if (!emailRes.length) {
-              db.newUser(user, (err, results) => {
-                if (err) {
-                  return err;
-                }
-                responseMessage.message = 'User Created Successfully';
-                return res.status(201).send(responseMessage).end();
-              });
-            }
+        // Does username exist?
+        if (usernameRes.length) {
+          responseMessage.message = 'Username already exists';
+          return res.status(401).send(responseMessage).end();
+        }
+        // If user doesn't exist Check for email.
+        return db.findUserFromEmail(user.email, (emailErr, emailRes) => {
+          if (emailErr) {
+            console.error(chalk.red('Find by Email Error: ') + emailErr.message);
+            return res.status(500).send(emailErr.message).end();
+          }
+          // Does email exist?
+          if (emailRes.length) {
             responseMessage.message = 'Email Already exists';
             return res.status(401).send(responseMessage).end();
-          })
-        }
-        responseMessage.message = 'Username already exists';
-        return res.send(responseMessage).end();
+          }
+          // if email doesn't exist create user
+          db.newUser(user, (err, _results) => {
+            if (err) {
+              return err;
+            }
+            responseMessage.message = 'User Created Successfully';
+            return res.status(201).send(responseMessage).end();
+          });
+        })
       })
 });
 
@@ -92,7 +96,7 @@ userRoutes.post('/login', async (req, res) => {
     } else {
       try {
         if (comparePassword(password, result[0].password) === false) {
-          responseMessage.message = "Username or Password doesn't match!";
+          responseMessage.message = "Login Details Incorrect. Please Try Again.";
           return res.status(403).send(responseMessage).end();
         }
         db.findUserFromUsername(username, (error, results) => {
