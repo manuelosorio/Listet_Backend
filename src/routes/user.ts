@@ -44,8 +44,9 @@ userRoutes.post('/register', async (req, res) => {
   return user.firstName === '' ? res.status(400).send({message: 'First Name is required'}).end() :
     user.username === '' ? res.status(400).send({message: 'Username is required'}).end() :
       user.email === '' ? res.status(400).send({message: 'Email is required'}).end() :
-        req.params.password.match("/^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/") ? res.status(400).send({message: 'passwords must be at least 8 characters long, contain 1 capital letter, a special character (@ $ ! % * # ? &), and at least one number.'}).end() :
+      user.email.match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/) ? res.status(400).send({message: 'Email is invalid'}).end() :
         req.params.password === '' ? res.status(400).send({message: 'Password is required'}).end() :
+        req.params.password.match("/^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/") ? res.status(400).send({message: 'passwords must be at least 8 characters long, contain 1 capital letter, a special character (@ $ ! % * # ? &), and at least one number.'}).end() :
         await db.findUserFromUsername(user.username, (usernameErr, usernameRes) => {
           if (usernameErr) {
             console.error(chalk.red('Find by Username Error: ') + usernameErr.message);
