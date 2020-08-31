@@ -44,38 +44,39 @@ userRoutes.post('/register', async (req, res) => {
   return user.firstName === '' ? res.status(400).send({message: 'First Name is required'}).end() :
     user.username === '' ? res.status(400).send({message: 'Username is required'}).end() :
       user.email === '' ? res.status(400).send({message: 'Email is required'}).end() :
-      req.params.password === '' ? res.status(400).send({message: 'Password is required'}).end() :
-      await db.findUserFromUsername(user.username, (usernameErr, usernameRes) => {
-        if (usernameErr) {
-          console.error(chalk.red('Find by Username Error: ') + usernameErr.message);
-          return res.status(500).send(usernameErr.message).end();
-        }
-        // Does username exist?
-        if (usernameRes.length) {
-          responseMessage.message = 'Username already exists';
-          return res.status(401).send(responseMessage).end();
-        }
-        // If user doesn't exist Check for email.
-        return db.findUserFromEmail(user.email, (emailErr, emailRes) => {
-          if (emailErr) {
-            console.error(chalk.red('Find by Email Error: ') + emailErr.message);
-            return res.status(500).send(emailErr.message).end();
+        req.params.password.match("/^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/") ? res.status(400).send({message: 'passwords must be at least 8 characters long, contain 1 capital letter, a special character (@ $ ! % * # ? &), and at least one number.'}).end() :
+        req.params.password === '' ? res.status(400).send({message: 'Password is required'}).end() :
+        await db.findUserFromUsername(user.username, (usernameErr, usernameRes) => {
+          if (usernameErr) {
+            console.error(chalk.red('Find by Username Error: ') + usernameErr.message);
+            return res.status(500).send(usernameErr.message).end();
           }
-          // Does email exist?
-          if (emailRes.length) {
-            responseMessage.message = 'Email Already exists';
+          // Does username exist?
+          if (usernameRes.length) {
+            responseMessage.message = 'Username already exists';
             return res.status(401).send(responseMessage).end();
           }
-          // if email doesn't exist create user
-          db.newUser(user, (err, _results) => {
-            if (err) {
-              return err;
+          // If user doesn't exist Check for email.
+          return db.findUserFromEmail(user.email, (emailErr, emailRes) => {
+            if (emailErr) {
+              console.error(chalk.red('Find by Email Error: ') + emailErr.message);
+              return res.status(500).send(emailErr.message).end();
             }
-            responseMessage.message = 'User Created Successfully';
-            return res.status(201).send(responseMessage).end();
-          });
+            // Does email exist?
+            if (emailRes.length) {
+              responseMessage.message = 'Email Already exists';
+              return res.status(401).send(responseMessage).end();
+            }
+            // if email doesn't exist create user
+            db.newUser(user, (err, _results) => {
+              if (err) {
+                return err;
+              }
+              responseMessage.message = 'User Created Successfully';
+              return res.status(201).send(responseMessage).end();
+            });
+          })
         })
-      })
 });
 
 userRoutes.post('/login', async (req, res) => {
