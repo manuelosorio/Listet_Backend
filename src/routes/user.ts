@@ -34,23 +34,16 @@ userRoutes.get("/user/:username", async (req, res) => {
 
 userRoutes.post('/register', async (req, res) => {
   console.log('new user');
-  const user: User = {
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    username: req.body.username,
-    password: hashPassword(req.body.password)
-  }
-  return user.firstName === '' ? res.status(400).send({message: 'First Name is required'}).end() :
-    user.username === '' ? res.status(400).send({message: 'Username is required'}).end() :
-      user.email === '' ? res.status(400).send({message: 'Email is required'}).end() :
-      user.email.match(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/) ? res.status(400).send({message: 'Email is invalid'}).end() :
-        req.params.password === '' ? res.status(400).send({message: 'Password is required'}).end() :
-        req.params.password.match("/^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/") ? res.status(400).send({message: 'passwords must be at least 8 characters long, contain 1 capital letter, a special character (@ $ ! % * # ? &), and at least one number.'}).end() :
-        await db.findUserFromUsername(user.username, (usernameErr, usernameRes) => {
+  return req.body.firstName === '' ? res.status(400).send({message: 'First Name is required'}).end() :
+    req.body.username === '' ? res.status(400).send({message: 'Username is required'}).end() :
+    !req.body.username.match(/^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/) ? res.status(400).send({ message: '' }).end() :
+      req.body.email === '' ? res.status(400).send({ message: 'Email is required' }).end() :
+      !req.body.email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]{2,4}$/) ? res.status(400).send({ message: 'Email is invalid' }).end() :
+        req.body.password === '' ? res.status(400).send({message: 'Password is required'}).end() :
+        !req.body.password.match(/^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/) ? res.status(400).send({ message: 'passwords must be at least 8 characters long, contain 1 capital letter, a special character (@ $ ! % * # ? &), and at least one number.' }).end() :
+        await db.findUserFromUsername(req.body.username, (usernameErr, usernameRes) => {
           if (usernameErr) {
-            console.error(chalk.red('Find by Username Error: ') + usernameErr.message);
-            return res.status(500).send(usernameErr.message).end();
+            return res.status(500).send({message: usernameErr.message}).end();
           }
           // Does username exist?
           if (usernameRes.length) {
@@ -58,17 +51,23 @@ userRoutes.post('/register', async (req, res) => {
             return res.status(401).send(responseMessage).end();
           }
           // If user doesn't exist Check for email.
-          return db.findUserFromEmail(user.email, (emailErr, emailRes) => {
+          return db.findUserFromEmail(req.body.email, (emailErr, emailRes) => {
             if (emailErr) {
               console.error(chalk.red('Find by Email Error: ') + emailErr.message);
               return res.status(500).send(emailErr.message).end();
             }
             // Does email exist?
             if (emailRes.length) {
-              responseMessage.message = 'Email Already exists';
-              return res.status(401).send(responseMessage).end();
+              return res.status(401).send({ message: 'Email Already exists' }).end();
             }
             // if email doesn't exist create user
+            const user: User = {
+              firstName: req.body.firstName,
+              lastName: req.body.lastName,
+              email: req.body.email.toLowerCase(),
+              username: req.body.username.toLowerCase(),
+              password: hashPassword(req.body.password)
+            }
             db.newUser(user, (err, _results) => {
               if (err) {
                 return err;
