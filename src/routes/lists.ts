@@ -29,8 +29,8 @@ listRoutes.get('/lists', async (req, res) =>  {
   });
 });
 
-listRoutes.get('/list/:username/:slug', async (req, res) =>  {
-  const query = {'username': req.params.username, 'slug': req.params.slug}
+listRoutes.get('/list/:owner_username/:slug', async (req, res) =>  {
+  const query = {'owner_username': req.params.owner_username, 'slug': req.params.slug}
   await db.findList(query, (err, results) => {
     if (err) {
       return console.log(err);
@@ -48,8 +48,8 @@ listRoutes.get('/list/:username/:slug/items', async (req, res) =>  {
     return res.status(200).send(results).end();
   });
 });
-listRoutes.get('/list/:list_id/:slug/comments', async  (req, res) =>  {
-  const query = {'list_id': req.params.list_id, 'slug': req.params.slug}
+listRoutes.get('/list/:list_owner_username/:slug/comments', async  (req, res) =>  {
+  const query = {'list_owner_username': req.params.list_owner_username, 'slug': req.params.slug}
   await db.findListComments(query, (err, results) => {
     if (err) {
       console.log(err);
