@@ -66,7 +66,7 @@ export class Db {
     await this.query('Select slug, name, description, creation_date, deadline, isPrivate, firstName, lastName FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
   }
   async findListItems(query, next: queryCallback) {
-    await this.query('Select item, deadline, comment, list_id, slug, username FROM view_list_items where username=? and slug= ?', [query.username, query.slug], next);
+    await this.query('Select id, item, deadline, comment, list_id, slug, username FROM view_list_items where username=? and slug= ?', [query.username, query.slug], next);
   }
   async findListComments(query, next: queryCallback) {
     await this.query('SELECT comment, creation_date, firstName, lastName, username FROM view_comments where list_owner_username=? and slug= ?', [query.list_owner_username, query.slug], next);
