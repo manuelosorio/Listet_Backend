@@ -2,6 +2,9 @@ import {MysqlError, Pool, PoolConnection, queryCallback} from 'mysql';
 import chalk from 'chalk';
 import {variables} from '../environments/variables';
 import {User} from '../models/user';
+import {List} from '../models/list';
+import {ListItem} from '../models/list-item';
+import {ListComment} from '../models/list-comment';
 
 
 export class Db {
@@ -33,7 +36,7 @@ export class Db {
     await this.query('Select email, username, firstName, lastName FROM users', null, next);
   }
   async findUserFromUsername(username: string, next: queryCallback) {
-    await this.query('Select email, username, firstName, lastName FROM users Where username= ?', username, next)
+    await this.query('Select id, email, username, firstName, lastName FROM users Where username= ?', username, next)
   }
   async findUserFromEmail(email: string, next: queryCallback) {
     await this.query('Select email, username, firstName, lastName FROM users Where email= ?', email, next);
@@ -60,16 +63,29 @@ export class Db {
 
   // List Queries
   async findAllLists(next: queryCallback) {
-    await this.query('SELECT * FROM view_lists', null, next);
+    await this.query('SELECT slug, name, description, creation_date, deadline, isPrivate, firstName, lastName, owner_username FROM view_lists where isPrivate=0', null, next);
   }
-  async findList(query, next: queryCallback) {
-    await this.query('Select slug, name, description, creation_date, deadline, isPrivate, firstName, lastName FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
+  async findListFromSlug(query, next: queryCallback) {
+    await this.query('Select slug, name, description, creation_date, deadline, isPrivate, comments_disabled, firstName, lastName, owner_username FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
+  }
+  async findListFromID(query, next: queryCallback) {
+    console.log('Query: ' + query)
+    await this.query('Select id, slug, name, description, creation_date, deadline, isPrivate, comments_disabled, firstName, lastName, owner_username FROM view_lists where id= ?', query, next);
   }
   async findListItems(query, next: queryCallback) {
     await this.query('Select id, item, deadline, comment, list_id, slug, username FROM view_list_items where username=? and slug= ?', [query.username, query.slug], next);
   }
   async findListComments(query, next: queryCallback) {
     await this.query('SELECT comment, creation_date, firstName, lastName, username FROM view_comments where list_owner_username=? and slug= ?', [query.list_owner_username, query.slug], next);
+  }
+  async createList(list: List, next: queryCallback) {
+    await this.query('INSERT INTO `lists` (`slug`, `name`, `description`, `creation_date`, `deadline`, `isPrivate`, `user_id`) VALUES (?, ?, ?, ?, ?, ?, ?)', [list.slug, list.name, list.description, list.creation_date, list.deadline, list.isPrivate, list.author_id], next)
+  }
+  async addListItem(listItem: ListItem, next: queryCallback) {
+    await this.query('INSERT INTO `list_items` (`item`, `deadline`, `completed`, `list_id`) VALUES (?, ?, ?, ?)', [listItem.item, listItem.deadline, listItem.completed, listItem.list_id], next);
+  }
+  async createListComments(listComment: ListComment, next: queryCallback) {
+    await this.query('INSERT INTO `list_comments` (`user_id`, `comment`, `creation_date`, `list_id`) VALUES (?, ?, ?, ?)', [listComment.author_id, listComment.comment_message, listComment.creation_date, listComment.parent_id], next);
   }
 }
 
