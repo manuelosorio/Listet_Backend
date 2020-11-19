@@ -30,7 +30,10 @@ const sess = {
   }
 }
 dev.use(cors({origin: [
-    variables.app_url
+      `http://${variables.app_url}`,
+      `https://${variables.app_url}`,
+      `http://localhost:4200`,
+      `https://localhost:4200`
   ], credentials: true}));
 dev.use(helmet());
 dev.use(express.static('private'));

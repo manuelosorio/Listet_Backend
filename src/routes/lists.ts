@@ -8,7 +8,7 @@ import {ListItem} from '../models/list-item';
 import {ListComment} from '../models/list-comment';
 
 const listRoutes = Router();
-const db = new Db(mysql.createPool(variables.db))
+const db = new Db(mysql.createPool(variables.db));
 
 
 listRoutes.get('/lists', async (req, res) =>  {

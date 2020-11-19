@@ -13,4 +13,10 @@ export class DateUtil{
     const year = date.getFullYear();
     return month + " " + day + ", " + year;
   }
+  getMonth() {
+    return new Date(this.date).getMonth() + 1;
+  }
+  getYear() {
+    return new Date(this.date).getFullYear();
+  }
 }
