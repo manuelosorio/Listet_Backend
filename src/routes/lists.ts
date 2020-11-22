@@ -11,6 +11,9 @@ const listRoutes = Router();
 const db = new Db(mysql.createPool(variables.db));
 
 
+/*
+----------------        Start Get Routes        ----------------
+*/
 listRoutes.get('/lists', async (req, res) =>  {
   await db.findAllLists((err, results)  => {
     if (err) {
@@ -66,7 +69,14 @@ listRoutes.get('/list/:owner_username/:slug/comments', async (req, res) =>  {
     return res.status(200).send(updatedResults).end();
   });
 });
+/*
+--------------        End Get Routes        --------------
+*/
 
+
+/*
+----------------        Start Creation Routes        ----------------
+*/
 // Handles List Creation...
 listRoutes.post('/create-list', async (req, res) => {
   const id = Number(req.session.user[0].id);
@@ -108,6 +118,7 @@ listRoutes.post('/add-item', async (req, res) => {
     completed: 0,
     list_id: id
   }
+
   await db.addListItem(listItem, (err, results, _fields) => {
     if (err) {
       return res.status(400).send(err).end();
@@ -156,6 +167,52 @@ listRoutes.post('/create-comment', async (req, res) => {
       })
     });
   });
+/*
+--------------        End Creation Routes        --------------
+*/
+
+
+/*
+----------------        Start Deletion Routes        ----------------
+*/
+// Handles List Modification...
+listRoutes.delete('/delete-list', async (_req, _res) => {
+  console.log('delete list route');
+})
+
+// Handles List Item Modification...
+listRoutes.delete('/delete-item', async (_req, _res) => {
+  console.log('delete list item route');
+})
+
+// Handles Comment Modification...
+listRoutes.delete('/delete-comment', async (_req, _res) => {
+  console.log('delete comment route');
+})
+/*
+--------------        End Deletion Routes        --------------
+*/
+
+
+
+/*
+----------------        Start Update Routes        ----------------
+*/
+// Handles Comment Deletion
+listRoutes.put('/update-list', async (_req, _res) => {
+  console.log('update list route');
+});
+listRoutes.put('/update-item', async (_req, _res) => {
+  console.log('update list item route');
+});
+
+listRoutes.put('/update-comment', async (_req, _res) => {
+  console.log('update comment route');
+});
+/*
+--------------        End Update Routes        --------------
+*/
+
 
 
 export default listRoutes;
