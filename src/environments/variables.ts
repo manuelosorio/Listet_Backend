@@ -21,4 +21,5 @@ export const variables: any = {
   session_id: process.env.SESSION_ID,
   session_secret: process.env.SESSION_SECRET,
   app_url: process.env.APP_URL,
+  app_url2: process.env.APP_URL2,
 }
