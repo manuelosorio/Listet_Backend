@@ -46,7 +46,7 @@
     "mysql": "^2.18.1",
     "nodemailer": "^6.4.16",
     "pug": "^3.0.0",
-    "snyk": "^1.370.1"
+    "snyk": "^1.425.4"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
