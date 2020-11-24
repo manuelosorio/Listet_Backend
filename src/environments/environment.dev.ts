@@ -2,7 +2,7 @@ import express from 'express';
 import session from 'express-session';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import cors from 'cors'
+import cors from 'cors';
 import {variables} from './variables';
 
 const dev = express();

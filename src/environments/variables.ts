@@ -16,7 +16,16 @@ export const variables: any = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
   },
-  postUserQuery: process.env.DB_POST_USER_QUERY,
+  smtp: {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: process.env.SMTP_SECURE || false,
+    auth: {
+      username: process.env.SMTP_USERNAME,
+      password: process.env.SMTP_PASSWORD,
+    },
+    email: process.env.SMTP_EMAIL
+  },
   saltsRounds: process.env.BYCRPT_SALT,
   session_id: process.env.SESSION_ID,
   session_secret: process.env.SESSION_SECRET,
