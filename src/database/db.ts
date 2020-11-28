@@ -87,5 +87,13 @@ export class Db {
   async createListComments(listComment: ListComment, next: queryCallback) {
     await this.query('INSERT INTO `list_comments` (`user_id`, `comment`, `creation_date`, `list_id`) VALUES (?, ?, ?, ?)', [listComment.author_id, listComment.comment_message, listComment.creation_date, listComment.parent_id], next);
   }
+
+  async resetPasswordToken(params, next: queryCallback) {
+    await this.query('UPDATE `users` SET reset_token= ? WHERE id= ?', [params.token, params.id], next);
+  }
+
+  async resetPasswordTokenStore(params, next: queryCallback) {
+    await this.query('INSERT INTO `token_reset_password` (token_id, expires, data) VALUES (?, ?, ?)', params, next);
+  }
 }
 

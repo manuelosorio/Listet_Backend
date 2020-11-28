@@ -28,11 +28,9 @@ export class Mailer {
    * @param template Corresponds to a directory inside of 'emails'.
    */
   sendMail(sender, data: EmailData, template?: string | 'verify-email' | 'reset-password') {
-    console.log(this.smtp);
-
     this.email = new EmailTemplate({
       message: {
-        from: `${data.firstName} ${data.lastName} <${data.email}>`
+        from: sender
       },
       send: true,
       transport: this.transporter,
@@ -40,15 +38,10 @@ export class Mailer {
     this.email.send({
       template,
       message: {
-        to: sender
+        to: `${data.firstName} ${data.lastName} <${data.email}>`
       },
       locals: data
     }).then(console.log)
       .catch(console.error);
-    // this.sendMail(message, (err, info) => {
-    //   if (err) {
-    //     console.error("Nodemailer Error: " + err);
-    //   }
-    // })
   }
 }

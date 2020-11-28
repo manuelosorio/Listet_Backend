@@ -1,6 +1,6 @@
 export class DateUtil{
   date: any;
-  constructor(date) {
+  constructor(date: Date) {
     this.date = date;
   }
   months = ["January", "February", "March", "April", "May", "June",
@@ -18,5 +18,12 @@ export class DateUtil{
   }
   getYear() {
     return new Date(this.date).getFullYear();
+  }
+
+  setExpire(timeInMilliSeconds: number): Date {
+    return new Date(this.date.getTime() + timeInMilliSeconds);
+  }
+  checkExpire(endDate: Date): boolean {
+    return this.date >= endDate;
   }
 }

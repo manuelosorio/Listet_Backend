@@ -2,13 +2,19 @@ import {Router} from 'express';
 import mysql from 'mysql';
 import chalk from 'chalk';
 import {Db} from '../database/db';
-import {variables} from '../environments/variables';
+import * as vars from '../environments/variables';
 import {comparePassword, hashPassword} from '../middleware/bcrypt';
 import {User} from '../models/user';
+import {Crypto} from '../middleware/crypto';
+import {DateUtil} from '../middleware/date';
+import {Mailer} from '../middleware/nodemailer';
+import {EmailData} from '../models/email-data';
 
 const userRoutes = Router();
-const  db = new Db(mysql.createPool(variables.db));
-
+const db = new Db(mysql.createPool(vars.variables.db));
+const mailer = new Mailer(vars.smtp)
+const crypto = new Crypto();
+const date = new DateUtil(new Date());
 const responseMessage = {
   message: ''
 };
@@ -120,6 +126,47 @@ userRoutes.post('/logout', (req, res) => {
   req.session.destroy((err) => {
     err ? res.status(500).send({message: 'Could not logout.'}).end() :
       res.status(200).send({}).end();
+  })
+});
+
+userRoutes.post('/reset-password', async (req, res) => {
+  await db.findUserFromEmail(req.body.email, (err, results) => {
+    if (err) {
+      return res.status(403).send(err).end();
+    }
+    if (results.length) {
+      const num = parseInt(vars.token.expire_time, 0);
+      const expireDate = date.setExpire(num);
+      const data: object = {
+        expires: expireDate,
+        email: req.params.email
+      };
+      const tokenStore = crypto.generateString();
+      const encryptedToken = crypto.createToken(JSON.stringify(data));
+      const emailData: EmailData = {
+        firstName: results[0].firstName,
+        lastName: results[0].lastName,
+        email: results[0].email,
+        token: 'https://' + vars.variables.app_url + '/reset-password/' + tokenStore
+      }
+      const queryParams = {
+        token: tokenStore,
+        id: results[0].id
+      }
+
+      db.resetPasswordToken(queryParams, (tokenErr, _results) => {
+        if (tokenErr) {
+          return res.status(403).send(tokenErr).end();
+        }
+        return db.resetPasswordTokenStore([tokenStore, expireDate.getTime(),encryptedToken], (tokenStoreErr, _tokenResults) => {
+          if (tokenStoreErr) {
+            return res.status(500).send(tokenStoreErr);
+          }
+          mailer.sendMail(vars.smtp.email, emailData, 'reset-password');
+          return res.send('If an account with the email address exists, an email has been sent containing further instructions. If you can\'t find it, try checking your junk folder.')
+        });
+      })
+    }
   })
 });
 
