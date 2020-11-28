@@ -1,6 +1,5 @@
 import {MysqlError, Pool, PoolConnection, queryCallback} from 'mysql';
 import chalk from 'chalk';
-import {variables} from '../environments/variables';
 import {User} from '../models/user';
 import {List} from '../models/list';
 import {ListItem} from '../models/list-item';
@@ -9,9 +8,18 @@ import {ListComment} from '../models/list-comment';
 
 export class Db {
   db: Pool;
-  constructor(db) {
+
+  /**
+   * Initialize Database
+   * @param db
+   */
+  constructor(db: Pool) {
     this.db = db;
   }
+
+  /**
+   * Retrieve Database Connection
+   */
   getConnection () {
     this.db.getConnection((err: MysqlError, connection: PoolConnection) => {
       const errMessage = "Connection to database base refused. " +
@@ -26,27 +34,61 @@ export class Db {
     return this.db;
   }
 
-  // User Queries
+  /**
+   * Run Database Queries
+   * @param query SQL query
+   * @param params
+   * @param next (MysqlError, fields, results)
+   */
   async query(query: string, params: any | null, next: queryCallback) {
     console.log("Fetching data");
     if (!params) this.getConnection().query(query, next);
     else this.getConnection().query(query, params, next)
   }
+  // User Queries
+  /**
+   * Retrieve All Users
+   * @param next
+   */
   async findAllUsers(next: queryCallback) {
     await this.query('Select email, username, firstName, lastName FROM users', null, next);
   }
+
+  /**
+   * Retrieve userdata [id, email, username, firstName, lastName] from username.
+   * @param username
+   * @param next
+   */
   async findUserFromUsername(username: string, next: queryCallback) {
     await this.query('Select id, email, username, firstName, lastName FROM users Where username= ?', username, next)
   }
+
+  /**
+   * Retrieve userdata [id, email, username, firstName, lastName] from email.
+   * @param email
+   * @param next
+   */
   async findUserFromEmail(email: string, next: queryCallback) {
-    await this.query('Select email, username, firstName, lastName FROM users Where email= ?', email, next);
+    await this.query('Select id, email, username, firstName, lastName FROM users Where email= ?', email, next);
   }
+
+  /**
+   * Retrieve password from username.
+   * @param username
+   * @param next
+   */
   async getPassword (username: string, next: queryCallback) {
     console.log("Fetching User Data");
     await this.query("Select password FROM users Where username= ?", username, next);
   }
+
+  /**
+   * Create a New User
+   * @param user
+   * @param next
+   */
   async newUser(user: User, next: queryCallback) {
-    await this.query(variables.postUserQuery, [
+    await this.query('INSERT INTO `users` (`firstName`, `lastName`, `email`, `username`, `password`, `admin`, `deactivated`) VALUES (?, ?, ?, ?, ?, ?, ?)', [
       user.firstName,
       user.lastName,
       user.email,
@@ -57,41 +99,102 @@ export class Db {
     ], next)
   }
 
+  /**
+   * Apply session data to the requested session user.
+   * @param req
+   * @param sessionData
+   */
   userSession(req, sessionData: object) {
     return req.session.user = sessionData;
   };
 
   // List Queries
+  /**
+   * Retrieve all public lists.
+   * @param next
+   */
   async findAllLists(next: queryCallback) {
     await this.query('SELECT slug, name, description, creation_date, deadline, isPrivate, firstName, lastName, owner_username FROM view_lists where isPrivate=0', null, next);
   }
+
+  /**
+   * Find list that belongs to a particular user using a slug.
+   * @param query
+   * @param next
+   */
   async findListFromSlug(query, next: queryCallback) {
     await this.query('Select slug, name, description, creation_date, deadline, isPrivate, comments_disabled, firstName, lastName, owner_username FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
   }
+
+  /**
+   * Directly find a list from its ID.
+   * @param query
+   * @param next
+   */
   async findListFromID(query, next: queryCallback) {
     console.log('Query: ' + query)
     await this.query('Select id, slug, name, description, creation_date, deadline, isPrivate, comments_disabled, firstName, lastName, owner_username FROM view_lists where id= ?', query, next);
   }
+
+  /**
+   * Find all list items using list owner username and slug
+   * @param query
+   * @param next
+   */
   async findListItems(query, next: queryCallback) {
     await this.query('Select id, item, deadline, comment, list_id, slug, username FROM view_list_items where username=? and slug= ?', [query.username, query.slug], next);
   }
+
+  /**
+   * Find all comments using list owner username and slug
+   * @param query
+   * @param next
+   */
   async findListComments(query, next: queryCallback) {
     await this.query('SELECT comment, creation_date, firstName, lastName, username FROM view_comments where list_owner_username=? and slug= ?', [query.list_owner_username, query.slug], next);
   }
+
+  /**
+   * Create lists
+   * @param list
+   * @param next
+   */
   async createList(list: List, next: queryCallback) {
     await this.query('INSERT INTO `lists` (`slug`, `name`, `description`, `creation_date`, `deadline`, `isPrivate`, `user_id`) VALUES (?, ?, ?, ?, ?, ?, ?)', [list.slug, list.name, list.description, list.creation_date, list.deadline, list.isPrivate, list.author_id], next)
   }
+
+  /**
+   * create list items using Parent List ID
+   * @param listItem
+   * @param next
+   */
   async addListItem(listItem: ListItem, next: queryCallback) {
     await this.query('INSERT INTO `list_items` (`item`, `deadline`, `completed`, `list_id`) VALUES (?, ?, ?, ?)', [listItem.item, listItem.deadline, listItem.completed, listItem.list_id], next);
   }
+
+  /**
+   * Create Comments using Parent List ID
+   * @param listComment
+   * @param next
+   */
   async createListComments(listComment: ListComment, next: queryCallback) {
     await this.query('INSERT INTO `list_comments` (`user_id`, `comment`, `creation_date`, `list_id`) VALUES (?, ?, ?, ?)', [listComment.author_id, listComment.comment_message, listComment.creation_date, listComment.parent_id], next);
   }
 
+  /**
+   * Add Token To User
+   * @param params
+   * @param next
+   */
   async resetPasswordToken(params, next: queryCallback) {
     await this.query('UPDATE `users` SET reset_token= ? WHERE id= ?', [params.token, params.id], next);
   }
 
+  /**
+   * Create Token Storage for Encrypted Data
+   * @param params
+   * @param next
+   */
   async resetPasswordTokenStore(params, next: queryCallback) {
     await this.query('INSERT INTO `token_reset_password` (token_id, expires, data) VALUES (?, ?, ?)', params, next);
   }
