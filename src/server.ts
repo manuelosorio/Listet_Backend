@@ -4,8 +4,6 @@ import userRoutes  from './routes/user';
 import {variables} from './environments/variables';
 import listRoutes from './routes/lists';
 import environment from './environments/environment';
-import { Mailer } from './middleware/nodemailer'
-import {EmailData} from './models/email-data';
 if (variables.nodeEnv === 'Production') {
   // tslint:disable-next-line:only-arrow-functions no-empty
   console.log = function() {
@@ -14,7 +12,6 @@ if (variables.nodeEnv === 'Production') {
 
 const app = express();
 const port = variables.port;
-const mailer = new Mailer(variables.smtp);
 
 app.use(environment);
 app.use(Flash());
@@ -38,17 +35,6 @@ app.get('/', (req, res) => {
   }
 });
 
-app.get('/test-email', (req, res) => {
-  res.send('Test Email Route')
-  const data: EmailData = {
-    email: 'hey@manuelosorio.me',
-    firstName: 'Manuel',
-    lastName: 'Osorio',
-    token: 'faketoken'
-  }
-  mailer.sendMail(variables.smtp.email, data, 'reset-password');
-
-});
 app.listen(port, err => {
   if (err) {
     throw err;

@@ -4,6 +4,7 @@ import {User} from '../models/user';
 import {List} from '../models/list';
 import {ListItem} from '../models/list-item';
 import {ListComment} from '../models/list-comment';
+import {ResetPassword} from '../models/reset-password';
 
 
 export class Db {
@@ -198,5 +199,39 @@ export class Db {
   async resetPasswordTokenStore(params, next: queryCallback) {
     await this.query('INSERT INTO `token_reset_password` (token_id, expires, data) VALUES (?, ?, ?)', params, next);
   }
+
+  /**
+   *
+   * @param params
+   * @param next
+   */
+  async userResetPasswordToken(params, next: queryCallback) {
+    await this.query('SELECT `reset_token` FROM view_tokens where reset_token= ?', [params],next);
+  }
+
+  /**
+   *
+   * @param params
+   * @param next
+   */
+  async getResetPasswordTokenStoreExpiration(params, next: queryCallback) {
+    await this.query('SELECT `expires` FROM token_reset_password where token_id = ?', [params],next);
+  }
+  async getResetPasswordTokenStore(params, next: queryCallback) {
+    await this.query('SELECT `data` FROM token_reset_password where token_id = ?', [params],next);
+  }
+  /**
+   * Updates Password Deletes token
+   * @param params
+   * @param next
+   */
+  async resetPassword(params: ResetPassword,next: queryCallback) {
+    await this.query(`UPDATE users SET reset_token= null, password = ? WHERE email = ?`, [params.password, params.email], next);
+  }
+  async deleteResetTokenStore(params, next: queryCallback) {
+    await this.query('DELETE FROM token_reset_password WHERE token_id= ?',
+      [params, params], next)
+  }
+
 }
 
