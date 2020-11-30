@@ -239,3 +239,13 @@ fabric.properties
 .idea/**/markdown-navigator/
 
 # End of https://www.gitignore.io/api/node,dotenv,angular,webstorm,visualstudiocode
+.htaccess
+./app.js
+./server.js
+public/
+.well-known/
+.well-known/**
+cgi-bin/
+cgi-bin/**
+logs/**/
+logs/**/*
