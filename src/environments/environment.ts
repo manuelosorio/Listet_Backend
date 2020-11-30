@@ -13,12 +13,15 @@ environment.use(bodyParser.json());
 environment.use(bodyParser.urlencoded({extended: false}))
 
 switch (env) {
+  case 'Development':
   case 'development':
     environment.use(development)
-    break;
+  break;
+
+  case 'Production':
   case 'production':
     environment.use(production)
-    break;
+  break;
 }
 
 export = environment;
