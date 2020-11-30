@@ -8,6 +8,7 @@
     "dev": "nodemon --watch src/ --exec \"tsc && npm start\" --verbose -e ts",
     "dev2": "concurrently -k -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold\" \"npm run watch-ts\" \"nodemon ./dist/app.js\"",
     "watch-ts": "tsc -w",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
@@ -46,7 +47,8 @@
     "mysql": "^2.18.1",
     "nodemailer": "^6.4.16",
     "pug": "^3.0.0",
-    "snyk": "^1.370.1"
+    "snyk": "^1.370.1",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
@@ -61,7 +63,6 @@
     "@types/helmet": "0.0.47",
     "@types/mysql": "^2.15.10",
     "@types/nodemailer": "^6.4.0",
-    "morgan": "^1.10.0",
     "nodemon": "^2.0.3",
     "tslint": "^6.1.2",
     "typescript": "^3.8.3"
