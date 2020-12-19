@@ -35,7 +35,7 @@ userRoutes.get('/users', async(req, res) => {
       case 'Production':
       case 'production':
         res.status(200).send([{
-          "username": "ForSecuirityPurposes",
+          "username": "ForSecurityPurposes",
           "firstName": "Users are not",
           "lastName": "Shown in production"
         }]).end();
