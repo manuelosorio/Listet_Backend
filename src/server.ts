@@ -4,6 +4,7 @@ import userRoutes  from './routes/user';
 import {variables} from './environments/variables';
 import listRoutes from './routes/lists';
 import environment from './environments/environment';
+import tokens from './routes/tokens';
 if (variables.nodeEnv === 'Production') {
   // tslint:disable-next-line:only-arrow-functions no-empty
   console.log = function() {
@@ -17,6 +18,7 @@ app.use(environment);
 app.use(Flash());
 app.use(userRoutes);
 app.use(listRoutes);
+app.use(tokens);
 
 // TODO: Delete functions for default path
 app.get('/', (req, res) => {

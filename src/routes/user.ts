@@ -9,7 +9,6 @@ import {Crypto} from '../middleware/crypto';
 import {DateUtil} from '../middleware/date';
 import {Mailer} from '../middleware/nodemailer';
 import {EmailData} from '../models/email-data';
-import {ResetPassword} from '../models/reset-password';
 
 const userRoutes = Router();
 const db = new Db(mysql.createPool(vars.variables.db));
@@ -21,13 +20,27 @@ const responseMessage = {
 
 // Display all users. Remove in preparation for production.
 userRoutes.get('/users', async(req, res) => {
-  await db.findAllUsers((err, results) => {
-    if (err) {
-      const errorMessage = `we failed to query users ${err}`;
-      return res.sendStatus(500).send(errorMessage).end();
+
+    switch (vars.variables.nodeEnv) {
+      case 'Development':
+      case 'development':
+        await db.findAllUsers((err, results) => {
+          if (err) {
+            const errorMessage = `we failed to query users ${err}`;
+            return res.sendStatus(500).send(errorMessage).end();
+          }
+          return res.status(200).send(results).end();
+        });
+        break;
+      case 'Production':
+      case 'production':
+        res.status(200).send([{
+          "username": "ForSecuirityPurposes",
+          "firstName": "Users are not",
+          "lastName": "Shown in production"
+        }]).end();
+        break;
     }
-    return res.status(200).send(results).end();
-  });
 });
 
 userRoutes.get("/user/:username", async (req, res) => {
@@ -39,6 +52,7 @@ userRoutes.get("/user/:username", async (req, res) => {
 });
 
 userRoutes.post('/register', async (req, res) => {
+  const date = new DateUtil(new Date());
   console.log('new user');
   return req.body.firstName === '' ? res.status(409).send({message: 'First Name is required'}).end() :
     req.body.username === '' ? res.status(409).send({message: 'Username is required'}).end() :
@@ -78,11 +92,44 @@ userRoutes.post('/register', async (req, res) => {
               if (err) {
                 return err;
               }
-              responseMessage.message = 'User Created Successfully';
-              return res.status(201).send(responseMessage).end();
+              const num = parseInt(vars.token.expire_time, 0);
+              const expireDate = date.setExpire(num);
+              console.log(expireDate);
+              const data: object = {
+                expires: expireDate,
+                email: req.body.email
+              };
+              const tokenStore = crypto.generateString();
+              const encryptedToken = crypto.createToken(JSON.stringify(data));
+              const emailData: EmailData = {
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                email: req.body.email,
+                token: 'https://' + vars.variables.app_url + vars.variables.app_path + '/verify-account/' + tokenStore
+              }
+              const queryParams = {
+                token: tokenStore,
+                email: req.body.email
+              }
+
+              return db.verifyAccountToken(queryParams, (tokenErr, _tokenResults) => {
+                if (tokenErr) {
+                  console.error(chalk.bgRed.white(tokenErr))
+                  return res.status(500).send(tokenErr).end();
+                }
+                return db.verifyAccountTokenStore([tokenStore, expireDate.getTime(),encryptedToken], (tokenStoreErr, _tokenStoreResults) => {
+                  if (tokenStoreErr) {
+                    console.error(chalk.bgRed.white(tokenStoreErr))
+                    return res.status(500).send(tokenStoreErr).end();
+                  }
+                  responseMessage.message = 'User Created Successfully';
+                  mailer.sendMail(vars.smtp.email, emailData, 'verify-email');
+                  return res.status(200).send(responseMessage).end()
+                });
+              });
             });
-          })
-        })
+          });
+        });
 });
 
 userRoutes.post('/login', async (req, res) => {
@@ -147,7 +194,7 @@ userRoutes.post('/reset-password', async (req, res) => {
         firstName: results[0].firstName,
         lastName: results[0].lastName,
         email: results[0].email,
-        token: 'https://' + vars.variables.app_url + '/reset-password/' + tokenStore
+        token: 'https://' + vars.variables.app_url + vars.variables.app_path + '/reset-password/' + tokenStore
       }
       const queryParams = {
         token: tokenStore,
@@ -163,85 +210,14 @@ userRoutes.post('/reset-password', async (req, res) => {
             return res.status(500).send(tokenStoreErr).end();
           }
           mailer.sendMail(vars.smtp.email, emailData, 'reset-password');
-          return res.status(200).send({message: 'If an account with the email address exists, an email has been sent containing further instructions. If you can\'t find it, try checking your junk folder.'}).end()
+          responseMessage.message = "If an account with the email address exists, an email has been sent containing further instructions. If you can't find it, try checking your junk folder."
+          return res.status(200).send(responseMessage).end()
         });
       })
     }
   })
 });
 
-userRoutes.get('/reset-password/:tokenStore', (req, res) => {
-  const tokenStore = req.params.tokenStore;
-  db.userResetPasswordToken([tokenStore], (err, results) => {
-    if (err) {
-      return res.status(500).send(err).end();
-    }
-    return !results.length ?
-      res.status(401).send("Token doesn't exist or has expired.")
-      : db.getResetPasswordTokenStoreExpiration([tokenStore], (tokenErr, tokenResults) => {
-        if (tokenErr) {
-          return res.status(500).send(tokenErr).end();
-        }
-        const expires = tokenResults.map(result => {
-          return result.expires;
-        })[0];
-        const isExpired: boolean = new DateUtil(new Date()).checkExpire(new Date(expires as number));
-        return isExpired === true ? res.status(401).send({message: "Token doesn't exist or has expired."}) : res.status(200).send({expired: false}).end();
-      })
-  })
-});
-
-userRoutes.put('/reset-password/:tokenStore', (req, res) => {
-  const tokenStore = req.params.tokenStore
-  const password = req.body.password;
-  let newPassword: string;
-  if (password === '') {
-    responseMessage.message = "Password is required.";
-    return res.status(409).send(responseMessage).end();
-  } else {
-    newPassword = hashPassword(password);
-  }
-  db.getResetPasswordTokenStore([tokenStore], (err, results) => {
-    if (err) {
-      return res.status(500).send(err).end();
-    }
-    if (!results.length) {
-      return res.status(401).send('Token doesn\'t exist or has expired. 1');
-    }
-    const userEmail = results.map(result => {
-      return crypto.decipher(result.data).email;
-    })[0];
-    console.log(userEmail);
-    return db.getResetPasswordTokenStoreExpiration([tokenStore], (tokenErr, tokenResults) => {
-      if (tokenErr) {
-        return res.status(500).send(tokenErr).end();
-      }
-      const expires = tokenResults.map(result => {
-        return result.expires;
-      })[0];
-      console.log('time', expires)
-      const isExpired: boolean = new DateUtil(new Date()).checkExpire(new Date(expires as number));
-      const data: ResetPassword = {email: userEmail, password: newPassword, token: tokenStore};
-      console.log('expired', isExpired)
-      if (isExpired) {
-        return res.status(401).send({
-          message: "Token doesn't exist or has expired. 2"
-        });
-      } else {
-        return db.deleteResetTokenStore(tokenStore, (deleteStoreErr, _) =>{
-          if(deleteStoreErr) return res.send(deleteStoreErr)
-          return db.resetPassword(data, (resetPasswordErr, _resetPasswordResults) => {
-            if (resetPasswordErr) {
-              console.log(resetPasswordErr)
-              return res.status(401).send(resetPasswordErr).end();
-            }
-            return res.status(200).send({message: 'Password has been reset.'}).end();
-          });
-        });
-      }
-    })
-  });
-});
 userRoutes.get('/session', (req, res) => {
   req.session.user ? res.status(200).send({authenticated: true, /*sessionData: req.session.user.map(result => {
       return {username: result.username, firstName: result.firstName, lastName: result.lastName};

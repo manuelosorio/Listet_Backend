@@ -52,7 +52,7 @@ export class Db {
    * @param next
    */
   async findAllUsers(next: queryCallback) {
-    await this.query('Select email, username, firstName, lastName FROM users', null, next);
+    await this.query('Select username, firstName, lastName FROM users', null, next);
   }
 
   /**
@@ -201,6 +201,24 @@ export class Db {
   }
 
   /**
+   * Add Token To User
+   * @param params
+   * @param next
+   */
+  async verifyAccountToken(params, next: queryCallback) {
+    await this.query('UPDATE `users` SET verification_token= ? WHERE email= ?', [params.token, params.email], next);
+  }
+
+  /**
+   * Create Token Storage for Encrypted Data
+   * @param params
+   * @param next
+   */
+  async verifyAccountTokenStore(params, next: queryCallback) {
+    await this.query('INSERT INTO `token_verify_account` (token_id, expires, data) VALUES (?, ?, ?)', params, next);
+  }
+
+  /**
    *
    * @param params
    * @param next
@@ -208,6 +226,10 @@ export class Db {
   async userResetPasswordToken(params, next: queryCallback) {
     await this.query('SELECT `reset_token` FROM view_tokens where reset_token= ?', [params],next);
   }
+  async userVerifyAccountToken(params, next: queryCallback) {
+    await this.query('SELECT `verification_token` FROM view_tokens where verification_token= ?', [params],next);
+  }
+
 
   /**
    *
@@ -220,6 +242,12 @@ export class Db {
   async getResetPasswordTokenStore(params, next: queryCallback) {
     await this.query('SELECT `data` FROM token_reset_password where token_id = ?', [params],next);
   }
+  async getVerifyAccountTokenStore(params, next: queryCallback) {
+    await this.query('SELECT `data` FROM token_verify_account where token_id = ?', [params],next);
+  }
+  async getVerifyAccountTokenStoreExpiration(params, next: queryCallback) {
+    await this.query('SELECT `expires` FROM token_verify_account where token_id = ?', [params],next);
+  }
   /**
    * Updates Password Deletes token
    * @param params
@@ -228,10 +256,16 @@ export class Db {
   async resetPassword(params: ResetPassword,next: queryCallback) {
     await this.query(`UPDATE users SET reset_token= null, password = ? WHERE email = ?`, [params.password, params.email], next);
   }
+  async userVerify(params, next: queryCallback) {
+    await this.query('UPDATE users SET verification_token=null, verification_status=1 where email = ? ', [params.email],next);
+  }
   async deleteResetTokenStore(params, next: queryCallback) {
     await this.query('DELETE FROM token_reset_password WHERE token_id= ?',
       [params, params], next)
   }
-
+  async deleteVerifyTokenStore(params, next: queryCallback) {
+    await this.query('DELETE FROM token_verify_account WHERE token_id= ?',
+      [params, params], next)
+  }
 }
 
