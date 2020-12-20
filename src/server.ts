@@ -5,6 +5,7 @@ import {variables} from './environments/variables';
 import listRoutes from './routes/lists';
 import environment from './environments/environment';
 import tokens from './routes/tokens';
+
 if (variables.nodeEnv === 'Production') {
   // tslint:disable-next-line:only-arrow-functions no-empty
   console.log = function() {

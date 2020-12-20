@@ -11,7 +11,7 @@ import {Mailer} from '../middleware/nodemailer';
 import {EmailData} from '../models/email-data';
 
 const userRoutes = Router();
-const db = new Db(mysql.createPool(vars.variables.db));
+const db = new Db(mysql.createPool(vars.db));
 const mailer = new Mailer(vars.smtp)
 const crypto = new Crypto();
 const responseMessage = {
@@ -20,7 +20,6 @@ const responseMessage = {
 
 // Display all users. Remove in preparation for production.
 userRoutes.get('/users', async(req, res) => {
-
     switch (vars.variables.nodeEnv) {
       case 'Development':
       case 'development':
@@ -88,11 +87,11 @@ userRoutes.post('/register', async (req, res) => {
               username: req.body.username.toLowerCase(),
               password: hashPassword(req.body.password)
             }
-            db.newUser(user, (err, _results) => {
+            return db.newUser(user, (err, _results) => {
               if (err) {
                 return err;
               }
-              const num = parseInt(vars.token.expire_time, 0);
+              const num = parseInt(vars.token.verify_expire_time, 0);
               const expireDate = date.setExpire(num);
               console.log(expireDate);
               const data: object = {
@@ -105,7 +104,7 @@ userRoutes.post('/register', async (req, res) => {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 email: req.body.email,
-                token: 'https://' + vars.variables.app_url + vars.variables.app_path + '/verify-account/' + tokenStore
+                token: 'https://' + vars.app.url + vars.app.path + '/verify-account/' + tokenStore
               }
               const queryParams = {
                 token: tokenStore,
@@ -133,17 +132,17 @@ userRoutes.post('/register', async (req, res) => {
 });
 
 userRoutes.post('/login', async (req, res) => {
-  const username: string = req.body.username;
+  const email: string = req.body.email;
   const password: string = req.body.password;
-  if (username === '') {
-    responseMessage.message = "Username is required.";
+  if (email === '') {
+    responseMessage.message = "Email is required.";
     return res.status(409).send(responseMessage).end();
   }
   if (password === '') {
     responseMessage.message = "Password is required.";
     return res.status(409).send(responseMessage).end();
   }
-  await db.getPassword(username, (err, result) => {
+  await db.getPassword(email, (err, result) => {
     if (err) {
       console.log(err);
       return res.status(500).send(err).end();
@@ -153,15 +152,17 @@ userRoutes.post('/login', async (req, res) => {
           responseMessage.message = "Login Details Incorrect. Please Try Again.";
           return res.status(403).send(responseMessage).end();
         }
-        db.findUserFromUsername(username, (error, results) => {
+        return db.findUserFromEmail(email, (error, results) => {
           if (error) {
             return res.status(500).send(error).end();
           }
+          console.log('login: ', chalk.bgYellow.white(results))
           db.userSession(req, results);
           responseMessage.message = 'Login Successful';
           return res.status(200).send(responseMessage).end();
         });
       } catch (e) {
+        console.log(e);
         return e;
       }
     }
@@ -182,7 +183,7 @@ userRoutes.post('/reset-password', async (req, res) => {
     }
     const date = new DateUtil(new Date());
     if (results.length) {
-      const num = parseInt(vars.token.expire_time, 0);
+      const num = parseInt(vars.token.reset_expire_time, 0);
       const expireDate = date.setExpire(num);
       const data: object = {
         expires: expireDate,
@@ -194,7 +195,7 @@ userRoutes.post('/reset-password', async (req, res) => {
         firstName: results[0].firstName,
         lastName: results[0].lastName,
         email: results[0].email,
-        token: 'https://' + vars.variables.app_url + vars.variables.app_path + '/reset-password/' + tokenStore
+        token: 'https://' + vars.app.url + vars.app.path + '/reset-password/' + tokenStore
       }
       const queryParams = {
         token: tokenStore,
@@ -219,9 +220,9 @@ userRoutes.post('/reset-password', async (req, res) => {
 });
 
 userRoutes.get('/session', (req, res) => {
-  req.session.user ? res.status(200).send({authenticated: true, /*sessionData: req.session.user.map(result => {
-      return {username: result.username, firstName: result.firstName, lastName: result.lastName};
-    }), sessionID: req.session.id*/})
+  req.session.user ? res.status(200).send({authenticated: true, sessionData: req.session.user.map(result => {
+      return {verified: result.verification_status === 1};
+    })})
     : res.status(200).send({authenticated: false}).end();
 });
 export default userRoutes;

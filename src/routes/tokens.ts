@@ -9,15 +9,15 @@ import {ResetPassword} from '../models/reset-password';
 import {VerifyAccount} from '../models/verify-account';
 
 const tokens = Router();
-const db = new Db(mysql.createPool(vars.variables.db));
+const db = new Db(mysql.createPool(vars.db));
 const crypto = new Crypto();
 const responseMessage = {
   message: ''
 };
 
-tokens.get('/reset-password/:tokenStore', (req, res) => {
+tokens.get('/reset-password/:tokenStore', async (req, res) => {
   const tokenStore = req.params.tokenStore;
-  db.userResetPasswordToken([tokenStore], (err, results) => {
+  await db.userResetPasswordToken([tokenStore], (err, results) => {
     if (err) {
       return res.status(500).send(err).end();
     }
@@ -36,7 +36,7 @@ tokens.get('/reset-password/:tokenStore', (req, res) => {
   });
 });
 
-tokens.put('/reset-password/:tokenStore', (req, res) => {
+tokens.put('/reset-password/:tokenStore', async (req, res) => {
   const tokenStore = req.params.tokenStore;
   const password = req.body.password;
   let newPassword: string;
@@ -46,7 +46,7 @@ tokens.put('/reset-password/:tokenStore', (req, res) => {
   } else {
     newPassword = hashPassword(password);
   }
-  db.getResetPasswordTokenStore([tokenStore], (err, results) => {
+  await db.getResetPasswordTokenStore([tokenStore], (err, results) => {
     if (err) {
       return res.status(500).send(err).end();
     }
@@ -92,9 +92,9 @@ tokens.put('/reset-password/:tokenStore', (req, res) => {
 tokens.get('/verify-account', (req, res) => {
   res.send('test');
 });
-tokens.get('/verify-account/:tokenStore', (req, res) => {
+tokens.get('/verify-account/:tokenStore', async (req, res) => {
   const tokenStore = req.params.tokenStore;
-  db.getVerifyAccountTokenStore([tokenStore], (err, results) => {
+ await db.getVerifyAccountTokenStore([tokenStore], (err, results) => {
     if (err) {
       return res.status(500).send(err).end();
     }

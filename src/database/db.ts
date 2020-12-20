@@ -61,7 +61,7 @@ export class Db {
    * @param next
    */
   async findUserFromUsername(username: string, next: queryCallback) {
-    await this.query('Select id, email, username, firstName, lastName FROM users Where username= ?', username, next)
+    await this.query('Select id, email, username, firstName, lastName, verification_status FROM users WHERE username= ?', username, next)
   }
 
   /**
@@ -70,17 +70,17 @@ export class Db {
    * @param next
    */
   async findUserFromEmail(email: string, next: queryCallback) {
-    await this.query('Select id, email, username, firstName, lastName FROM users Where email= ?', email, next);
+    await this.query('Select id, email, username, firstName, lastName, verification_status FROM users WHERE email= ?', email, next);
   }
 
   /**
    * Retrieve password from username.
-   * @param username
+   * @param email
    * @param next
    */
-  async getPassword (username: string, next: queryCallback) {
+  async getPassword (email: string, next: queryCallback) {
     console.log("Fetching User Data");
-    await this.query("Select password FROM users Where username= ?", username, next);
+    await this.query("Select password FROM users Where email= ?", email, next);
   }
 
   /**

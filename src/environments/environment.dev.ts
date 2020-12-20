@@ -3,7 +3,7 @@ import session from 'express-session';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
-import {variables} from './variables';
+import * as vars from './variables';
 
 const dev = express();
 
@@ -16,11 +16,11 @@ const dev = express();
  */
 // tslint:disable-next-line:no-var-requires
 const MySQLStore = require('express-mysql-session')(session);
-const sessionStore = new MySQLStore(variables.db);
+const sessionStore = new MySQLStore(vars.db);
 
 const sess = {
-  name: variables.session_id,
-  secret: variables.session_secret,
+  name: vars.session.id,
+  secret: vars.session.secret,
   resave: false,
   saveUninitialized: false,
   store: sessionStore,
@@ -30,10 +30,10 @@ const sess = {
   }
 }
 dev.use(cors({origin: [
-      `http://${variables.app_url}`,
-      `https://${variables.app_url}`,
-      `http://${variables.app_url2}`,
-      `https://${variables.app_url2}`,
+      `http://${vars.app.url}`,
+      `https://${vars.app.url}`,
+      `http://${vars.app.url2}`,
+      `https://${vars.app.url2}`,
       `http://localhost:4200`,
       `https://localhost:4200`,
       `http://localhost:4000`,
