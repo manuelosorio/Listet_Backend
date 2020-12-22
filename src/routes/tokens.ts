@@ -51,7 +51,7 @@ tokens.put('/reset-password/:tokenStore', async (req, res) => {
       return res.status(500).send(err).end();
     }
     if (!results.length) {
-      return res.status(401).send('Token doesn\'t exist or has expired. 1');
+      return res.status(401).send('Token doesn\'t exist or has expired.');
     }
     const userEmail = results.map(result => {
       return crypto.decipher(result.data).email;
