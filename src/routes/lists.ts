@@ -79,9 +79,13 @@ listRoutes.get('/list/:owner_username/:slug/comments', async (req, res) =>  {
 */
 // Handles List Creation...
 listRoutes.post('/create-list', async (req, res) => {
+
+
   const id = Number(req.session.user[0].id);
+  const username = req.session.user[0].username;
   const deadlineDate = new Date(req.body.deadline);
-  const listPrivate = req.body.isPrivate === 'on' ? 1 : 0;
+  const listPrivate = req.body.is_private === true ? 1 : 0;
+  const listAllowsComments = req.body.allow_comments === true ? 1 : 0;
   const url = req.body.title.toLowerCase().split(' ').join('-');
   console.log(url);
   const list: List = {
@@ -91,6 +95,7 @@ listRoutes.post('/create-list', async (req, res) => {
     creation_date: new Date(),
     deadline: deadlineDate,
     isPrivate: listPrivate,
+    allowComments: listAllowsComments,
     author_id: id
   }
   console.log(list)
@@ -98,7 +103,7 @@ listRoutes.post('/create-list', async (req, res) => {
     if (err) {
       return res.status(400).send(err).end();
     } else {
-      return res.status(201).send('List created.')
+      return res.status(201).send({ message: 'List created.', url: `${username}/${list.slug}`})
     }
   });
 })
@@ -158,7 +163,7 @@ listRoutes.post('/create-comment', async (req, res) => {
     if (listErr) {
       return res.status(400).send(listErr).end();
     }
-    return listResults[0].comments_disabled === 1 ? res.send('Comments are disabled') :
+    return listResults[0].allow_comments === 1 ? res.send('Comments are disabled') :
       await db.createListComments(listComment, (commentErr, _results, _fields) => {
         if (commentErr) {
           return res.status(400).send(commentErr).end();

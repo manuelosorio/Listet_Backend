@@ -115,7 +115,7 @@ export class Db {
    * @param next
    */
   async findAllLists(next: queryCallback) {
-    await this.query('SELECT slug, name, description, creation_date, deadline, isPrivate, firstName, lastName, owner_username FROM view_lists where isPrivate=0', null, next);
+    await this.query('SELECT slug, name, description, creation_date, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where is_private=0', null, next);
   }
 
   /**
@@ -124,7 +124,7 @@ export class Db {
    * @param next
    */
   async findListFromSlug(query, next: queryCallback) {
-    await this.query('Select slug, name, description, creation_date, deadline, isPrivate, comments_disabled, firstName, lastName, owner_username FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
+    await this.query('Select slug, name, description, creation_date, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
   }
 
   /**
@@ -134,7 +134,7 @@ export class Db {
    */
   async findListFromID(query, next: queryCallback) {
     console.log('Query: ' + query)
-    await this.query('Select id, slug, name, description, creation_date, deadline, isPrivate, comments_disabled, firstName, lastName, owner_username FROM view_lists where id= ?', query, next);
+    await this.query('Select id, slug, name, description, creation_date, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where id= ?', query, next);
   }
 
   /**
@@ -161,7 +161,7 @@ export class Db {
    * @param next
    */
   async createList(list: List, next: queryCallback) {
-    await this.query('INSERT INTO `lists` (`slug`, `name`, `description`, `creation_date`, `deadline`, `isPrivate`, `user_id`) VALUES (?, ?, ?, ?, ?, ?, ?)', [list.slug, list.name, list.description, list.creation_date, list.deadline, list.isPrivate, list.author_id], next)
+    await this.query('INSERT INTO `lists` (`slug`, `name`, `description`, `creation_date`, `deadline`, `is_private`, `allow_comments`, `user_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [list.slug, list.name, list.description, list.creation_date, list.deadline, list.isPrivate, list.allowComments, list.author_id], next)
   }
 
   /**
