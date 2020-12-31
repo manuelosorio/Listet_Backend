@@ -150,8 +150,8 @@ listRoutes.post('/create-comment', async (req, res) => {
   if (req.body.list_id !== undefined) {
     parent = Number(req.body.list_id);
   }
-  if (req.body.comment_message !== undefined) {
-    commentMessage = req.body.comment_message;
+  if (req.body.comment !== undefined) {
+    commentMessage = req.body.comment;
   }
   const listComment: ListComment = {
     author_id: id,
@@ -163,12 +163,12 @@ listRoutes.post('/create-comment', async (req, res) => {
     if (listErr) {
       return res.status(400).send(listErr).end();
     }
-    return listResults[0].allow_comments === 1 ? res.send('Comments are disabled') :
+    return listResults[0].allow_comments === 0 ? res.status(400).send('Comments are disabled').end() :
       await db.createListComments(listComment, (commentErr, _results, _fields) => {
         if (commentErr) {
           return res.status(400).send(commentErr).end();
         }
-        return res.status(201).send('Comment created').end();
+        return res.status(201).send({message: 'Comment created.'}).end();
       })
     });
   });

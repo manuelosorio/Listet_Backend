@@ -124,7 +124,7 @@ export class Db {
    * @param next
    */
   async findListFromSlug(query, next: queryCallback) {
-    await this.query('Select slug, name, description, creation_date, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
+    await this.query('Select id, slug, name, description, creation_date, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
   }
 
   /**
