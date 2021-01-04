@@ -26,7 +26,7 @@ export class Db {
       const errMessage = "Connection to database base refused. " +
         "Please check that connection details are correct and that the database is running."
       if(err) return console.error(chalk.red(errMessage));
-      console.log('Connected')
+      console.log('Connected to Database')
       if (connection) {
         connection.release();
         console.log("Connection has been released!")
@@ -133,7 +133,6 @@ export class Db {
    * @param next
    */
   async findListFromID(query, next: queryCallback) {
-    console.log('Query: ' + query)
     await this.query('Select id, slug, name, description, creation_date, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where id= ?', query, next);
   }
 

@@ -14,10 +14,23 @@ export let db = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
 };
-export let app = {
+export const app = {
   url: process.env.APP_URL,
   url2: process.env.APP_URL2,
   path: process.env.APP_PATH
+}
+export const CORS = {
+  origin: [
+    `http://${app.url}`,
+    `https://${app.url}`,
+    `http://${app.url2}`,
+    `https://${app.url2}`,
+    `http://localhost:4200`,
+    `https://localhost:4200`,
+    `http://localhost:4000`,
+    `https://localhost:4000`
+  ],
+  credentials: true,
 }
 export let smtp: Smtp = process.env.SMTP_POOL === 'true' ?
   {
