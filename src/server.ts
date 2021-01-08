@@ -1,5 +1,6 @@
 import express from 'express';
 import Flash from 'express-flash';
+import http from 'http';
 import userRoutes  from './routes/user';
 import {variables, CORS} from './environments/variables';
 import listRoutes from './routes/lists';
@@ -30,6 +31,8 @@ const server = app.listen(port, err => {
 const io = new SocketIO.Server(server, ({
   cors: CORS
 }));
+
+server.listen(port || 3000);
 
 io.on(WebsocketEvents.CONNECT, (socket) => {
   console.log('Client Connected');
