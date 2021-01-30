@@ -4,15 +4,19 @@ dotenv.config()
 
 export const variables: any = {
   nodeEnv: process.env.NODE_ENV,
-  port: process.env.PORT,
+  httpPort: process.env.HTTP_PORT,
+  port: process.env.HTTP_PORT,
+  httpsPort: process.env.HTTPS_PORT,
+  hostname: process.env.HOSTNAME,
   session_id: process.env.SESSION_ID,
   session_secret: process.env.SESSION_SECRET,
 }
 export let db = {
   host: process.env.DB_URL,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  debug: false
 };
 export const app = {
   url: process.env.APP_URL,
@@ -61,4 +65,9 @@ export const token = {
   secret: process.env.TOKEN_SECRET,
   reset_expire_time: process.env.TOKEN_RESET_EXPIRE_TIME,
   verify_expire_time: process.env.TOKEN_VERIFY_EXPIRE_TIME,
+}
+
+export const SSL = {
+  cert: process.env.SSL_CERT,
+  key: process.env.SSL_KEY
 }
