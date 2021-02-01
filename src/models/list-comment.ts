@@ -9,5 +9,6 @@ export interface ListCommentEmitter {
   creation_date: Date;
   firstName: string;
   lastName: string;
-  username: string
+  username: string;
+  listInfo: string;
 }

@@ -16,6 +16,7 @@ export class Sockets {
         credentials: CORS.credentials
       },
       path: '/socket-io',
+      transports: ['polling']
     }))
     this.session = session;
     this.io.on('disconnect', reason => {
@@ -35,7 +36,8 @@ export class Sockets {
           lastName: user.lastName,
           username: user.username,
           comment: res.comment,
-          creation_date: new Date()
+          creation_date: new Date(),
+          listInfo: res.listInfo
         }
         console.log('Create Comment:\n', JSON.stringify(commentData));
         socket.broadcast.emit(CommentEvents.CREATE_COMMENT, commentData);
