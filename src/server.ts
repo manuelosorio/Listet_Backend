@@ -22,7 +22,9 @@ app.use(listRoutes);
 app.use(tokens);
 const server = http.createServer(app)
 server.listen(port || 3000);
-new Sockets(server);
+app.use(((req) => {
+  new Sockets(server, req.session);
+}))
 
 
 // TODO: Delete functions for default path

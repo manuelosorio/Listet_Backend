@@ -1,4 +1,4 @@
-export enum WebsocketEvents {
+export enum CommentEvents {
   CONNECT = 'connection',
   CREATE_COMMENT = 'CreateComment',
   UPDATE_COMMENT = 'UpdateComment',
