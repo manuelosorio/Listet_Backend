@@ -6,25 +6,20 @@ import { variables } from './environments/variables';
 import listRoutes from './routes/lists';
 import environment from './environments/environment';
 import tokens from './routes/tokens';
-import { Sockets } from "./middleware/sockets";
 
 
 if (variables.nodeEnv === 'production') {
   console.log = () => {return}
 }
 const app = express();
-const port = variables.port;
+const server = new http.Server(app);
 
+app.set('port', variables.port || 3000);
 app.use(environment);
 app.use(Flash());
 app.use(userRoutes);
 app.use(listRoutes);
 app.use(tokens);
-const server = http.createServer(app)
-server.listen(port || 3000);
-app.use(((req) => {
-  new Sockets(server, req.session);
-}))
 
 
 // TODO: Delete functions for default path
@@ -42,4 +37,10 @@ app.get('/', (req, res) => {
     const lastName = user[0].lastName
     return res.send(`Hello ${firstName} ${lastName}`);
   }
+});
+
+
+// new Sockets(server);
+server.listen(app.get('port'), () => {
+  console.log('Server listening on port ' + app.get('port'))
 });

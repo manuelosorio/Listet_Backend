@@ -1,5 +1,5 @@
 import express from 'express';
-import session from 'express-session';
+import session, { SessionOptions } from 'express-session';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -18,7 +18,7 @@ const dev = express();
 const MySQLStore = require('express-mysql-session')(session);
 const sessionStore = new MySQLStore(vars.db);
 
-const sess = {
+const sess: SessionOptions = {
   name: vars.session.id,
   secret: vars.session.secret,
   resave: false,
@@ -27,7 +27,7 @@ const sess = {
   cookie: {
     secure: false,
     maxAge: 2 * 60 * 60 * 1000
-  }
+  },
 }
 dev.use(cors({origin: [
       `http://${vars.app.url}`,
@@ -41,7 +41,7 @@ dev.use(cors({origin: [
   ], credentials: true}));
 dev.use(helmet());
 dev.use(express.static('private'));
-dev.use(morgan('combined'));
+dev.use(morgan('tiny'));
 dev.use(session(sess));
 
 export = dev;
