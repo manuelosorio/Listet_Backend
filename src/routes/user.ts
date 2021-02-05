@@ -220,13 +220,13 @@ userRoutes.post('/reset-password', async (req, res) => {
 });
 
 userRoutes.get('/session', (req, res) => {
-
   if (!req.session.user) {
     return res.status(200).send({authenticated: false}).end();
   }
   const sessionData = req.session.user.map(result => {
     return {verified: result.verification_status === 1}
   });
-  res.status(200).send({ authenticated: true, verified: sessionData[0].verified });
+  const user = req.session.user[0];
+  res.status(200).send({ authenticated: true, verified: sessionData[0].verified, username: user.username });
 });
 export default userRoutes;
