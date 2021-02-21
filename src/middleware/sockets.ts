@@ -24,15 +24,24 @@ export function getIoInstance(): SocketIO.Server {
   return ioInstance;
 }
 
-export function emit(event: string | CommentEvents | ListItemEvents, response) {
-  switch (event) {
-    case CommentEvents.CREATE_COMMENT: {
-      console.log(chalk.bgCyan.black(response))
-        const socket = getSocketInstance();
-        socket.emit(event, response);
-        socket.broadcast.emit(event, response);
+export function emit(event: string | CommentEvents | ListItemEvents, data) {
+  const socket = getSocketInstance();
+  socket.on(event, (res) => {
+    switch (event) {
+      case CommentEvents.CREATE_COMMENT: {
+        console.log(chalk.bgCyan.black(data))
+        let commentData: ListCommentEmitter = data;
+        commentData.listInfo = res.listInfo;
+        socket.emit(event, commentData);
+        socket.broadcast.emit(event, commentData);
+        break;
+      }
+      default: {
+        socket.emit(event, data);
+        socket.broadcast.emit(event, data)
+      }
     }
-  }
+  })
 }
 
 export class Sockets {
