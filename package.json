@@ -38,18 +38,18 @@
     "concurrently": "^5.3.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
-    "email-templates": "^8.0.1",
+    "email-templates": "^8.0.3",
     "express": "^4.17.1",
     "express-flash": "0.0.2",
-    "express-mysql-session": "^2.1.4",
+    "express-mysql-session": "^2.1.5",
     "express-session": "^1.17.1",
     "helmet": "^3.23.1",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
-    "nodemailer": "^6.4.16",
+    "nodemailer": "^6.4.17",
     "pug": "^3.0.0",
-    "snyk": "^1.440.1",
-    "socket.io": "^3.0.4"
+    "snyk": "^1.440.1"
+    "socket.io": "^3.1.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",

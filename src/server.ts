@@ -6,6 +6,7 @@ import { variables } from './environments/variables';
 import listRoutes from './routes/lists';
 import environment from './environments/environment';
 import tokens from './routes/tokens';
+import { Sockets } from "./middleware/sockets";
 
 
 if (variables.nodeEnv === 'production') {
@@ -40,7 +41,7 @@ app.get('/', (req, res) => {
 });
 
 
-// new Sockets(server);
+new Sockets(server);
 server.listen(app.get('port'), () => {
   console.log('Server listening on port ' + app.get('port'))
 });

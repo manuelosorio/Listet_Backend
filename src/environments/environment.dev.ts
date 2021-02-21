@@ -21,7 +21,7 @@ const sessionStore = new MySQLStore(vars.db);
 const sess: SessionOptions = {
   name: vars.session.id,
   secret: vars.session.secret,
-  resave: false,
+  resave: true,
   saveUninitialized: false,
   store: sessionStore,
   cookie: {
@@ -29,16 +29,7 @@ const sess: SessionOptions = {
     maxAge: 2 * 60 * 60 * 1000
   },
 }
-dev.use(cors({origin: [
-      `http://${vars.app.url}`,
-      `https://${vars.app.url}`,
-      `http://${vars.app.url2}`,
-      `https://${vars.app.url2}`,
-      `http://localhost:4200`,
-      `https://localhost:4200`,
-      `http://localhost:4000`,
-      `https://localhost:4000`
-  ], credentials: true}));
+dev.use(cors(vars.CORS));
 dev.use(helmet());
 dev.use(express.static('private'));
 dev.use(morgan('tiny'));

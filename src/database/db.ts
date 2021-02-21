@@ -124,7 +124,7 @@ export class Db {
    * @param next
    */
   async findListFromSlug(query, next: queryCallback) {
-    await this.query('Select id, slug, name, description, creation_date, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
+    await this.query('Select id, slug, name, description, creation_date, is_complete, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
   }
 
   /**
@@ -133,7 +133,7 @@ export class Db {
    * @param next
    */
   async findListFromID(query, next: queryCallback) {
-    await this.query('Select id, slug, name, description, creation_date, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where id= ?', query, next);
+    await this.query('Select id, slug, name, description, creation_date, is_complete, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where id= ?', query, next);
   }
 
   /**
@@ -151,7 +151,7 @@ export class Db {
    * @param next
    */
   async findListComments(query, next: queryCallback) {
-    await this.query('SELECT comment, creation_date, firstName, lastName, username FROM view_comments where list_owner_username=? and slug= ?', [query.list_owner_username, query.slug], next);
+    await this.query('SELECT comment, creation_date, firstName, lastName, username FROM view_comments where list_owner_username=? and slug= ? ORDER BY creation_date DESC', [query.list_owner_username, query.slug], next);
   }
 
   /**
