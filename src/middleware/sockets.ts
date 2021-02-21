@@ -5,11 +5,40 @@ import { CommentEvents } from "../events/comment.events";
 import { User } from "../models/user";
 import { ListCommentEmitter } from "../models/list-comment";
 import { ListItemEvents } from "../events/list-item.events";
+import express from "express";
+import chalk from "chalk";
+
+let socketInstance: SocketIO.Socket
+let ioInstance: SocketIO.Server;
+
+function setSocketInstance(socket: SocketIO.Socket) {
+  socketInstance = socket;
+}
+export function getSocketInstance(): SocketIO.Socket {
+  return socketInstance;
+}
+function setIoInstance(io: SocketIO.Server) {
+  ioInstance = io;
+}
+export function getIoInstance(): SocketIO.Server {
+  return ioInstance;
+}
+
+export function emit(event: string | CommentEvents | ListItemEvents, response) {
+  switch (event) {
+    case CommentEvents.CREATE_COMMENT: {
+      console.log(chalk.bgCyan.black(response))
+        const socket = getSocketInstance();
+        socket.emit(event, response);
+        socket.broadcast.emit(event, response);
+    }
+  }
+}
 
 export class Sockets {
   private io: Server;
   private session: Express.Session;
-  constructor(server: http.Server, session: Express.Session) {
+  constructor(server: http.Server) {
     this.io = new SocketIO.Server(server, ({
       cors: {
         origin: CORS.origin,
@@ -19,18 +48,20 @@ export class Sockets {
       path: '/socket-io',
       transports: ['polling']
     }))
-    this.session = session;
-    console.log('Websocket Initialized!');
+    this.session = express().request.session;
+    console.log(chalk.bgYellow.black('Websocket Initialized!'));
+    setIoInstance(this.io);
     this.connect();
     this.io.on('disconnect', reason => {
-      console.log(`Client Disconnected: ${reason}`)
+      console.log(chalk.bgYellow.black(`Client Disconnected: ${reason}`))
     });
   }
   connect() {
     this.io.on('connection', (socket: Socket) => {
-      console.log('Client Connected.')
-      this.comments(socket);
-      this.listItems(socket);
+      console.log(chalk.bgYellow.black('Client Connected.'))
+      setSocketInstance(socket);
+      // this.comments(socket);
+      // this.listItems(socket);
     })
   }
   comments(socket: Socket) {
@@ -85,8 +116,5 @@ export class Sockets {
       socket.emit(ListItemEvents.COMPLETE_ITEM, res);
       socket.broadcast.emit(ListItemEvents.COMPLETE_ITEM, res);
     });
-
-
-
   }
 }

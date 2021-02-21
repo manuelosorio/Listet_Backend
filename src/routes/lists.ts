@@ -1,11 +1,13 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import mysql from 'mysql';
-import {Db} from '../database/db';
+import { Db } from '../database/db';
 import * as vars from '../environments/variables';
-import {DateUtil} from "../middleware/date";
-import {List} from '../models/list';
-import {ListItem} from '../models/list-item';
-import {ListComment} from '../models/list-comment';
+import { DateUtil } from "../middleware/date";
+import { List } from '../models/list';
+import { ListItem } from '../models/list-item';
+import { ListComment, ListCommentEmitter } from '../models/list-comment';
+import { emit } from "../middleware/sockets";
+import { CommentEvents } from "../events/comment.events";
 
 const listRoutes = Router();
 const db = new Db(mysql.createPool(vars.db));
@@ -98,11 +100,11 @@ listRoutes.post('/create-list', async (req, res) => {
     allowComments: listAllowsComments,
     author_id: id
   }
-  console.log(list)
   await db.createList(list, (err, results, _fields) => {
     if (err) {
       return res.status(400).send(err).end();
     } else {
+      list
       return res.status(201).send({ message: 'List created.', url: `${username}/${list.slug}`})
     }
   });
@@ -168,6 +170,15 @@ listRoutes.post('/create-comment', async (req, res) => {
         if (commentErr) {
           return res.status(400).send(commentErr).end();
         }
+        const user = req.session.user[0];
+        const commentData: ListCommentEmitter = {
+          comment: listComment.comment_message,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          creation_date: listComment.creation_date,
+        }
+        emit(CommentEvents.CREATE_COMMENT, commentData)
         return res.status(201).send({message: 'Comment created.'}).end();
       })
     });

@@ -10,5 +10,5 @@ export interface ListCommentEmitter {
   firstName: string;
   lastName: string;
   username: string;
-  listInfo: string;
+  listInfo?: string;
 }
