@@ -1,13 +1,12 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import mysql from 'mysql';
-import {Db} from '../database/db';
+import { Db } from '../database/db';
 import * as vars from '../environments/variables';
-import {hashPassword} from '../middleware/bcrypt';
-import {Crypto} from '../middleware/crypto';
-import {DateUtil} from '../middleware/date';
-import {ResetPassword} from '../models/reset-password';
-import {VerifyAccount} from '../models/verify-account';
-
+import { hashPassword } from '../middleware/bcrypt';
+import { Crypto } from '../middleware/crypto';
+import { DateUtil } from '../middleware/date';
+import { ResetPassword } from '../models/reset-password';
+import { VerifyAccount } from '../models/verify-account';
 const tokens = Router();
 const db = new Db(mysql.createPool(vars.db));
 const crypto = new Crypto();
