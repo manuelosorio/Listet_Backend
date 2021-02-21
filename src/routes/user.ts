@@ -104,7 +104,7 @@ userRoutes.post('/register', async (req, res) => {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 email: req.body.email,
-                token: 'https://' + vars.smtp.host + vars.app.path + '/verify-account/' + tokenStore
+                token: 'https://' + vars.app.hostname + vars.app.path + '/verify-account/' + tokenStore
               }
               const queryParams = {
                 token: tokenStore,
@@ -195,7 +195,7 @@ userRoutes.post('/reset-password', async (req, res) => {
         firstName: results[0].firstName,
         lastName: results[0].lastName,
         email: results[0].email,
-        token: 'https://' + vars.smtp.host + vars.app.path + '/reset-password/' + tokenStore
+        token: 'https://' + vars.app.hostname + vars.app.path + '/reset-password/' + tokenStore
       }
       const queryParams = {
         token: tokenStore,

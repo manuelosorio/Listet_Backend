@@ -19,6 +19,7 @@ export let db = {
   debug: false
 };
 export const app = {
+  hostname: process.env.APP_HOSTNAME,
   url: process.env.APP_URL,
   url2: process.env.APP_URL2,
   path: process.env.APP_PATH
