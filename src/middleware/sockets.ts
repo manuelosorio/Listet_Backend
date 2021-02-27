@@ -26,19 +26,30 @@ export function getIoInstance(): SocketIO.Server {
 
 export function emit(event: string | CommentEvents | ListItemEvents, data) {
   const socket = getSocketInstance();
-  socket.on(event, (res) => {
+  socket.once(event, (_res) => {
     switch (event) {
       case CommentEvents.CREATE_COMMENT: {
-        console.log(chalk.bgCyan.black(data))
+        console.log(chalk.bgCyan.black('comment emitted'))
         let commentData: ListCommentEmitter = data;
-        commentData.listInfo = res.listInfo;
-        socket.emit(event, commentData);
+        socket.emit(event, data);
         socket.broadcast.emit(event, commentData);
         break;
       }
+      case ListItemEvents.COMPLETE_ITEM: {
+        console.log(chalk.bgCyan.black('item emitted'));
+        socket.broadcast.emit(event, data);
+        break;
+      }
+      case ListItemEvents.DELETE_ITEM: {
+        console.log(chalk.bgCyan.black('Default', event));
+        socket.broadcast.emit(event, data)
+        break;
+      }
       default: {
+        console.log(chalk.bgCyan.black('Default', event));
         socket.emit(event, data);
         socket.broadcast.emit(event, data)
+        break;
       }
     }
   })
@@ -73,6 +84,7 @@ export class Sockets {
       // this.listItems(socket);
     })
   }
+  // TODO: Delete comments()
   comments(socket: Socket) {
     // Create
     socket.on(CommentEvents.CREATE_COMMENT, res => {
@@ -105,6 +117,7 @@ export class Sockets {
       socket.emit(CommentEvents.DELETE_COMMENT, res);
     });
   }
+  // TODO: Delete ListItems()
   listItems(socket: Socket) {
     socket.on(ListItemEvents.ADD_ITEM, (res) => {
       socket.emit(ListItemEvents.ADD_ITEM, res);

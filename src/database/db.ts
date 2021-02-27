@@ -1,4 +1,4 @@
-import {MysqlError, Pool, PoolConnection, queryCallback} from 'mysql';
+import { MysqlError, Pool, PoolConnection, queryCallback } from 'mysql';
 import chalk from 'chalk';
 import {User} from '../models/user';
 import {List} from '../models/list';
@@ -111,6 +111,30 @@ export class Db {
 
   // List Queries
   /**
+   * Check if user Owns list
+   * @param listID
+   * @param next
+   */
+  async getListOwner(listID: number | any, next: queryCallback) {
+    await this.query(
+      'SELECT `owner_id` from view_lists where id = ?',
+      listID,
+      next
+    )
+  }
+  /**
+   * Check if user Owns list item
+   * @param listID
+   * @param next
+   */
+  async getListItemOwner(listID: number | any, next: queryCallback) {
+    await this.query(
+      'SELECT `owner_id` from view_list_items where id = ?',
+      listID,
+      next
+    )
+  }
+  /**
    * Retrieve all public lists.
    * @param next
    */
@@ -142,9 +166,24 @@ export class Db {
    * @param next
    */
   async findListItems(query, next: queryCallback) {
-    await this.query('Select id, item, deadline, comment, list_id, slug, username FROM view_list_items where username=? and slug= ?', [query.username, query.slug], next);
+    await this.query('Select id, item, deadline, completed, list_id, slug, username FROM view_list_items where username=? and slug= ?', [query.username, query.slug], next);
   }
-
+  async updateListItemStatus(listItem: {completed: number, id: number}, next: queryCallback) {
+    await this.query(
+      `UPDATE view_list_items SET completed = ? WHERE id = ? `,
+      [
+        listItem.completed,
+        listItem.id
+    ] , next);
+  }
+  /**
+   * Delete List Item
+   * @param listId
+   * @param next
+   */
+  async deleteListItem(listId: number, next: queryCallback) {
+    this.db.query('DELETE FROM `list_items` WHERE id = ?', listId, next)
+  }
   /**
    * Find all comments using list owner username and slug
    * @param query
@@ -153,7 +192,6 @@ export class Db {
   async findListComments(query, next: queryCallback) {
     await this.query('SELECT comment, creation_date, firstName, lastName, username FROM view_comments where list_owner_username=? and slug= ? ORDER BY creation_date DESC', [query.list_owner_username, query.slug], next);
   }
-
   /**
    * Create lists
    * @param list
@@ -181,6 +219,7 @@ export class Db {
     await this.query('INSERT INTO `list_comments` (`user_id`, `comment`, `creation_date`, `list_id`) VALUES (?, ?, ?, ?)', [listComment.author_id, listComment.comment_message, listComment.creation_date, listComment.parent_id], next);
   }
 
+  // User Tokens
   /**
    * Add Token To User
    * @param params
@@ -218,20 +257,25 @@ export class Db {
   }
 
   /**
-   *
+   * Get Reset Token Data
    * @param params
    * @param next
    */
   async userResetPasswordToken(params, next: queryCallback) {
     await this.query('SELECT `reset_token` FROM view_tokens where reset_token= ?', [params],next);
   }
+
+  /**
+   * Get Verification Token Data
+   * @param params
+   * @param next
+   */
   async userVerifyAccountToken(params, next: queryCallback) {
     await this.query('SELECT `verification_token` FROM view_tokens where verification_token= ?', [params],next);
   }
 
-
   /**
-   *
+   * Get the Expiration Date for Token
    * @param params
    * @param next
    */
@@ -247,6 +291,7 @@ export class Db {
   async getVerifyAccountTokenStoreExpiration(params, next: queryCallback) {
     await this.query('SELECT `expires` FROM token_verify_account where token_id = ?', [params],next);
   }
+
   /**
    * Updates Password Deletes token
    * @param params
