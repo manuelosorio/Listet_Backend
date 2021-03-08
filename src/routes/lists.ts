@@ -4,7 +4,7 @@ import { Db } from '../database/db';
 import * as vars from '../environments/variables';
 import { DateUtil } from "../middleware/date";
 import { List } from '../models/list';
-import { ListItem, ListItemModel } from '../models/list-item';
+import { ListItemModel } from '../models/list-item';
 import { ListComment, ListCommentEmitter } from '../models/list-comment';
 import { emit } from "../middleware/sockets";
 import { CommentEvents } from "../events/comment.events";

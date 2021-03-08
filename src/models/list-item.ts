@@ -6,11 +6,12 @@ export interface ListItem {
   list_id: number,
 }
 export interface ListItemModel {
-  id: number
+  id?: number
   item: string;
-  deadline: Date;
+  deadline?: string;
   completed: number;
-  list_id: number;
-  username: string;
-  slug: string;
+  list_id?: number;
+  username?: string;
+  slug?: string;
+  listInfo?: string;
 }
