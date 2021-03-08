@@ -117,11 +117,13 @@ listRoutes.post('/create-list', async (req, res) => {
 listRoutes.post('/add-item', async (req, res) => {
   console.log(req.body)
   const id = Number(req.body.list_id);
-  const listItem: ListItem = {
+  const listItem: ListItemModel = {
+    id: 0,
+    deadline: req.body.deadline,
     item: req.body.item,
-    deadline: deadlineDate ?? null,
     completed: 0,
-    list_id: id
+    list_id: id,
+    listInfo: req.body.listInfo
   }
   await db.addListItem(listItem, (err, results, _fields) => {
     if (err) {

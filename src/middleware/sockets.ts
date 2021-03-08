@@ -1,142 +1,78 @@
 import SocketIO, { Server, Socket } from "socket.io";
 import http from "http";
+import chalk from "chalk";
 import { CORS } from "../environments/variables";
 import { CommentEvents } from "../events/comment.events";
-import { User } from "../models/user";
-import { ListCommentEmitter } from "../models/list-comment";
 import { ListItemEvents } from "../events/list-item.events";
-import express from "express";
-import chalk from "chalk";
 
-let socketInstance: SocketIO.Socket
+let socketInstance: SocketIO.Socket;
 let ioInstance: SocketIO.Server;
 
 function setSocketInstance(socket: SocketIO.Socket) {
-  socketInstance = socket;
+  return socketInstance = socket;
 }
+// noinspection JSUnusedGlobalSymbols
 export function getSocketInstance(): SocketIO.Socket {
   return socketInstance;
 }
 function setIoInstance(io: SocketIO.Server) {
-  ioInstance = io;
+  return ioInstance = io;
 }
 export function getIoInstance(): SocketIO.Server {
   return ioInstance;
 }
 
 export function emit(event: string | CommentEvents | ListItemEvents, data) {
-  const socket = getSocketInstance();
-  socket.once(event, (_res) => {
+  const io = getIoInstance();
+  try {
     switch (event) {
-      case CommentEvents.CREATE_COMMENT: {
-        console.log(chalk.bgCyan.black('comment emitted'))
-        let commentData: ListCommentEmitter = data;
-        socket.emit(event, data);
-        socket.broadcast.emit(event, commentData);
-        break;
-      }
       case ListItemEvents.COMPLETE_ITEM: {
-        console.log(chalk.bgCyan.black('item emitted'));
-        socket.broadcast.emit(event, data);
+        io.sockets.to(`${data.username}-${data.slug}`).emit(event, data);
         break;
       }
       case ListItemEvents.DELETE_ITEM: {
-        console.log(chalk.bgCyan.black('Default', event));
-        socket.broadcast.emit(event, data)
+        console.log(chalk.bgCyan.black(event, 'emitted'));
+        io.sockets.emit(event, data);
         break;
       }
       default: {
-        console.log(chalk.bgCyan.black('Default', event));
-        socket.emit(event, data);
-        socket.broadcast.emit(event, data)
+        console.log(chalk.bgCyan.black(event, 'emitted'));
+        io.to(data.listInfo).sockets.emit(event, data);
         break;
       }
     }
-  })
+  } catch (e) {
+    console.error(chalk.red(e))
+  }
 }
 
 export class Sockets {
-  private io: Server;
-  private session: Express.Session;
+  private readonly io: Server;
   constructor(server: http.Server) {
     this.io = new SocketIO.Server(server, ({
       cors: {
         origin: CORS.origin,
-        methods: ['GET', 'POST', 'UPDATE', 'DELETE'],
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: CORS.credentials
       },
       path: '/socket-io',
-      transports: ['polling']
+
     }))
-    this.session = express().request.session;
     console.log(chalk.bgYellow.black('Websocket Initialized!'));
     setIoInstance(this.io);
-    this.connect();
-    this.io.on('disconnect', reason => {
-      console.log(chalk.bgYellow.black(`Client Disconnected: ${reason}`))
-    });
   }
   connect() {
-    this.io.on('connection', (socket: Socket) => {
-      console.log(chalk.bgYellow.black('Client Connected.'))
+    this.io.on('connection', async (socket: Socket) => {
+      console.log(chalk.bgYellow.black(`Client #${socket.id} Connected.`))
       setSocketInstance(socket);
-      // this.comments(socket);
-      // this.listItems(socket);
+
+      socket.on('join', (res) => {
+        console.log(chalk.bgYellow.black(`Client #${socket.id} joined: ${res}  \n`));
+        socket.join(res);
+      });
+      socket.on('disconnect', reason => {
+        console.log(chalk.bgYellow.black(`Client #${socket.id} Disconnected: ${reason}. \n`))
+      });
     })
-  }
-  // TODO: Delete comments()
-  comments(socket: Socket) {
-    // Create
-    socket.on(CommentEvents.CREATE_COMMENT, res => {
-      // console.log(this.session.user);
-      const user: User = this.session.user[0];
-      const commentData: ListCommentEmitter = {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        username: user.username,
-        comment: res.comment,
-        creation_date: new Date(),
-        listInfo: res.listInfo
-      }
-      console.log('Create Comment:\n', JSON.stringify(commentData));
-      socket.broadcast.emit(CommentEvents.CREATE_COMMENT, commentData);
-      socket.emit(CommentEvents.CREATE_COMMENT, commentData);
-    });
-
-    // Update
-    socket.on(CommentEvents.UPDATE_COMMENT, res=> {
-      console.log('Socket Update Comment:\n', JSON.stringify({CommentData: res}));
-      socket.broadcast.emit(CommentEvents.UPDATE_COMMENT, res);
-      socket.emit(CommentEvents.UPDATE_COMMENT, res);
-    });
-
-    // Delete
-    socket.on(CommentEvents.DELETE_COMMENT, res=> {
-      console.log('Socket Delete Comment:\n', JSON.stringify({CommentData: res}));
-      socket.broadcast.emit(CommentEvents.DELETE_COMMENT, res);
-      socket.emit(CommentEvents.DELETE_COMMENT, res);
-    });
-  }
-  // TODO: Delete ListItems()
-  listItems(socket: Socket) {
-    socket.on(ListItemEvents.ADD_ITEM, (res) => {
-      socket.emit(ListItemEvents.ADD_ITEM, res);
-      socket.broadcast.emit(ListItemEvents.ADD_ITEM, res);
-    });
-
-    socket.on(ListItemEvents.UPDATE_ITEM, (res) => {
-      socket.emit(ListItemEvents.UPDATE_ITEM, res);
-      socket.broadcast.emit(ListItemEvents.UPDATE_ITEM, res);
-    });
-
-    socket.on(ListItemEvents.DELETE_ITEM, (res) => {
-      socket.emit(ListItemEvents.DELETE_ITEM, res);
-      socket.broadcast.emit(ListItemEvents.DELETE_ITEM, res);
-    });
-
-    socket.on(ListItemEvents.COMPLETE_ITEM, (res) => {
-      socket.emit(ListItemEvents.COMPLETE_ITEM, res);
-      socket.broadcast.emit(ListItemEvents.COMPLETE_ITEM, res);
-    });
   }
 }

@@ -2,7 +2,7 @@ import { MysqlError, Pool, PoolConnection, queryCallback } from 'mysql';
 import chalk from 'chalk';
 import {User} from '../models/user';
 import {List} from '../models/list';
-import {ListItem} from '../models/list-item';
+import { ListItemModel } from '../models/list-item';
 import {ListComment} from '../models/list-comment';
 import {ResetPassword} from '../models/reset-password';
 
@@ -206,8 +206,8 @@ export class Db {
    * @param listItem
    * @param next
    */
-  async addListItem(listItem: ListItem, next: queryCallback) {
-    await this.query('INSERT INTO `list_items` (`item`, `deadline`, `completed`, `list_id`) VALUES (?, ?, ?, ?)', [listItem.item, listItem.deadline, listItem.completed, listItem.list_id], next);
+  async addListItem(listItem: ListItemModel, next: queryCallback) {
+    await this.query('INSERT INTO `list_items` (`item`, `deadline`, `completed`, `list_id`) VALUES (?, ?, ?, ?)',[listItem.item, listItem.deadline, listItem.completed, listItem.list_id], next);
   }
 
   /**

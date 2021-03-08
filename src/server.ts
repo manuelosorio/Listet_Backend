@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
 });
 
 
-new Sockets(server);
+new Sockets(server).connect();
 server.listen(app.get('port'), () => {
-  console.log('Server listening on port ' + app.get('port'))
+  console.log('Server listening on port ' + app.get('port'));
 });
