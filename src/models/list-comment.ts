@@ -6,7 +6,7 @@ export interface ListComment {
 }
 export interface ListCommentEmitter {
   comment: string;
-  creation_date: Date;
+  creation_date: Date | string;
   firstName: string;
   lastName: string;
   username: string;

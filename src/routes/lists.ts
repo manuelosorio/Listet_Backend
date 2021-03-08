@@ -165,8 +165,10 @@ listRoutes.post('/create-comment', async (req, res) => {
     if (listErr) {
       return res.status(400).send(listErr).end();
     }
+    const listOwner = listResults[0].owner_username;
+    const slug = listResults[0].slug;
     return listResults[0].allow_comments === 0 ? res.status(400).send('Comments are disabled').end() :
-      await db.createListComments(listComment, (commentErr, _results, _fields) => {
+      await db.createListComments(listComment, (commentErr, results, _fields) => {
         if (commentErr) {
           return res.status(400).send(commentErr).end();
         }
@@ -176,8 +178,9 @@ listRoutes.post('/create-comment', async (req, res) => {
           username: user.username,
           firstName: user.firstName,
           lastName: user.lastName,
-          creation_date: listComment.creation_date,
+          creation_date: new DateUtil(listComment.creation_date).format(),
         }
+        commentData.listInfo = `${listOwner}-${slug}`;
         emit(CommentEvents.CREATE_COMMENT, commentData)
         return res.status(201).send({message: 'Comment created.'}).end();
       })
