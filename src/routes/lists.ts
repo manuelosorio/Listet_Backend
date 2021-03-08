@@ -9,7 +9,6 @@ import { ListComment, ListCommentEmitter } from '../models/list-comment';
 import { emit } from "../middleware/sockets";
 import { CommentEvents } from "../events/comment.events";
 import { ListItemEvents } from "../events/list-item.events";
-import chalk from "chalk";
 
 const listRoutes = Router();
 const db = new Db(mysql.createPool(vars.db));
@@ -18,8 +17,8 @@ const db = new Db(mysql.createPool(vars.db));
 /*
 ----------------        Start Get Routes        ----------------
 */
-listRoutes.get('/lists', (req, res) =>  {
-  db.findAllLists((err, results)  => {
+listRoutes.get('/lists', async (req, res) =>  {
+  await db.findAllLists((err, results)  => {
     if (err) {
       const errorMessage = `We failed to query lists ${err}`;
       console.log(err);
@@ -58,9 +57,9 @@ listRoutes.get('/list/:owner_username/:slug/items', async (req, res) =>  {
     return res.status(200).send(results).end();
   });
 });
-listRoutes.get('/list/:owner_username/:slug/comments', (req, res) =>  {
+listRoutes.get('/list/:owner_username/:slug/comments', async (req, res) =>  {
   const query = {'list_owner_username': req.params.owner_username, 'slug': req.params.slug}
-  db.findListComments(query, (err, results) => {
+  await db.findListComments(query, (err, results) => {
     if (err) {
       console.log(err);
       return res.sendStatus(500).send(err.message).end();
@@ -104,7 +103,6 @@ listRoutes.post('/create-list', async (req, res) => {
     if (err) {
       return res.status(400).send(err).end();
     } else {
-      list
       return res.status(201).send({ message: 'List created.', url: `${username}/${list.slug}`})
     }
   });
@@ -118,7 +116,6 @@ listRoutes.post('/create-list', async (req, res) => {
  */
 listRoutes.post('/add-item', async (req, res) => {
   console.log(req.body)
-  const deadlineDate = new Date(req.body.deadline);
   const id = Number(req.body.list_id);
   const listItem: ListItem = {
     item: req.body.item,
@@ -126,7 +123,6 @@ listRoutes.post('/add-item', async (req, res) => {
     completed: 0,
     list_id: id
   }
-  console.log(chalk.bgGreenBright(listItem))
   await db.addListItem(listItem, (err, results, _fields) => {
     if (err) {
       console.error(err);
@@ -204,7 +200,6 @@ listRoutes.put('/update-item', async (_req, _res) => {
 });
 listRoutes.put('/update-item-status', async (req, res) => {
   const listItem: ListItemModel = req.body;
-  // console.log(listItem)
   if (!!req.session.user) {
     const userID = req.session.user[0].id;
     await db.getListOwner(listItem.list_id, async (error, result) => {
@@ -213,7 +208,6 @@ listRoutes.put('/update-item-status', async (req, res) => {
         return res.status(500).send(error).end();
       }
       if (userID === result[0].owner_id) {
-        console.log(listItem)
         return await db.updateListItemStatus({
           completed: listItem.completed,
           id: listItem.id
@@ -234,7 +228,7 @@ listRoutes.put('/update-comment', async (req, _res) => {
   console.log('update comment route');
 });
 /*
---------------        End Update Routes        --------------
+-----------------        End Update Routes        --------------
 */
 
 /*
@@ -251,7 +245,7 @@ listRoutes.delete('/delete-item/:id', async (req, res) => {
   const id = req.params.id as unknown as number;
   if (!!req.session.user) {
     const userID = req.session.user[0].id;
-    db.getListItemOwner(id, ((err, result) => {
+    await db.getListItemOwner(id, ((err, result) => {
       if (err) {
         console.error(err.message);
         return res.status(500).send(err).end();
@@ -277,13 +271,6 @@ listRoutes.delete('/delete-comment', async (_req, _res) => {
 /*
 --------------        End Deletion Routes        --------------
 */
-
-
-
-
-listRoutes.get('/length/:val', (req, res) => {
-  res.send(req.params.val.length);
-})
 
 
 export default listRoutes;

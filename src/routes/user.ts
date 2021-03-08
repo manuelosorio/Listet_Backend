@@ -156,7 +156,6 @@ userRoutes.post('/login', async (req, res) => {
           if (error) {
             return res.status(500).send(error).end();
           }
-          console.log('login: ', chalk.bgYellow.white(results))
           db.userSession(req, results);
           responseMessage.message = 'Login Successful';
           return res.status(200).send(responseMessage).end();
