@@ -1,11 +1,14 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import mysql from 'mysql';
-import {Db} from '../database/db';
+import { Db } from '../database/db';
 import * as vars from '../environments/variables';
-import {DateUtil} from "../middleware/date";
-import {List} from '../models/list';
-import {ListItem} from '../models/list-item';
-import {ListComment} from '../models/list-comment';
+import { DateUtil } from "../middleware/date";
+import { List } from '../models/list';
+import { ListItemModel } from '../models/list-item';
+import { ListComment, ListCommentEmitter } from '../models/list-comment';
+import { emit } from "../middleware/sockets";
+import { CommentEvents } from "../events/comment.events";
+import { ListItemEvents } from "../events/list-item.events";
 
 const listRoutes = Router();
 const db = new Db(mysql.createPool(vars.db));
@@ -35,14 +38,14 @@ listRoutes.get('/lists', async (req, res) =>  {
   });
 });
 
-listRoutes.get('/list/:owner_username/:slug', async (req, res) =>  {
+listRoutes.get('/list/:owner_username/:slug', (req, res) =>  {
   const query = {'owner_username': req.params.owner_username, 'slug': req.params.slug}
-  await db.findListFromSlug(query, (err, results) => {
+  db.findListFromSlug(query, (err, results) => {
     if (err) {
       return console.log(err);
     }
     return !results.length ? res.status(404).send('List Doesn\'t Exist.').end(): res.status(200).send(results).end();
-  });
+  }).then(()=> {});
 });
 listRoutes.get('/list/:owner_username/:slug/items', async (req, res) =>  {
   const query = {'username': req.params.owner_username, 'slug': req.params.slug}
@@ -80,8 +83,10 @@ listRoutes.get('/list/:owner_username/:slug/comments', async (req, res) =>  {
 // Handles List Creation...
 listRoutes.post('/create-list', async (req, res) => {
   const id = Number(req.session.user[0].id);
+  const username = req.session.user[0].username;
   const deadlineDate = new Date(req.body.deadline);
-  const listPrivate = req.body.isPrivate === 'on' ? 1 : 0;
+  const listPrivate = req.body.is_private === true ? 1 : 0;
+  const listAllowsComments = req.body.allow_comments === true ? 1 : 0;
   const url = req.body.title.toLowerCase().split(' ').join('-');
   console.log(url);
   const list: List = {
@@ -91,14 +96,14 @@ listRoutes.post('/create-list', async (req, res) => {
     creation_date: new Date(),
     deadline: deadlineDate,
     isPrivate: listPrivate,
+    allowComments: listAllowsComments,
     author_id: id
   }
-  console.log(list)
   await db.createList(list, (err, results, _fields) => {
     if (err) {
       return res.status(400).send(err).end();
     } else {
-      return res.status(201).send('List created.')
+      return res.status(201).send({ message: 'List created.', url: `${username}/${list.slug}`})
     }
   });
 })
@@ -110,20 +115,24 @@ listRoutes.post('/create-list', async (req, res) => {
  *    - Fulfill the minimum character count
  */
 listRoutes.post('/add-item', async (req, res) => {
-  const deadlineDate = new Date(req.body.deadline);
+  console.log(req.body)
   const id = Number(req.body.list_id);
-  const listItem: ListItem = {
+  const listItem: ListItemModel = {
+    id: 0,
+    deadline: req.body.deadline,
     item: req.body.item,
-    deadline: deadlineDate || null,
     completed: 0,
-    list_id: id
+    list_id: id,
+    listInfo: req.body.listInfo
   }
-
   await db.addListItem(listItem, (err, results, _fields) => {
     if (err) {
+      console.error(err);
       return res.status(400).send(err).end();
     }
-    return res.status(201).send('List item added.')
+    listItem.id = results.insertId;
+    emit(ListItemEvents.ADD_ITEM, listItem);
+    return res.status(201).send({message: 'List item added.'});
   });
 });
 
@@ -145,8 +154,8 @@ listRoutes.post('/create-comment', async (req, res) => {
   if (req.body.list_id !== undefined) {
     parent = Number(req.body.list_id);
   }
-  if (req.body.comment_message !== undefined) {
-    commentMessage = req.body.comment_message;
+  if (req.body.comment !== undefined) {
+    commentMessage = req.body.comment;
   }
   const listComment: ListComment = {
     author_id: id,
@@ -158,41 +167,30 @@ listRoutes.post('/create-comment', async (req, res) => {
     if (listErr) {
       return res.status(400).send(listErr).end();
     }
-    return listResults[0].comments_disabled === 1 ? res.send('Comments are disabled') :
-      await db.createListComments(listComment, (commentErr, _results, _fields) => {
+    const listOwner = listResults[0].owner_username;
+    const slug = listResults[0].slug;
+    return listResults[0].allow_comments === 0 ? res.status(400).send('Comments are disabled').end() :
+      await db.createListComments(listComment, (commentErr, results, _fields) => {
         if (commentErr) {
           return res.status(400).send(commentErr).end();
         }
-        return res.status(201).send('Comment created').end();
+        const user = req.session.user[0];
+        const commentData: ListCommentEmitter = {
+          comment: listComment.comment_message,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          creation_date: new DateUtil(listComment.creation_date).format(),
+        }
+        commentData.listInfo = `${listOwner}-${slug}`;
+        emit(CommentEvents.CREATE_COMMENT, commentData)
+        return res.status(201).send({message: 'Comment created.'}).end();
       })
     });
   });
 /*
 --------------        End Creation Routes        --------------
 */
-
-
-/*
-----------------        Start Deletion Routes        ----------------
-*/
-// Handles List Modification...
-listRoutes.delete('/delete-list', async (_req, _res) => {
-  console.log('delete list route');
-})
-
-// Handles List Item Modification...
-listRoutes.delete('/delete-item', async (_req, _res) => {
-  console.log('delete list item route');
-})
-
-// Handles Comment Modification...
-listRoutes.delete('/delete-comment', async (_req, _res) => {
-  console.log('delete comment route');
-})
-/*
---------------        End Deletion Routes        --------------
-*/
-
 
 
 /*
@@ -205,14 +203,79 @@ listRoutes.put('/update-list', async (_req, _res) => {
 listRoutes.put('/update-item', async (_req, _res) => {
   console.log('update list item route');
 });
+listRoutes.put('/update-item-status', async (req, res) => {
+  const listItem: ListItemModel = req.body;
+  if (!!req.session.user) {
+    const userID = req.session.user[0].id;
+    await db.getListOwner(listItem.list_id, async (error, result) => {
+      if (error) {
+        console.error(error)
+        return res.status(500).send(error).end();
+      }
+      if (userID === result[0].owner_id) {
+        return await db.updateListItemStatus({
+          completed: listItem.completed,
+          id: listItem.id
+        }, (err, _) => {
+          if (err) {
+            console.error(err)
+            return res.status(500).send(err).end();
+          }
 
-listRoutes.put('/update-comment', async (_req, _res) => {
+          emit(ListItemEvents.COMPLETE_ITEM, listItem);
+          return res.status(201).send({ message: "Updated Item Status" }).end();
+        })
+      }
+    })
+  }
+})
+listRoutes.put('/update-comment', async (req, _res) => {
   console.log('update comment route');
 });
 /*
---------------        End Update Routes        --------------
+-----------------        End Update Routes        --------------
 */
 
+/*
+----------------        Start Deletion Routes        ----------------
+*/
+// Handles List Modification...
+listRoutes.delete('/delete-list', async (_req, _res) => {
+  console.log('delete list route');
+})
+
+// Handles List Item Modification...
+listRoutes.delete('/delete-item/:id', async (req, res) => {
+  // console.log('delete list item route' + req.params.id);
+  const id = req.params.id as unknown as number;
+  if (!!req.session.user) {
+    const userID = req.session.user[0].id;
+    await db.getListItemOwner(id, ((err, result) => {
+      if (err) {
+        console.error(err.message);
+        return res.status(500).send(err).end();
+      }
+      if (userID === result[0].owner_id) {
+        db.deleteListItem(id, error => {
+          if (error) {
+            console.error(error.message);
+            return res.status(500).send(error).end();
+          }
+          emit(ListItemEvents.DELETE_ITEM, id);
+          return res.send({message: 'Item Deleted'}).status(202);
+        })
+      }
+    }))
+  }
+})
+
+// Handles Comment Modification...
+listRoutes.delete('/delete-comment', async (_req, _res) => {
+  console.log('delete comment route');
+})
+/*
+--------------        End Deletion Routes        --------------
+*/
 
 
 export default listRoutes;

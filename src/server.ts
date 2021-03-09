@@ -1,25 +1,27 @@
 import express from 'express';
 import Flash from 'express-flash';
+import http from 'http';
 import userRoutes  from './routes/user';
-import {variables} from './environments/variables';
+import { variables } from './environments/variables';
 import listRoutes from './routes/lists';
 import environment from './environments/environment';
 import tokens from './routes/tokens';
+import { Sockets } from "./middleware/sockets";
 
-if (variables.nodeEnv === 'Production') {
-  // tslint:disable-next-line:only-arrow-functions no-empty
-  console.log = function() {
-  }
+
+if (variables.nodeEnv === 'production') {
+  console.log = () => {return}
 }
-
 const app = express();
-const port = variables.port;
+const server = new http.Server(app);
 
+app.set('port', variables.port || 3000);
 app.use(environment);
 app.use(Flash());
 app.use(userRoutes);
 app.use(listRoutes);
 app.use(tokens);
+
 
 // TODO: Delete functions for default path
 app.get('/', (req, res) => {
@@ -38,11 +40,8 @@ app.get('/', (req, res) => {
   }
 });
 
-app.listen(port, err => {
-  if (err) {
-    throw err;
-  }
 
-  return console.log(`server is listening on ${port}`);
-})
-
+new Sockets(server).connect();
+server.listen(app.get('port'), () => {
+  console.log('Server listening on port ' + app.get('port'));
+});

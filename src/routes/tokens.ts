@@ -1,13 +1,13 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import mysql from 'mysql';
-import {Db} from '../database/db';
+import { Db } from '../database/db';
 import * as vars from '../environments/variables';
-import {hashPassword} from '../middleware/bcrypt';
-import {Crypto} from '../middleware/crypto';
-import {DateUtil} from '../middleware/date';
-import {ResetPassword} from '../models/reset-password';
-import {VerifyAccount} from '../models/verify-account';
-
+import { hashPassword } from '../middleware/bcrypt';
+import { Crypto } from '../middleware/crypto';
+import { DateUtil } from '../middleware/date';
+import { ResetPassword } from '../models/reset-password';
+import { VerifyAccount } from '../models/verify-account';
+import chalk from "chalk";
 const tokens = Router();
 const db = new Db(mysql.createPool(vars.db));
 const crypto = new Crypto();
@@ -51,7 +51,7 @@ tokens.put('/reset-password/:tokenStore', async (req, res) => {
       return res.status(500).send(err).end();
     }
     if (!results.length) {
-      return res.status(401).send('Token doesn\'t exist or has expired.');
+      return res.status(401).send("Token doesn't exist or has expired.");
     }
     const userEmail = results.map(result => {
       return crypto.decipher(result.data).email;
@@ -69,7 +69,7 @@ tokens.put('/reset-password/:tokenStore', async (req, res) => {
       console.log('expired', isExpired);
       if (isExpired) {
         return res.status(401).send({
-          message: 'Token doesn\'t exist or has expired.'
+          message: "Token doesn't exist or has expired."
         });
       } else {
         return db.deleteResetTokenStore(tokenStore, (deleteStoreErr, _) => {
@@ -98,10 +98,15 @@ tokens.get('/verify-account/:tokenStore', async (req, res) => {
     if (err) {
       return res.status(500).send(err).end();
     }
-    const userEmail = results.map(result => {
-      return crypto.decipher(result.data).email;
-    })[0];
-    return !results.length ?
+    let userEmail = null;
+    try {
+      userEmail = results.map(result => {
+        return crypto.decipher(result.data).email;
+      })[0];
+    } catch (err) {
+      console.error(chalk.red(err));
+    }
+    return !results.length && !!userEmail ?
       res.status(401).send("Token doesn't exist or has expired.")
       : db.getVerifyAccountTokenStoreExpiration([tokenStore], (tokenErr, tokenResults) => {
         if (tokenErr) {
@@ -128,5 +133,4 @@ tokens.get('/verify-account/:tokenStore', async (req, res) => {
       })
   })
 });
-
 export default tokens;

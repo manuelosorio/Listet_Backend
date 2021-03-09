@@ -249,3 +249,8 @@ cgi-bin/
 cgi-bin/**
 logs/**/
 logs/**/*
+ssl/*.key
+ssl/*.pem
+ssl/*.csr
+ssl/*.crt
+ssl/*.srl

@@ -104,7 +104,7 @@ userRoutes.post('/register', async (req, res) => {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 email: req.body.email,
-                token: 'https://' + vars.app.url + vars.app.path + '/verify-account/' + tokenStore
+                token: 'https://' + vars.app.hostname + vars.app.path + '/verify-account/' + tokenStore
               }
               const queryParams = {
                 token: tokenStore,
@@ -156,7 +156,6 @@ userRoutes.post('/login', async (req, res) => {
           if (error) {
             return res.status(500).send(error).end();
           }
-          console.log('login: ', chalk.bgYellow.white(results))
           db.userSession(req, results);
           responseMessage.message = 'Login Successful';
           return res.status(200).send(responseMessage).end();
@@ -195,7 +194,7 @@ userRoutes.post('/reset-password', async (req, res) => {
         firstName: results[0].firstName,
         lastName: results[0].lastName,
         email: results[0].email,
-        token: 'https://' + vars.app.url + vars.app.path + '/reset-password/' + tokenStore
+        token: 'https://' + vars.app.hostname + vars.app.path + '/reset-password/' + tokenStore
       }
       const queryParams = {
         token: tokenStore,
@@ -220,13 +219,13 @@ userRoutes.post('/reset-password', async (req, res) => {
 });
 
 userRoutes.get('/session', (req, res) => {
-
   if (!req.session.user) {
     return res.status(200).send({authenticated: false}).end();
   }
   const sessionData = req.session.user.map(result => {
     return {verified: result.verification_status === 1}
   });
-  res.status(200).send({ authenticated: true, verified: sessionData[0].verified });
+  const user = req.session.user[0];
+  res.status(200).send({ authenticated: true, verified: sessionData[0].verified, username: user.username });
 });
 export default userRoutes;
