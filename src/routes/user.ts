@@ -52,17 +52,31 @@ userRoutes.get("/user/:username", async (req, res) => {
 
 userRoutes.post('/register', async (req, res) => {
   const date = new DateUtil(new Date());
-  console.log('new user');
-  return req.body.firstName === '' ? res.status(409).send({message: 'First Name is required'}).end() :
-    req.body.username === '' ? res.status(409).send({message: 'Username is required'}).end() :
-    !req.body.username.match(/^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/) ? res.status(400).send({ message: '' }).end() :
-      req.body.email === '' ? res.status(409).send({ message: 'Email is required' }).end() :
-      !req.body.email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]{2,4}$/) ? res.status(400).send({ message: 'Email is invalid' }).end() :
-        req.body.password === '' ? res.status(409).send({message: 'Password is required'}).end() :
-        !req.body.password.match(/^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/) ? res.status(409).send({ message: 'passwords must be at least 8 characters long, contain 1 capital letter, a special character (@ $ ! % * # ? &), and at least one number.' }).end() :
-        await db.findUserFromUsername(req.body.username, (usernameErr, usernameRes) => {
+  if (!req.body.firstName)
+  return res.status(422).send({ message: 'First Name is required' }).end();
+  if (!req.body.lastName)
+  return res.status(422).send({ message: 'Last Name is required' }).end();
+  if (!req.body.username)
+  return res.status(422).send({ message: 'Username is required' }).end()
+  if (!req.body.username.match(/^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/))
+  return res.status(422).send({ message: '' }).end();
+  if (!req.body.email)
+  return res.status(422).send({ message: 'Email is required' }).end();
+  if (!req.body.email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]{2,4}$/))
+  return res.status(422).send({ message: 'Email is invalid' }).end();
+  if (req.body.password) {
+    console.log({password: req.body.password})
+  return res.status(422).send({ message: 'Password is required'}).end();
+  }
+  if (!req.body.password.match(/^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/))
+    return res.status(422).send(
+      {
+      message: 'passwords must be at least 8 characters long, contain 1 capital letter, ' +
+        'a special character (@ $ ! % * # ? &), and at least one number.'
+      }).end();
+  return await db.findUserFromUsername(req.body.username, (usernameErr, usernameRes) => {
           if (usernameErr) {
-            return res.status(500).send({message: usernameErr.message}).end();
+            return res.status(500).send({ message: usernameErr.message }).end();
           }
           // Does username exist?
           if (usernameRes.length) {
@@ -176,45 +190,51 @@ userRoutes.post('/logout', (req, res) => {
 });
 
 userRoutes.post('/reset-password', async (req, res) => {
-  await db.findUserFromEmail(req.body.email, (err, results) => {
+  if (!req.body.email)
+    return res.status(400).send('Email is required').end();
+  const email = req.body.email;
+  await db.findUserFromEmail(email, (err, results) => {
     if (err) {
       return res.status(500).send(err).end();
     }
     const date = new DateUtil(new Date());
-    if (results.length) {
-      const num = parseInt(vars.token.reset_expire_time, 0);
-      const expireDate = date.setExpire(num);
-      const data: object = {
-        expires: expireDate,
-        email: req.body.email
-      };
-      const tokenStore = crypto.generateString();
-      const encryptedToken = crypto.createToken(JSON.stringify(data));
-      const emailData: EmailData = {
-        firstName: results[0].firstName,
-        lastName: results[0].lastName,
-        email: results[0].email,
-        token: 'https://' + vars.app.hostname + vars.app.path + '/reset-password/' + tokenStore
-      }
-      const queryParams = {
-        token: tokenStore,
-        id: results[0].id
-      }
-
-      db.resetPasswordToken(queryParams, (tokenErr, _results) => {
-        if (tokenErr) {
-          return res.status(500).send(tokenErr).end();
-        }
-        return db.resetPasswordTokenStore([tokenStore, expireDate.getTime(),encryptedToken], (tokenStoreErr, _tokenResults) => {
-          if (tokenStoreErr) {
-            return res.status(500).send(tokenStoreErr).end();
-          }
-          mailer.sendMail(vars.smtp.email, emailData, 'reset-password');
-          responseMessage.message = "If an account with the email address exists, an email has been sent containing further instructions. If you can't find it, try checking your junk folder."
-          return res.status(200).send(responseMessage).end()
-        });
-      })
+    console.log(!results)
+    if (!!results){
+      responseMessage.message = `Instructions to reset your password have been sent. <em></em>`
+      return res.status(200).send(responseMessage).end()
     }
+    const num = parseInt(vars.token.reset_expire_time, 0);
+    const expireDate = date.setExpire(num);
+    const data: object = {
+      expires: expireDate,
+      email: req.body.email
+    };
+    const tokenStore = crypto.generateString();
+    const encryptedToken = crypto.createToken(JSON.stringify(data));
+    const emailData: EmailData = {
+      firstName: results[0].firstName,
+      lastName: results[0].lastName,
+      email: results[0].email,
+      token: 'https://' + vars.app.hostname + vars.app.path + '/reset-password/' + tokenStore
+    }
+    const queryParams = {
+      token: tokenStore,
+      id: results[0].id
+    }
+
+    db.resetPasswordToken(queryParams, (tokenErr, _results) => {
+      if (tokenErr) {
+        return res.status(500).send(tokenErr).end();
+      }
+      return db.resetPasswordTokenStore([tokenStore, expireDate.getTime(),encryptedToken], (tokenStoreErr, _tokenResults) => {
+        if (tokenStoreErr) {
+          return res.status(500).send(tokenStoreErr).end();
+        }
+        mailer.sendMail(vars.smtp.email, emailData, 'reset-password');
+        responseMessage.message = "Instructions to reset your password have been sent."
+        return res.status(200).send(responseMessage).end()
+      });
+    })
   })
 });
 
