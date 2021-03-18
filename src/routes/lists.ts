@@ -37,7 +37,6 @@ listRoutes.get('/lists', async (req, res) =>  {
     return res.status(200).send(updatedResults).end();
   });
 });
-
 listRoutes.get('/list/:owner_username/:slug', (req, res) =>  {
   const query = {'owner_username': req.params.owner_username, 'slug': req.params.slug}
   db.findListFromSlug(query, (err, results) => {
@@ -117,9 +116,10 @@ listRoutes.post('/create-list', async (req, res) => {
 listRoutes.post('/add-item', async (req, res) => {
   console.log(req.body)
   const id = Number(req.body.list_id);
+  const date = !!req.body.deadline ? req.body.deadline : null;
   const listItem: ListItemModel = {
     id: 0,
-    deadline: req.body.deadline,
+    deadline: date,
     item: req.body.item,
     completed: 0,
     list_id: id,

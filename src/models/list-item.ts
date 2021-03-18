@@ -8,7 +8,7 @@ export interface ListItem {
 export interface ListItemModel {
   id?: number
   item: string;
-  deadline?: string;
+  deadline?: Date | null;
   completed: number;
   list_id?: number;
   username?: string;
