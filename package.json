@@ -1,7 +1,7 @@
 {
-  "name": "todo-list_backend",
+  "name": "listet_backend",
   "version": "1.0.0",
-  "description": "Backend api for ToDo List Web App",
+  "description": "Backend api for Listet",
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
@@ -13,11 +13,11 @@
     "test": "echo 'Error: no test specified' && exit 1",
     "snyk:protect": "snyk protect",
     "snyk:test": "snyk test",
-    "prepare": "npm run snyk-protect"
+    "prepare": "npm run snyk:protect"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/manuelosorio/todo-list_backend.git"
+    "url": "git+https://github.com/manuelosorio/Listet_Backend.git"
   },
   "keywords": [
     "Todo",
@@ -30,9 +30,9 @@
   "author": "Manuel Osorio",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/manuelosorio/todo-list_backend/issues"
+    "url": "https://github.com/manuelosorio/Listet_Backend.git/issues"
   },
-  "homepage": "https://github.com/manuelosorio/todo-list_backend#readme",
+  "homepage": "https://github.com/manuelosorio/Listet_Backend.git#readme",
   "dependencies": {
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
@@ -65,11 +65,13 @@
     "@types/express-session": "^1.17.0",
     "@types/helmet": "0.0.47",
     "@types/mysql": "^2.15.10",
+    "@types/node": "^14.14.35",
     "@types/nodemailer": "^6.4.0",
     "@types/socket.io": "^2.1.12",
     "nodemon": "^2.0.3",
     "tslint": "^6.1.2",
     "typescript": "^4.1.3"
   },
-  "snyk": true
+  "snyk": true,
+  "private": true
 }
