@@ -198,9 +198,8 @@ userRoutes.post('/reset-password', async (req, res) => {
       return res.status(500).send(err).end();
     }
     const date = new DateUtil(new Date());
-    console.log(!results)
-    if (!!results){
-      responseMessage.message = `Instructions to reset your password have been sent. <em></em>`
+    if (!results.length){
+      responseMessage.message = `If account exists, instructions to reset your password will be sent.`
       return res.status(200).send(responseMessage).end()
     }
     const num = parseInt(vars.token.reset_expire_time, 0);
@@ -231,11 +230,11 @@ userRoutes.post('/reset-password', async (req, res) => {
           return res.status(500).send(tokenStoreErr).end();
         }
         mailer.sendMail(vars.smtp.email, emailData, 'reset-password');
-        responseMessage.message = "Instructions to reset your password have been sent."
+        responseMessage.message = `If account exists, instructions to reset your password will be sent.`
         return res.status(200).send(responseMessage).end()
       });
-    })
-  })
+    });
+  });
 });
 
 userRoutes.get('/session', (req, res) => {
