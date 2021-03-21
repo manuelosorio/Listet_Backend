@@ -139,7 +139,7 @@ export class Db {
    * @param next
    */
   async findAllLists(next: queryCallback) {
-    await this.query('SELECT slug, name, description, creation_date, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where is_private=0', null, next);
+    await this.query('SELECT slug, name, description, creation_date, deadline, is_private, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where is_private=0', null, next);
   }
 
   /**
