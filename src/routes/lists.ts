@@ -64,8 +64,6 @@ listRoutes.get('/list/:owner_username/:slug/comments', async (req, res) =>  {
       return res.sendStatus(500).send(err.message).end();
     }
     const updatedResults = results.map((result) => {
-      const date = new DateUtil(result.creation_date);
-      result.creation_date = date.format();
       return result;
     });
     return res.status(200).send(updatedResults).end();
@@ -169,18 +167,20 @@ listRoutes.post('/create-comment', async (req, res) => {
     }
     const listOwner = listResults[0].owner_username;
     const slug = listResults[0].slug;
+    console.log(listComment)
     return listResults[0].allow_comments === 0 ? res.status(400).send('Comments are disabled').end() :
       await db.createListComments(listComment, (commentErr, results, _fields) => {
         if (commentErr) {
           return res.status(400).send(commentErr).end();
         }
+        console.log(results)
         const user = req.session.user[0];
         const commentData: ListCommentEmitter = {
           comment: listComment.comment_message,
           username: user.username,
           firstName: user.firstName,
           lastName: user.lastName,
-          creation_date: new DateUtil(listComment.creation_date).format(),
+          creation_date: listComment.creation_date,
         }
         commentData.listInfo = `${listOwner}-${slug}`;
         emit(CommentEvents.CREATE_COMMENT, commentData)
