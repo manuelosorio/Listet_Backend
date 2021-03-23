@@ -56,8 +56,8 @@ export class Sockets {
         credentials: CORS.credentials
       },
       path: '/socket-io',
-
-    }))
+      transports: ['polling']
+    }));
     console.log(chalk.bgYellow.black('Websocket Initialized!'));
     setIoInstance(this.io);
   }
