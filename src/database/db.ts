@@ -1,10 +1,10 @@
 import { MysqlError, Pool, PoolConnection, queryCallback } from 'mysql';
 import chalk from 'chalk';
-import {User} from '../models/user';
-import {List} from '../models/list';
-import { ListItemModel } from '../models/list-item';
-import {ListComment} from '../models/list-comment';
-import {ResetPassword} from '../models/reset-password';
+import {User} from '../models/_types/user';
+import {List} from '../models/_types/list';
+import { ListItemModel } from '../models/_types/list-item';
+import {ListComment} from '../models/_types/list-comment';
+import {ResetPassword} from '../models/_types/reset-password';
 
 
 export class Db {

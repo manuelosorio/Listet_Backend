@@ -2,8 +2,8 @@ import SocketIO, { Server, Socket } from "socket.io";
 import http from "http";
 import chalk from "chalk";
 import { CORS } from "../environments/variables";
-import { CommentEvents } from "../events/comment.events";
-import { ListItemEvents } from "../events/list-item.events";
+import { CommentEvents } from "../models/events/comment.events";
+import { ListItemEvents } from "../models/events/list-item.events";
 
 let socketInstance: SocketIO.Socket;
 let ioInstance: SocketIO.Server;

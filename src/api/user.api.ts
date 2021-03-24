@@ -3,14 +3,14 @@ import mysql from 'mysql';
 import chalk from 'chalk';
 import {Db} from '../database/db';
 import * as vars from '../environments/variables';
-import {comparePassword, hashPassword} from '../middleware/bcrypt';
-import {User} from '../models/user';
-import {Crypto} from '../middleware/crypto';
-import {DateUtil} from '../middleware/date';
-import {Mailer} from '../middleware/nodemailer';
-import {EmailData} from '../models/email-data';
+import {comparePassword, hashPassword} from '../utilities/bcrypt';
+import {User} from '../models/_types/user';
+import {Crypto} from '../utilities/crypto';
+import {DateUtil} from '../utilities/date';
+import {Mailer} from '../utilities/nodemailer';
+import {EmailData} from '../models/_types/email-data';
 
-const userRoutes = Router();
+const userApi = Router();
 const db = new Db(mysql.createPool(vars.db));
 const mailer = new Mailer(vars.smtp)
 const crypto = new Crypto();
@@ -19,7 +19,7 @@ const responseMessage = {
 };
 
 // Display all users. Remove in preparation for production.
-userRoutes.get('/users', async(req, res) => {
+userApi.get('/users', async(req, res) => {
     switch (vars.variables.nodeEnv) {
       case 'Development':
       case 'development':
@@ -42,7 +42,7 @@ userRoutes.get('/users', async(req, res) => {
     }
 });
 
-userRoutes.get("/user/:username", async (req, res) => {
+userApi.get("/user/:username", async (req, res) => {
   const userName = req.params.username;
   await db.findUserFromUsername(userName, (err, results) => {
     return err ? res.status(403).send(err).end() :
@@ -50,7 +50,7 @@ userRoutes.get("/user/:username", async (req, res) => {
   });
 });
 
-userRoutes.post('/register', async (req, res) => {
+userApi.post('/register', async (req, res) => {
   const date = new DateUtil(new Date());
   if (!req.body.firstName)
   return res.status(422).send({ message: 'First Name is required' }).end();
@@ -145,7 +145,7 @@ userRoutes.post('/register', async (req, res) => {
         });
 });
 
-userRoutes.post('/login', async (req, res) => {
+userApi.post('/login', async (req, res) => {
   const email: string = req.body.email;
   const password: string = req.body.password;
   if (email === '') {
@@ -182,14 +182,14 @@ userRoutes.post('/login', async (req, res) => {
   })
 });
 
-userRoutes.post('/logout', (req, res) => {
+userApi.post('/logout', (req, res) => {
   req.session.destroy((err) => {
     err ? res.status(500).send({message: 'Could not logout.'}).end() :
       res.status(200).send({}).end();
   })
 });
 
-userRoutes.post('/reset-password', async (req, res) => {
+userApi.post('/reset-password', async (req, res) => {
   if (!req.body.email)
     return res.status(400).send('Email is required').end();
   const email = req.body.email;
@@ -237,7 +237,7 @@ userRoutes.post('/reset-password', async (req, res) => {
   });
 });
 
-userRoutes.get('/session', (req, res) => {
+userApi.get('/session', (req, res) => {
   if (!req.session.user) {
     return res.status(200).send({authenticated: false}).end();
   }
@@ -247,4 +247,4 @@ userRoutes.get('/session', (req, res) => {
   const user = req.session.user[0];
   res.status(200).send({ authenticated: true, verified: sessionData[0].verified, username: user.username });
 });
-export default userRoutes;
+export default userApi;

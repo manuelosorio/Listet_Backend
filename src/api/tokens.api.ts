@@ -2,20 +2,20 @@ import { Router } from 'express';
 import mysql from 'mysql';
 import { Db } from '../database/db';
 import * as vars from '../environments/variables';
-import { hashPassword } from '../middleware/bcrypt';
-import { Crypto } from '../middleware/crypto';
-import { DateUtil } from '../middleware/date';
-import { ResetPassword } from '../models/reset-password';
-import { VerifyAccount } from '../models/verify-account';
+import { hashPassword } from '../utilities/bcrypt';
+import { Crypto } from '../utilities/crypto';
+import { DateUtil } from '../utilities/date';
+import { ResetPassword } from '../models/_types/reset-password';
+import { VerifyAccount } from '../models/_types/verify-account';
 import chalk from "chalk";
-const tokens = Router();
+const tokensApi = Router();
 const db = new Db(mysql.createPool(vars.db));
 const crypto = new Crypto();
 const responseMessage = {
   message: ''
 };
 
-tokens.get('/reset-password/:tokenStore', async (req, res) => {
+tokensApi.get('/reset-password/:tokenStore', async (req, res) => {
   const tokenStore = req.params.tokenStore;
   await db.userResetPasswordToken([tokenStore], (err, results) => {
     if (err) {
@@ -36,7 +36,7 @@ tokens.get('/reset-password/:tokenStore', async (req, res) => {
   });
 });
 
-tokens.put('/reset-password/:tokenStore', async (req, res) => {
+tokensApi.put('/reset-password/:tokenStore', async (req, res) => {
   const tokenStore = req.params.tokenStore;
   const password = req.body.password;
   let newPassword: string;
@@ -89,10 +89,10 @@ tokens.put('/reset-password/:tokenStore', async (req, res) => {
   });
 });
 
-tokens.get('/verify-account', (req, res) => {
+tokensApi.get('/verify-account', (req, res) => {
   res.send('test');
 });
-tokens.get('/verify-account/:tokenStore', async (req, res) => {
+tokensApi.get('/verify-account/:tokenStore', async (req, res) => {
   const tokenStore = req.params.tokenStore;
  await db.getVerifyAccountTokenStore([tokenStore], (err, results) => {
     if (err) {
@@ -133,4 +133,4 @@ tokens.get('/verify-account/:tokenStore', async (req, res) => {
       })
   })
 });
-export default tokens;
+export default tokensApi;

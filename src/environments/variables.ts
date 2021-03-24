@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import {Smtp} from '../models/smtp';
+import {Smtp} from '../models/_types/smtp';
 dotenv.config()
 
 export const variables: any = {

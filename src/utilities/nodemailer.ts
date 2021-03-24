@@ -1,6 +1,6 @@
-import {Smtp} from '../models/smtp';
+import {Smtp} from '../models/_types/smtp';
 import EmailTemplate from 'email-templates'
-import {EmailData} from '../models/email-data';
+import {EmailData} from '../models/_types/email-data';
 
 
 

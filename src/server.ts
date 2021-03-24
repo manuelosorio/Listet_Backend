@@ -1,12 +1,12 @@
 import express from 'express';
 import Flash from 'express-flash';
 import http from 'http';
-import userRoutes  from './routes/user';
+import userRoutes  from './api/user';
 import { variables } from './environments/variables';
-import listRoutes from './routes/lists';
+import listRoutes from './api/lists';
 import environment from './environments/environment';
-import tokens from './routes/tokens';
-import { Sockets } from "./middleware/sockets";
+import tokensApi from './api/tokens';
+import { Sockets } from "./utilities/sockets";
 
 
 if (variables.nodeEnv === 'production') {
@@ -20,7 +20,7 @@ app.use(environment);
 app.use(Flash());
 app.use(userRoutes);
 app.use(listRoutes);
-app.use(tokens);
+app.use(tokensApi);
 
 
 // TODO: Delete functions for default path

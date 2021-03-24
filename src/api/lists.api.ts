@@ -2,22 +2,22 @@ import { Router } from 'express';
 import mysql from 'mysql';
 import { Db } from '../database/db';
 import * as vars from '../environments/variables';
-import { DateUtil } from "../middleware/date";
-import { List } from '../models/list';
-import { ListItemModel } from '../models/list-item';
-import { ListComment, ListCommentEmitter } from '../models/list-comment';
-import { emit } from "../middleware/sockets";
-import { CommentEvents } from "../events/comment.events";
-import { ListItemEvents } from "../events/list-item.events";
+import { DateUtil } from "../utilities/date";
+import { List } from '../models/_types/list';
+import { ListItemModel } from '../models/_types/list-item';
+import { ListComment, ListCommentEmitter } from '../models/_types/list-comment';
+import { emit } from "../utilities/sockets";
+import { CommentEvents } from "../models/events/comment.events";
+import { ListItemEvents } from "../models/events/list-item.events";
 
-const listRoutes = Router();
+const listApi = Router();
 const db = new Db(mysql.createPool(vars.db));
 
 
 /*
 ----------------        Start Get Routes        ----------------
 */
-listRoutes.get('/lists', async (req, res) =>  {
+listApi.get('/lists', async (req, res) =>  {
   await db.findAllLists((err, results)  => {
     if (err) {
       const errorMessage = `We failed to query lists ${err}`;
@@ -37,16 +37,17 @@ listRoutes.get('/lists', async (req, res) =>  {
     return res.status(200).send(updatedResults).end();
   });
 });
-listRoutes.get('/list/:owner_username/:slug', (req, res) =>  {
+listApi.get('/list/:owner_username/:slug', async (req, res) =>  {
   const query = {'owner_username': req.params.owner_username, 'slug': req.params.slug}
-  db.findListFromSlug(query, (err, results) => {
+  await db.findListFromSlug(query,  (err, results) => {
     if (err) {
       return console.log(err);
     }
-    return !results.length ? res.status(404).send('List Doesn\'t Exist.').end(): res.status(200).send(results).end();
-  }).then(()=> {});
+    return !results.length ? res.status(404).send('List Doesn\'t Exist.').end() : res.status(200).send(results).end();
+  })
 });
-listRoutes.get('/list/:owner_username/:slug/items', async (req, res) =>  {
+
+listApi.get('/list/:owner_username/:slug/items', async (req, res) =>  {
   const query = {'username': req.params.owner_username, 'slug': req.params.slug}
   await db.findListItems(query, (err, results) => {
     if (err) {
@@ -56,7 +57,7 @@ listRoutes.get('/list/:owner_username/:slug/items', async (req, res) =>  {
     return res.status(200).send(results).end();
   });
 });
-listRoutes.get('/list/:owner_username/:slug/comments', async (req, res) =>  {
+listApi.get('/list/:owner_username/:slug/comments', async (req, res) =>  {
   const query = {'list_owner_username': req.params.owner_username, 'slug': req.params.slug}
   await db.findListComments(query, (err, results) => {
     if (err) {
@@ -78,7 +79,7 @@ listRoutes.get('/list/:owner_username/:slug/comments', async (req, res) =>  {
 ----------------        Start Creation Routes        ----------------
 */
 // Handles List Creation...
-listRoutes.post('/create-list', async (req, res) => {
+listApi.post('/create-list', async (req, res) => {
   const id = Number(req.session.user[0].id);
   const username = req.session.user[0].username;
   const deadlineDate = new Date(req.body.deadline);
@@ -111,7 +112,7 @@ listRoutes.post('/create-list', async (req, res) => {
  *    - the current user must own the list
  *    - Fulfill the minimum character count
  */
-listRoutes.post('/add-item', async (req, res) => {
+listApi.post('/add-item', async (req, res) => {
   console.log(req.body)
   const id = Number(req.body.list_id);
   const date = !!req.body.deadline ? req.body.deadline : null;
@@ -141,7 +142,7 @@ listRoutes.post('/add-item', async (req, res) => {
  *    - Comment must be at least 160 characters long.
  *    - List must have comments enabled.
  */
-listRoutes.post('/create-comment', async (req, res) => {
+listApi.post('/create-comment', async (req, res) => {
   let id;
   let parent
   let commentMessage;
@@ -197,13 +198,13 @@ listRoutes.post('/create-comment', async (req, res) => {
 ----------------        Start Update Routes        ----------------
 */
 // Handles Comment Deletion
-listRoutes.put('/update-list', async (_req, _res) => {
+listApi.put('/update-list', async (_req, _res) => {
   console.log('update list route');
 });
-listRoutes.put('/update-item', async (_req, _res) => {
+listApi.put('/update-item', async (_req, _res) => {
   console.log('update list item route');
 });
-listRoutes.put('/update-item-status', async (req, res) => {
+listApi.put('/update-item-status', async (req, res) => {
   const listItem: ListItemModel = req.body;
   if (!!req.session.user) {
     const userID = req.session.user[0].id;
@@ -229,7 +230,7 @@ listRoutes.put('/update-item-status', async (req, res) => {
     })
   }
 })
-listRoutes.put('/update-comment', async (req, _res) => {
+listApi.put('/update-comment', async (req, _res) => {
   console.log('update comment route');
 });
 /*
@@ -240,12 +241,12 @@ listRoutes.put('/update-comment', async (req, _res) => {
 ----------------        Start Deletion Routes        ----------------
 */
 // Handles List Modification...
-listRoutes.delete('/delete-list', async (_req, _res) => {
+listApi.delete('/delete-list', async (_req, _res) => {
   console.log('delete list route');
 })
 
 // Handles List Item Modification...
-listRoutes.delete('/delete-item/:id', async (req, res) => {
+listApi.delete('/delete-item/:id', async (req, res) => {
   // console.log('delete list item route' + req.params.id);
   const id = req.params.id as unknown as number;
   if (!!req.session.user) {
@@ -270,7 +271,7 @@ listRoutes.delete('/delete-item/:id', async (req, res) => {
 })
 
 // Handles Comment Modification...
-listRoutes.delete('/delete-comment', async (_req, _res) => {
+listApi.delete('/delete-comment', async (_req, _res) => {
   console.log('delete comment route');
 })
 /*
@@ -278,4 +279,4 @@ listRoutes.delete('/delete-comment', async (_req, _res) => {
 */
 
 
-export default listRoutes;
+export default listApi;
