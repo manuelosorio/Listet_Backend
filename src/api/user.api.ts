@@ -11,7 +11,7 @@ import {Mailer} from '../utilities/nodemailer';
 import {EmailData} from '../models/_types/email-data';
 
 const userApi = Router();
-const db = new Db(mysql.createPool(vars.db));
+const db = new Db(mysql.createPool(vars.DB_CONFIG));
 const mailer = new Mailer(vars.smtp)
 const crypto = new Crypto();
 const responseMessage = {

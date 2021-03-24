@@ -11,7 +11,7 @@ export const variables: any = {
   session_id: process.env.SESSION_ID,
   session_secret: process.env.SESSION_SECRET,
 }
-export const db = {
+export const DB_CONFIG = {
   host: process.env.DB_URL,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,

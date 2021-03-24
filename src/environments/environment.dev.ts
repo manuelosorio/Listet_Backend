@@ -11,7 +11,7 @@ const dev = express();
 
 
 const MySQLStore = MySQLSession(expressSession);
-const sessionStore = new MySQLStore(vars.db);
+const sessionStore = new MySQLStore(vars.DB_CONFIG);
 
 const sess: expressSession.SessionOptions = {
   name: vars.session.id,

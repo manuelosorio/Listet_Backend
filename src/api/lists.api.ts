@@ -11,7 +11,7 @@ import { CommentEvents } from "../models/events/comment.events";
 import { ListItemEvents } from "../models/events/list-item.events";
 
 const listApi = Router();
-const db = new Db(mysql.createPool(vars.db));
+const db = new Db(mysql.createPool(vars.DB_CONFIG));
 
 
 /*
