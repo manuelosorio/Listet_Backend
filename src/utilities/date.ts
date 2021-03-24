@@ -6,17 +6,17 @@ export class DateUtil{
   months = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"];
 
-  format() {
+  format(): string {
     const date = new Date(this.date);
     const month = this.months[date.getMonth()];
     const day = date.getDate();
     const year = date.getFullYear();
     return month + " " + day + ", " + year;
   }
-  getMonth() {
+  getMonth(): number {
     return new Date(this.date).getMonth() + 1;
   }
-  getYear() {
+  getYear(): number {
     return new Date(this.date).getFullYear();
   }
 

@@ -1,11 +1,14 @@
 import { MysqlError, Pool, PoolConnection, queryCallback } from 'mysql';
 import chalk from 'chalk';
-import {User} from '../models/_types/user';
-import {List} from '../models/_types/list';
+import { User } from '../models/_types/user';
+import { List } from '../models/_types/list';
 import { ListItemModel } from '../models/_types/list-item';
-import {ListComment} from '../models/_types/list-comment';
-import {ResetPassword} from '../models/_types/reset-password';
-
+import { ListComment } from '../models/_types/list-comment';
+import { ResetPassword } from '../models/_types/reset-password';
+import { Request } from 'express';
+/**
+ * TODO: Add proper types when db methods is reworked.
+ */
 
 export class Db {
   db: Pool;
@@ -21,17 +24,17 @@ export class Db {
   /**
    * Retrieve Database Connection
    */
-  getConnection () {
+  getConnection(): Pool {
     this.db.getConnection((err: MysqlError, connection: PoolConnection) => {
-      const errMessage = "Connection to database base refused. " +
-        "Please check that connection details are correct and that the database is running."
-      if(err) return console.error(chalk.red(errMessage));
-      console.log('Connected to Database')
+      const errMessage = 'Connection to database base refused. ' +
+        'Please check that connection details are correct and that the database is running.';
+      if (err) return console.error(chalk.red(errMessage));
+      console.log('Connected to Database');
       if (connection) {
         connection.release();
-        console.log("Connection has been released!")
+        console.log('Connection has been released!');
       }
-    })
+    });
     return this.db;
   }
 
@@ -41,17 +44,17 @@ export class Db {
    * @param params
    * @param next (MysqlError, fields, results)
    */
-  async query(query: string, params: any | null, next: queryCallback) {
+  async query(query: string, params: any | null, next: queryCallback): Promise<void> {
     console.log("Fetching data");
     if (!params) this.getConnection().query(query, next);
-    else this.getConnection().query(query, params, next)
+    else this.getConnection().query(query, params, next);
   }
   // User Queries
   /**
    * Retrieve All Users
    * @param next
    */
-  async findAllUsers(next: queryCallback) {
+  async findAllUsers(next: queryCallback): Promise<void> {
     await this.query('Select username, firstName, lastName FROM users', null, next);
   }
 
@@ -60,7 +63,7 @@ export class Db {
    * @param username
    * @param next
    */
-  async findUserFromUsername(username: string, next: queryCallback) {
+  async findUserFromUsername(username: string, next: queryCallback): Promise<void> {
     await this.query('Select id, email, username, firstName, lastName, verification_status FROM users WHERE username= ?', username, next)
   }
 
@@ -69,7 +72,7 @@ export class Db {
    * @param email
    * @param next
    */
-  async findUserFromEmail(email: string, next: queryCallback) {
+  async findUserFromEmail(email: string, next: queryCallback): Promise<void> {
     await this.query('Select id, email, username, firstName, lastName, verification_status FROM users WHERE email= ?', email, next);
   }
 
@@ -78,7 +81,7 @@ export class Db {
    * @param email
    * @param next
    */
-  async getPassword (email: string, next: queryCallback) {
+  async getPassword (email: string, next: queryCallback): Promise<void> {
     console.log("Fetching User Data");
     await this.query("Select password FROM users Where email= ?", email, next);
   }
@@ -88,7 +91,7 @@ export class Db {
    * @param user
    * @param next
    */
-  async newUser(user: User, next: queryCallback) {
+  async newUser(user: User, next: queryCallback): Promise<void> {
     await this.query('INSERT INTO `users` (`firstName`, `lastName`, `email`, `username`, `password`, `admin`, `deactivated`) VALUES (?, ?, ?, ?, ?, ?, ?)', [
       user.firstName,
       user.lastName,
@@ -105,9 +108,10 @@ export class Db {
    * @param req
    * @param sessionData
    */
-  userSession(req, sessionData: object) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  userSession(req: Request, sessionData): Promise<void> {
     return req.session.user = sessionData;
-  };
+  }
 
   // List Queries
   /**
@@ -115,7 +119,7 @@ export class Db {
    * @param listID
    * @param next
    */
-  async getListOwner(listID: number | any, next: queryCallback) {
+  async getListOwner(listID: number | any, next: queryCallback): Promise<void> {
     await this.query(
       'SELECT `owner_id` from view_lists where id = ?',
       listID,
@@ -127,7 +131,7 @@ export class Db {
    * @param listID
    * @param next
    */
-  async getListItemOwner(listID: number | any, next: queryCallback) {
+  async getListItemOwner(listID: number | any, next: queryCallback): Promise<void> {
     await this.query(
       'SELECT `owner_id` from view_list_items where id = ?',
       listID,
@@ -138,16 +142,17 @@ export class Db {
    * Retrieve all public lists.
    * @param next
    */
-  async findAllLists(next: queryCallback) {
+  async findAllLists(next: queryCallback): Promise<void> {
     await this.query('SELECT slug, name, description, creation_date, deadline, is_private, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where is_private=0', null, next);
   }
 
   /**
    * Find list that belongs to a particular user using a slug.
    * @param query
-   * @param next
+   * @param next`
    */
-  async findListFromSlug(query, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async findListFromSlug(query, next: queryCallback): Promise<void> {
     await this.query('Select id, slug, name, description, creation_date, is_complete, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
   }
 
@@ -156,7 +161,8 @@ export class Db {
    * @param query
    * @param next
    */
-  async findListFromID(query, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async findListFromID(query, next: queryCallback): Promise<void> {
     await this.query('Select id, slug, name, description, creation_date, is_complete, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where id= ?', query, next);
   }
 
@@ -165,10 +171,11 @@ export class Db {
    * @param query
    * @param next
    */
-  async findListItems(query, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async findListItems(query, next: queryCallback): Promise<void> {
     await this.query('Select id, item, deadline, completed, list_id, slug, username FROM view_list_items where username=? and slug= ?', [query.username, query.slug], next);
   }
-  async updateListItemStatus(listItem: {completed: number, id: number}, next: queryCallback) {
+  async updateListItemStatus(listItem: {completed: number, id: number}, next: queryCallback): Promise<void> {
     await this.query(
       `UPDATE view_list_items SET completed = ? WHERE id = ? `,
       [
@@ -181,7 +188,7 @@ export class Db {
    * @param listId
    * @param next
    */
-  async deleteListItem(listId: number, next: queryCallback) {
+  async deleteListItem(listId: number, next: queryCallback): Promise<void> {
     this.db.query('DELETE FROM `list_items` WHERE id = ?', listId, next)
   }
   /**
@@ -189,7 +196,8 @@ export class Db {
    * @param query
    * @param next
    */
-  async findListComments(query, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async findListComments(query, next: queryCallback): Promise<void> {
     await this.query('SELECT comment, creation_date, firstName, lastName, username FROM view_comments where list_owner_username=? and slug= ? ORDER BY creation_date DESC', [query.list_owner_username, query.slug], next);
   }
   /**
@@ -197,7 +205,7 @@ export class Db {
    * @param list
    * @param next
    */
-  async createList(list: List, next: queryCallback) {
+  async createList(list: List, next: queryCallback): Promise<void> {
     await this.query('INSERT INTO `lists` (`slug`, `name`, `description`, `creation_date`, `deadline`, `is_private`, `allow_comments`, `user_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [list.slug, list.name, list.description, list.creation_date, list.deadline, list.isPrivate, list.allowComments, list.author_id], next)
   }
 
@@ -206,7 +214,7 @@ export class Db {
    * @param listItem
    * @param next
    */
-  async addListItem(listItem: ListItemModel, next: queryCallback) {
+  async addListItem(listItem: ListItemModel, next: queryCallback): Promise<void> {
     await this.query('INSERT INTO `list_items` (`item`, `deadline`, `completed`, `list_id`) VALUES (?, ?, ?, ?)',[listItem.item, listItem.deadline, listItem.completed, listItem.list_id], next);
   }
 
@@ -215,7 +223,7 @@ export class Db {
    * @param listComment
    * @param next
    */
-  async createListComments(listComment: ListComment, next: queryCallback) {
+  async createListComments(listComment: ListComment, next: queryCallback): Promise<void> {
     await this.query('INSERT INTO `list_comments` (`user_id`, `comment`, `creation_date`, `list_id`) VALUES (?, ?, ?, ?)', [listComment.author_id, listComment.comment_message, listComment.creation_date, listComment.parent_id], next);
   }
 
@@ -225,7 +233,8 @@ export class Db {
    * @param params
    * @param next
    */
-  async resetPasswordToken(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async resetPasswordToken(params, next: queryCallback): Promise<void> {
     await this.query('UPDATE `users` SET reset_token= ? WHERE id= ?', [params.token, params.id], next);
   }
 
@@ -234,7 +243,8 @@ export class Db {
    * @param params
    * @param next
    */
-  async resetPasswordTokenStore(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async resetPasswordTokenStore(params, next: queryCallback): Promise<void> {
     await this.query('INSERT INTO `token_reset_password` (token_id, expires, data) VALUES (?, ?, ?)', params, next);
   }
 
@@ -243,7 +253,8 @@ export class Db {
    * @param params
    * @param next
    */
-  async verifyAccountToken(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async verifyAccountToken(params, next: queryCallback): Promise<void> {
     await this.query('UPDATE `users` SET verification_token= ? WHERE email= ?', [params.token, params.email], next);
   }
 
@@ -252,7 +263,8 @@ export class Db {
    * @param params
    * @param next
    */
-  async verifyAccountTokenStore(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async verifyAccountTokenStore(params, next: queryCallback): Promise<void> {
     await this.query('INSERT INTO `token_verify_account` (token_id, expires, data) VALUES (?, ?, ?)', params, next);
   }
 
@@ -261,7 +273,8 @@ export class Db {
    * @param params
    * @param next
    */
-  async userResetPasswordToken(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async userResetPasswordToken(params, next: queryCallback): Promise<void> {
     await this.query('SELECT `reset_token` FROM view_tokens where reset_token= ?', [params],next);
   }
 
@@ -270,7 +283,8 @@ export class Db {
    * @param params
    * @param next
    */
-  async userVerifyAccountToken(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async userVerifyAccountToken(params, next: queryCallback): Promise<void> {
     await this.query('SELECT `verification_token` FROM view_tokens where verification_token= ?', [params],next);
   }
 
@@ -279,16 +293,20 @@ export class Db {
    * @param params
    * @param next
    */
-  async getResetPasswordTokenStoreExpiration(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async getResetPasswordTokenStoreExpiration(params, next: queryCallback): Promise<void> {
     await this.query('SELECT `expires` FROM token_reset_password where token_id = ?', [params],next);
   }
-  async getResetPasswordTokenStore(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async getResetPasswordTokenStore(params, next: queryCallback): Promise<void> {
     await this.query('SELECT `data` FROM token_reset_password where token_id = ?', [params],next);
   }
-  async getVerifyAccountTokenStore(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async getVerifyAccountTokenStore(params, next: queryCallback): Promise<void> {
     await this.query('SELECT `data` FROM token_verify_account where token_id = ?', [params],next);
   }
-  async getVerifyAccountTokenStoreExpiration(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async getVerifyAccountTokenStoreExpiration(params, next: queryCallback): Promise<void> {
     await this.query('SELECT `expires` FROM token_verify_account where token_id = ?', [params],next);
   }
 
@@ -297,17 +315,21 @@ export class Db {
    * @param params
    * @param next
    */
-  async resetPassword(params: ResetPassword,next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async resetPassword(params: ResetPassword,next: queryCallback): Promise<void> {
     await this.query(`UPDATE users SET reset_token= null, password = ? WHERE email = ?`, [params.password, params.email], next);
   }
-  async userVerify(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async userVerify(params, next: queryCallback): Promise<void> {
     await this.query('UPDATE users SET verification_token=null, verification_status=1 where email = ? ', [params.email],next);
   }
-  async deleteResetTokenStore(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async deleteResetTokenStore(params, next: queryCallback): Promise<void> {
     await this.query('DELETE FROM token_reset_password WHERE token_id= ?',
       [params, params], next)
   }
-  async deleteVerifyTokenStore(params, next: queryCallback) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async deleteVerifyTokenStore(params, next: queryCallback): Promise<void> {
     await this.query('DELETE FROM token_verify_account WHERE token_id= ?',
       [params, params], next)
   }

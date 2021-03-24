@@ -1,3 +1,4 @@
+// eslint-disable camelcase
 export interface List {
   slug: string;
   name: string;

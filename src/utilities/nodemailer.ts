@@ -27,6 +27,7 @@ export class Mailer {
    * @param data Data used inside email templates.
    * @param template Corresponds to a directory inside of 'emails'.
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   sendMail(sender, data: EmailData, template?: string | 'verify-email' | 'reset-password') {
     this.email = new EmailTemplate({
       message: {

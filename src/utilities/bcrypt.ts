@@ -1,11 +1,9 @@
 import Bcrypt from 'bcrypt';
 
-export function hashPassword(password: string) {
+export const hashPassword = (password: string): string => {
   const salt = Bcrypt.genSaltSync(10);
   return Bcrypt.hashSync(password, salt);
 }
-export function comparePassword(password: string, hash: string) {
-  const compare = Bcrypt.compareSync(password, hash);
-  console.log(compare);
-  return compare;
+export const comparePassword = (password: string, hash: string): boolean => {
+  return Bcrypt.compareSync(password, hash);
 }

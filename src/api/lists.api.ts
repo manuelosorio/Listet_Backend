@@ -97,7 +97,7 @@ listApi.post('/create-list', async (req, res) => {
     allowComments: listAllowsComments,
     author_id: id
   }
-  await db.createList(list, (err, results, _fields) => {
+  await db.createList(list, (err, _results, _fields) => {
     if (err) {
       return res.status(400).send(err).end();
     } else {
@@ -115,7 +115,7 @@ listApi.post('/create-list', async (req, res) => {
 listApi.post('/add-item', async (req, res) => {
   console.log(req.body)
   const id = Number(req.body.list_id);
-  const date = !!req.body.deadline ? req.body.deadline : null;
+  const date = req.body.deadline ? req.body.deadline : null;
   const listItem: ListItemModel = {
     id: 0,
     deadline: date,
@@ -206,7 +206,7 @@ listApi.put('/update-item', async (_req, _res) => {
 });
 listApi.put('/update-item-status', async (req, res) => {
   const listItem: ListItemModel = req.body;
-  if (!!req.session.user) {
+  if (req.session.user) {
     const userID = req.session.user[0].id;
     await db.getListOwner(listItem.list_id, async (error, result) => {
       if (error) {
@@ -230,7 +230,7 @@ listApi.put('/update-item-status', async (req, res) => {
     })
   }
 })
-listApi.put('/update-comment', async (req, _res) => {
+listApi.put('/update-comment', async (_req, _res) => {
   console.log('update comment route');
 });
 /*
@@ -249,7 +249,7 @@ listApi.delete('/delete-list', async (_req, _res) => {
 listApi.delete('/delete-item/:id', async (req, res) => {
   // console.log('delete list item route' + req.params.id);
   const id = req.params.id as unknown as number;
-  if (!!req.session.user) {
+  if (req.session.user) {
     const userID = req.session.user[0].id;
     await db.getListItemOwner(id, ((err, result) => {
       if (err) {

@@ -12,7 +12,7 @@ export class Crypto {
    * Generates random string.
    * @param size
    */
-  generateString(size: number = 20) {
+  generateString(size = 20): string {
     return randomBytes(size).toString('hex').slice(0, size);
   }
 
@@ -20,7 +20,7 @@ export class Crypto {
    * Create an encrypted token that contains object data saved as a string
    * @param data Stringify Object.
    */
-  createToken(data: string) {
+  createToken(data: string): string {
     const iv = randomBytes(16);
     const cipher = createCipheriv('aes-256-cbc', Buffer.from(this.secret), iv);
     let encrypted = cipher.update(data);
@@ -32,7 +32,8 @@ export class Crypto {
    * Decrypt and parse token data
    * @param encryptedToken
    */
-  decipher(encryptedToken) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  decipher(encryptedToken): any {
     try {
       const tokenParts = encryptedToken.split(':');
       const iv = Buffer.from(tokenParts.shift(), 'hex');

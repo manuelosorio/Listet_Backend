@@ -11,7 +11,7 @@ export const variables: any = {
   session_id: process.env.SESSION_ID,
   session_secret: process.env.SESSION_SECRET,
 }
-export let db = {
+export const db = {
   host: process.env.DB_URL,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -37,7 +37,7 @@ export const CORS = {
   ],
   credentials: true,
 }
-export let smtp: Smtp = process.env.SMTP_POOL === 'true' ?
+export const smtp: Smtp = process.env.SMTP_POOL === 'true' ?
   {
     pool: true,
     host: process.env.SMTP_HOST,
