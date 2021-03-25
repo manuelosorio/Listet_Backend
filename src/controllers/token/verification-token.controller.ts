@@ -19,7 +19,7 @@ export class VerificationTokenController {
       message: ''
     };
   }
-  async verifyAccount(req: Request, res: Response): Promise<any> {
+  verifyAccount = async (req: Request, res: Response): Promise<any> => {
     const tokenStore = req.params.tokenStore;
     await this.db.getVerifyAccountTokenStore([tokenStore], (err, results) => {
       if (err) {

@@ -19,7 +19,7 @@ export class ResetTokenController {
       message: ''
     };
   }
-  async checkToken(req: Request, res: Response): Promise<any> {
+  checkToken = async (req: Request, res: Response): Promise<any> => {
     const tokenStore = req.params.tokenStore;
     await this.db.userResetPasswordToken([tokenStore], (err, results) => {
       if (err) {
@@ -39,7 +39,7 @@ export class ResetTokenController {
     });
   }
 
-  async resetPassword(req: Request, res: Response): Promise<any> {
+  resetPassword = async (req: Request, res: Response): Promise<any> => {
     const tokenStore = req.params.tokenStore;
     const password = req.body.password;
     let newPassword: string;
