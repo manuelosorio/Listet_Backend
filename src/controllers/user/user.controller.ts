@@ -1,22 +1,29 @@
 import { DB_CONFIG, smtp } from '../../environments/variables';
 import { Mailer } from '../../utilities/nodemailer';
 import { Crypto } from '../../utilities/crypto';
-import { Db } from '../../database/db';
 import mysql from 'mysql';
 import { NextFunction, Request, Response } from 'express';
 import * as vars from '../../environments/variables';
 import { DateUtil } from '../../utilities/date';
 import chalk from 'chalk';
-import { User } from '../../models/_types/user';
+import { UserModel } from '../../models/user.model';
 import { comparePassword, hashPassword } from '../../utilities/bcrypt';
-import { EmailData } from '../../models/_types/email-data';
+import { EmailDataModel } from '../../models/email-data.model';
+import { UserDb } from '../../database/user/user.db';
+import { VerificationTokenDb } from '../../database/token/verification-token.db';
+import { ResetTokenDb } from '../../database/token/reset-token.db';
+
 export class UserController {
   private readonly crypto;
-  private readonly db;
+  private readonly db: UserDb;
+  private readonly verifyTokenDb: VerificationTokenDb;
+  private readonly resetTokenDb: ResetTokenDb;
   private readonly mailer;
   private responseMessage;
   constructor() {
-    this.db = new Db(mysql.createPool(DB_CONFIG));
+    this.db = new UserDb(mysql.createPool(DB_CONFIG));
+    this.verifyTokenDb = new VerificationTokenDb(mysql.createPool(DB_CONFIG));
+    this.resetTokenDb = new ResetTokenDb(mysql.createPool(DB_CONFIG));
     this.mailer = new Mailer(smtp)
     this.crypto = new Crypto();
     this.responseMessage = {
@@ -98,7 +105,7 @@ export class UserController {
           return res.status(401).send({ message: 'Email Already exists' }).end();
         }
         // if email doesn't exist create user
-        const user: User = {
+        const user: UserModel = {
           firstName: req.body.firstName,
           lastName: req.body.lastName,
           email: req.body.email.toLowerCase(),
@@ -118,7 +125,7 @@ export class UserController {
           };
           const tokenStore = this.crypto.generateString();
           const encryptedToken = this.crypto.createToken(JSON.stringify(data));
-          const emailData: EmailData = {
+          const emailData: EmailDataModel = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email,
@@ -129,12 +136,12 @@ export class UserController {
             email: req.body.email
           }
 
-          return this.db.verifyAccountToken(queryParams, (tokenErr, _tokenResults) => {
+          return this.verifyTokenDb.verifyAccountToken(queryParams, (tokenErr, _tokenResults) => {
             if (tokenErr) {
               console.error(chalk.bgRed.white(tokenErr))
               return res.status(500).send(tokenErr).end();
             }
-            return this.db.verifyAccountTokenStore([tokenStore, expireDate.getTime(),encryptedToken], (tokenStoreErr, _tokenStoreResults) => {
+            return this.verifyTokenDb.verifyAccountTokenStore([tokenStore, expireDate.getTime(),encryptedToken], (tokenStoreErr, _tokenStoreResults) => {
               if (tokenStoreErr) {
                 console.error(chalk.bgRed.white(tokenStoreErr))
                 return res.status(500).send(tokenStoreErr).end();
@@ -214,7 +221,7 @@ export class UserController {
       };
       const tokenStore = this.crypto.generateString();
       const encryptedToken = this.crypto.createToken(JSON.stringify(data));
-      const emailData: EmailData = {
+      const emailData: EmailDataModel = {
         firstName: results[0].firstName,
         lastName: results[0].lastName,
         email: results[0].email,
@@ -225,11 +232,11 @@ export class UserController {
         id: results[0].id
       }
 
-      this.db.resetPasswordToken(queryParams, (tokenErr, _results) => {
+      this.resetTokenDb.resetPasswordToken(queryParams, (tokenErr, _results) => {
         if (tokenErr) {
           return res.status(500).send(tokenErr).end();
         }
-        return this.db.resetPasswordTokenStore([tokenStore, expireDate.getTime(),encryptedToken], (tokenStoreErr, _tokenResults) => {
+        return this.resetTokenDb.resetPasswordTokenStore([tokenStore, expireDate.getTime(),encryptedToken], (tokenStoreErr, _tokenResults) => {
           if (tokenStoreErr) {
             return res.status(500).send(tokenStoreErr).end();
           }

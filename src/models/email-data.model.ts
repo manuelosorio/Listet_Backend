@@ -4,7 +4,8 @@
  * @param email Recipient's email
  * @param token token using
  */
-export interface EmailData {
+
+export interface EmailDataModel {
   firstName: string,
   lastName: string,
   email: string,

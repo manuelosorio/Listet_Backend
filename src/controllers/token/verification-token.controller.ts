@@ -1,19 +1,19 @@
-import { Db } from '../../database/db';
 import mysql from 'mysql';
 import { Request, Response } from 'express';
 import chalk from 'chalk';
 import { DateUtil } from '../../utilities/date';
-import { VerifyAccount } from '../../models/_types/verify-account';
+import { VerifyAccount } from '../../models/verify-account.model';
 import { Crypto } from '../../utilities/crypto';
 import { DB_CONFIG } from '../../environments/variables';
+import { VerificationTokenDb } from '../../database/token/verification-token.db';
 
 export class VerificationTokenController {
-  private readonly db: Db;
+  private readonly db: VerificationTokenDb;
   private readonly crypto;
   private readonly responseMessage;
 
   constructor() {
-    this.db = new Db(mysql.createPool(DB_CONFIG));
+    this.db = new VerificationTokenDb(mysql.createPool(DB_CONFIG));
     this.crypto = new Crypto();
     this.responseMessage = {
       message: ''

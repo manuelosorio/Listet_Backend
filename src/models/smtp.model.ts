@@ -1,4 +1,4 @@
-export interface Smtp {
+export interface SmtpModel {
   pool?: boolean,
   host: string,
   port: number,

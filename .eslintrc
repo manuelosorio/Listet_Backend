@@ -30,7 +30,7 @@
   },
   "overrides": [
     {
-      "files": ["src/**/*.d.ts"],
+      "files": ["src/**/*.d.ts", "src/**/*.model.ts"],
       "rules": {
         "camelcase": ["off"]
       }

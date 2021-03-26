@@ -1,15 +1,15 @@
-import { Db } from '../../../database/db';
 import mysql from 'mysql';
 import { DB_CONFIG } from '../../../environments/variables';
 import { NextFunction, Request, Response } from 'express';
 import { emit } from '../../../utilities/sockets';
-import { ListItemEvents } from '../../../models/events/list-item.events';
-import { ListItemModel } from '../../../models/_types/list-item';
+import { ListItemEvents } from '../../../events/list-item.events';
+import { ListItemModel } from '../../../models/list-item.model';
+import { ListItemDb } from '../../../database/list/item/list-item.db';
 
 export class ItemController {
-  private readonly db: Db;
+  private readonly db: ListItemDb;
   constructor() {
-    this.db = new Db(mysql.createPool(DB_CONFIG));
+    this.db = new ListItemDb(mysql.createPool(DB_CONFIG));
   }
 
   get = async (req: Request, res: Response): Promise<any> => {
@@ -69,7 +69,8 @@ export class ItemController {
     const listItem: ListItemModel = req.body;
     if (req.session.user) {
       const userID = req.session.user[0].id;
-      await this.db.getListOwner(listItem.list_id, async (error, result) => {
+      // TODO: Verify this works
+      await this.db.getListItemOwner(listItem.list_id, async (error, result) => {
         if (error) {
           console.error(error)
           return res.status(500).send(error).end();

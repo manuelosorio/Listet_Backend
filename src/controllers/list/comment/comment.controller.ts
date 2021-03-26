@@ -1,17 +1,20 @@
 import { NextFunction, Request, Response } from 'express';
 import mysql from 'mysql';
-import { Db } from '../../../database/db';
 import { DB_CONFIG } from '../../../environments/variables';
-import { ListComment, ListCommentEmitter } from '../../../models/_types/list-comment';
 import { emit } from '../../../utilities/sockets';
-import { CommentEvents } from '../../../models/events/comment.events';
+import { CommentEvents } from '../../../events/comment.events';
+import { CommentDb } from '../../../database/list/comment/comment.db';
+import { ListCommentEmitter, ListCommentModel } from '../../../models/list-comment.model';
+import { ListDb } from '../../../database/list/list.db';
 
 
 export class CommentController {
-  private readonly db: Db;
+  private readonly db: CommentDb;
+  private readonly listDb: ListDb;
 
   constructor() {
-    this.db = new Db(mysql.createPool(DB_CONFIG));
+    this.db = new CommentDb(mysql.createPool(DB_CONFIG));
+    this.listDb = new ListDb(mysql.createPool(DB_CONFIG));
   }
   get = async (req: Request, res: Response): Promise<any> => {
     const query = {'list_owner_username': req.params.owner_username, 'slug': req.params.slug}
@@ -46,13 +49,13 @@ export class CommentController {
     if (req.body.comment !== undefined) {
       commentMessage = req.body.comment;
     }
-    const listComment: ListComment = {
+    const listComment: ListCommentModel = {
       author_id: id,
       comment_message: commentMessage,
       creation_date: currentDate,
       parent_id: parent,
     };
-    await this.db.findListFromID(listComment.parent_id, async (listErr, listResults, _listFields) => {
+    await this.listDb.findListFromID(listComment.parent_id, async (listErr, listResults, _listFields) => {
       if (listErr) {
         return res.status(400).send(listErr).end();
       }

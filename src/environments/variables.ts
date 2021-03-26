@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import {Smtp} from '../models/_types/smtp';
+import { SmtpModel } from '../models/smtp.model';
 dotenv.config()
 
 export const variables: any = {
@@ -37,7 +37,7 @@ export const CORS = {
   ],
   credentials: true,
 }
-export const smtp: Smtp = process.env.SMTP_POOL === 'true' ?
+export const smtp: SmtpModel = process.env.SMTP_POOL === 'true' ?
   {
     pool: true,
     host: process.env.SMTP_HOST,

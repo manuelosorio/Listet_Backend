@@ -1,4 +1,4 @@
-export interface ListComment {
+export interface ListCommentModel {
   author_id: number;
   comment_message: string;
   creation_date: Date;

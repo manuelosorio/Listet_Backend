@@ -1,15 +1,15 @@
-import { Db } from '../../database/db';
 import mysql from 'mysql';
 import { DB_CONFIG } from '../../environments/variables';
 import { NextFunction, Request, Response } from 'express';
-import { List } from '../../models/_types/list';
 import { DateUtil } from '../../utilities/date';
+import { ListDb } from '../../database/list/list.db';
+import { ListModel } from '../../models/list.model';
 
 export class ListController {
-  private readonly db: Db;
+  private readonly db: ListDb;
 
   constructor() {
-    this.db = new Db(mysql.createPool(DB_CONFIG));
+    this.db = new ListDb(mysql.createPool(DB_CONFIG));
   }
   getAll = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
     await this.db.findAllLists((err, results)  => {
@@ -50,7 +50,7 @@ export class ListController {
     const listAllowsComments = req.body.allow_comments === true ? 1 : 0;
     const url = req.body.title.toLowerCase().split(' ').join('-');
     console.log(url);
-    const list: List = {
+    const list: ListModel = {
       slug: url,
       name:  req.body.title,
       description: req.body.description,

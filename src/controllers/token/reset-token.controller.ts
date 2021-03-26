@@ -1,19 +1,19 @@
 import { DateUtil } from '../../utilities/date';
 import { Response, Request } from 'express';
-import { Db } from '../../database/db';
 import mysql from 'mysql';
 import { DB_CONFIG } from '../../environments/variables';
 import { hashPassword } from '../../utilities/bcrypt';
-import { ResetPassword } from '../../models/_types/reset-password';
 import { Crypto } from '../../utilities/crypto';
+import { ResetTokenDb } from '../../database/token/reset-token.db';
+import { ResetPasswordModel } from '../../models/reset-password.model';
 
 export class ResetTokenController {
-  private readonly db: Db;
+  private readonly db: ResetTokenDb;
   private readonly crypto;
   private readonly responseMessage;
 
   constructor() {
-    this.db = new Db(mysql.createPool(DB_CONFIG));
+    this.db = new ResetTokenDb(mysql.createPool(DB_CONFIG));
     this.crypto = new Crypto();
     this.responseMessage = {
       message: ''
@@ -68,7 +68,7 @@ export class ResetTokenController {
           return result.expires;
         })[0];
         const isExpired: boolean = new DateUtil(new Date()).checkExpire(new Date(expires as number));
-        const data: ResetPassword = {email: userEmail, password: newPassword, token: tokenStore};
+        const data: ResetPasswordModel = {email: userEmail, password: newPassword, token: tokenStore};
         console.log('expired', isExpired);
         if (isExpired) {
           return res.status(401).send({
