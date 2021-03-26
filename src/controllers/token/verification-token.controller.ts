@@ -2,10 +2,10 @@ import mysql from 'mysql';
 import { Request, Response } from 'express';
 import chalk from 'chalk';
 import { DateUtil } from '../../utilities/date';
-import { VerifyAccount } from '../../models/verify-account.model';
 import { Crypto } from '../../utilities/crypto';
 import { DB_CONFIG } from '../../environments/variables';
 import { VerificationTokenDb } from '../../database/token/verification-token.db';
+import { VerifyAccountModel } from '../../models/verify-account.model';
 
 export class VerificationTokenController {
   private readonly db: VerificationTokenDb;
@@ -43,7 +43,7 @@ export class VerificationTokenController {
             return result.expires;
           })[0];
           const isExpired: boolean = new DateUtil(new Date()).checkExpire(new Date(expires as number));
-          const data: VerifyAccount = {email: userEmail, token: tokenStore};
+          const data: VerifyAccountModel = {email: userEmail, token: tokenStore};
           return isExpired === true ? res.status(401).send({message: "Token doesn't exist or has expired."})
                                     : this.db.deleteVerifyTokenStore(tokenStore, (deleteStoreErr, _) => {
               if (deleteStoreErr) {
