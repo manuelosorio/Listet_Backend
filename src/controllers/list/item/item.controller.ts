@@ -5,11 +5,14 @@ import { emit } from '../../../utilities/sockets';
 import { ListItemEvents } from '../../../events/list-item.events';
 import { ListItemModel } from '../../../models/list-item.model';
 import { ListItemDb } from '../../../database/list/item/list-item.db';
+import { ListDb } from '../../../database/list/list.db';
 
 export class ItemController {
   private readonly db: ListItemDb;
+  private readonly listDb: ListDb
   constructor() {
     this.db = new ListItemDb(mysql.createPool(DB_CONFIG));
+    this.listDb = new ListDb(mysql.createPool(DB_CONFIG));
   }
 
   get = async (req: Request, res: Response): Promise<any> => {
@@ -70,7 +73,7 @@ export class ItemController {
     if (req.session.user) {
       const userID = req.session.user[0].id;
       // TODO: Verify this works
-      await this.db.getListItemOwner(listItem.list_id, async (error, result) => {
+      await this.listDb.getListOwner(listItem.list_id, async (error, result) => {
         if (error) {
           console.error(error)
           return res.status(500).send(error).end();
@@ -84,7 +87,6 @@ export class ItemController {
               console.error(err)
               return res.status(500).send(err).end();
             }
-
             emit(ListItemEvents.COMPLETE_ITEM, listItem);
             return res.status(201).send({ message: "Updated Item Status" }).end();
           })
