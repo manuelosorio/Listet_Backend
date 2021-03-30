@@ -254,3 +254,8 @@ ssl/*.pem
 ssl/*.csr
 ssl/*.crt
 ssl/*.srl
+/prepros.config
+/emails/img/
+/emails/reset-password/html.html
+/emails/verify-email/html.html
+/emails/prepros.config

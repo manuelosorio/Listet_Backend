@@ -1,13 +1,14 @@
 import EmailTemplate from 'email-templates'
 import { SmtpModel } from '../models/smtp.model';
 import { EmailDataModel } from '../models/email-data.model';
+import path from 'path';
 
 
 
 export class Mailer {
   smtp;
   transporter;
-  email
+  email: EmailTemplate;
   constructor(smtp: SmtpModel) {
     this.smtp = smtp;
     this.transporter = {
@@ -35,6 +36,16 @@ export class Mailer {
       },
       send: true,
       transport: this.transporter,
+      juice: true,
+      juiceSettings: {
+        tableElements: ['table']
+      },
+      juiceResources: {
+        preserveImportant: true,
+        webResources: {
+         relativeTo: path.resolve('emails/css/')
+        }
+      }
     });
     this.email.send({
       template,

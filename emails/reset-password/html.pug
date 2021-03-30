@@ -1,6 +1,47 @@
-h1 Reset Your Password
-p Hi #{firstName},
-p There has recently been a password reset request in your account. Please disregard this email if you had not made that request.
-a(href=token) Reset Password
-p If the link above doesn't work copy and paste this into your browser:
-p #{token}
+doctype HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"
+head
+  link(rel="stylesheet", href="../css/style.css", data-inline="data-inline")
+
+body(bgcolor="#EDEDED")
+  center
+    table.empty
+      tr
+        td &nbsp;
+    table(bgcolor="#EDEDED").wrapper
+      tr
+        td.container(bgcolor="#EDEDED")
+          center
+            include ../_includes/header
+            table(bgcolor="#FEFEFE" cellpadding="10" cellspacing="10px").content
+              include ../_includes/grid
+              tr
+                td(colspan=1) &nbsp;
+                td(colspan=10)
+                  h1 Reset Your Password
+                td(colspan=1) &nbsp;
+              tr
+                td(colspan=1) &nbsp;
+                td(colspan=10)
+                  p Hi #{firstName} #{lastName},
+                  p There has recently been a password reset request in your account. Please disregard this email if you had not made that request.
+                td(colspan=1) &nbsp;
+              tr
+                td(colspan=1) &nbsp;
+                td(colspan=5 align="right").button
+                  center
+                    a(href=token) Reset Password
+                td(colspan=6) &nbsp;
+                tr
+                  td(colspan=1) &nbsp;
+                  td(colspan=10)
+                    p If the link above doesn't work copy and paste this into your browser:
+                  td(colspan=1) &nbsp;
+                tr
+                  td(colspan=1) &nbsp;
+                  td(colspan=11)
+                    p(style="color: #131313;") #{token}
+                tr
+                  td(colspan=12).empty &nbsp;
+    table.empty
+      tr
+        td &nbsp;
