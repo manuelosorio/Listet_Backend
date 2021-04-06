@@ -22,7 +22,7 @@ export class UserDb extends Db{
    * @param next
    */
   findUserFromUsername = async (username: string, next: queryCallback): Promise<Query> => {
-    return await this.db.query('Select id, email, username, firstName, lastName, verification_status FROM users WHERE username= ?', username, next)
+    return this.db.query('Select id, email, username, firstName, lastName, verification_status FROM users WHERE username= ?', username, next)
   }
 
   /**

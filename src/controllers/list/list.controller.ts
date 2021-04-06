@@ -4,12 +4,15 @@ import { NextFunction, Request, Response } from 'express';
 import { DateUtil } from '../../utilities/date';
 import { ListDb } from '../../database/list/list.db';
 import { ListModel } from '../../models/list.model';
+import { UserDb } from '../../database/user/user.db';
 
 export class ListController {
   private readonly db: ListDb;
+  private userDB: UserDb;
 
   constructor() {
     this.db = new ListDb(mysql.createPool(DB_CONFIG));
+    this.userDB = new UserDb(mysql.createPool(DB_CONFIG));
   }
   getAll = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
     await this.db.findAllLists((err, results)  => {
@@ -60,13 +63,18 @@ export class ListController {
       allowComments: listAllowsComments,
       author_id: id
     }
-    await this.db.createList(list, (err, _results, _fields) => {
-      if (err) {
-        return res.status(400).send(err).end();
-      } else {
+    if (!req.session) return res.status(401).send({ message: "You must be logged in to make a list"}).end();
+    return this.userDB.findUserFromUsername(req.session.user[0].username, async (userError, userResults) => {
+      if (userError) return res.status(500).end();
+      const verified = userResults[0].verification_status;
+      if (!verified) return res.status(403).send({ message: "Your account must be verified to send create a new list." }).end();
+      return await this.db.createList(list, (err, _results, _fields) => {
+        if (err) return res.status(400).send(err).end();
+
         return res.status(201).send({ message: 'List created.', url: `${username}/${list.slug}`})
-      }
-    });
+      });
+    })
+
   }
 
   update = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
