@@ -13,8 +13,8 @@ export class UserDb extends Db{
    * Retrieve All Users
    * @param next
    */
-  findAllUsers = async (next: queryCallback): Promise<void> => {
-    await this.db.query('Select username, firstName, lastName FROM users', null, next);
+  findAllUsers = async (next: queryCallback): Promise<Query> => {
+    return this.db.query('Select username, firstName, lastName FROM users', null, next);
   }
   /**
    * Retrieve userdata [id, email, username, firstName, lastName] from username.
@@ -30,8 +30,8 @@ export class UserDb extends Db{
    * @param email
    * @param next
    */
-  findUserFromEmail = async (email: string, next: queryCallback): Promise<void> => {
-    await this.db.query('Select id, email, username, firstName, lastName, verification_status FROM users WHERE email= ?', email, next);
+  findUserFromEmail = async (email: string, next: queryCallback): Promise<Query> => {
+    return this.db.query('Select id, email, username, firstName, lastName, verification_status FROM users WHERE email= ?', email, next);
   }
 
   /**
@@ -39,9 +39,9 @@ export class UserDb extends Db{
    * @param email
    * @param next
    */
-  getPassword = async (email: string, next: queryCallback): Promise<void> => {
+  getPassword = async (email: string, next: queryCallback): Promise<Query> => {
     console.log("Fetching User Data");
-    await this.db.query("Select password FROM users Where email= ?", email, next);
+    return this.db.query("Select password FROM users Where email= ?", email, next);
   }
 
 
@@ -50,8 +50,8 @@ export class UserDb extends Db{
    * @param user
    * @param next
    */
-  newUser = async (user: UserModel, next: queryCallback): Promise<void> => {
-    await this.db.query('INSERT INTO `users` (`firstName`, `lastName`, `email`, `username`, `password`, `admin`, `deactivated`) VALUES (?, ?, ?, ?, ?, ?, ?)', [
+  newUser = async (user: UserModel, next: queryCallback): Promise<Query> => {
+    return this.db.query('INSERT INTO `users` (`firstName`, `lastName`, `email`, `username`, `password`, `admin`, `deactivated`) VALUES (?, ?, ?, ?, ?, ?, ?)', [
       user.firstName,
       user.lastName,
       user.email,
@@ -68,7 +68,8 @@ export class UserDb extends Db{
    * @param sessionData
    */
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  userSession(req: Request, sessionData): Promise<void> {
+  userSession(req: Request, sessionData): Promise<Query> {
+    console.log(sessionData)
     return req.session.user = sessionData;
   }
 }

@@ -1,6 +1,8 @@
 import { Db } from '../db';
-import { Pool, queryCallback } from 'mysql';
+import { Pool, Query, queryCallback } from 'mysql';
 import { ResetPasswordModel } from '../../models/reset-password.model';
+import { TokenModel } from '../../models/token.model';
+
 
 export class ResetTokenDb extends Db{
   constructor(db: Pool) {
@@ -10,49 +12,61 @@ export class ResetTokenDb extends Db{
 
   /**
    * Add Token To User
-   * @param params
+   * @param tokenStore
    * @param next
    */
-  resetPasswordToken = async (params, next: queryCallback): Promise<void> => {
-    await this.db.query('UPDATE `users` SET reset_token= ? WHERE id= ?', [params.token, params.id], next);
+  resetPasswordToken = async (tokenStore: TokenModel, next: queryCallback): Promise<Query> => {
+    return this.db.query('UPDATE `users` SET reset_token= ? WHERE id= ?', [tokenStore.token, tokenStore.id], next);
   }
   /**
    * Create Token Storage for Encrypted Data
-   * @param params
+   * @param tokenStore
    * @param next
    */
-  resetPasswordTokenStore = async (params, next: queryCallback): Promise<void> => {
-    await this.db.query('INSERT INTO `token_reset_password` (token_id, expires, data) VALUES (?, ?, ?)', params, next);
+  resetPasswordTokenStore = async (tokenStore: TokenModel, next: queryCallback): Promise<Query> => {
+    return this.db.query(
+      'INSERT INTO `token_reset_password` (token_id, expires, data) VALUES (?, ?, ?)',
+      [tokenStore], next
+    );
   }
   /**
    * Get Reset Token Data
-   * @param params
+   * @param tokenStore
    * @param next
    */
-  userResetPasswordToken = async (params, next: queryCallback): Promise<void> => {
-    await this.db.query('SELECT `reset_token` FROM view_tokens where reset_token= ?', [params],next);
+  userResetPasswordToken = async (tokenStore: string, next: queryCallback): Promise<Query> => {
+    return this.db.query(
+      'SELECT `reset_token` FROM view_tokens where reset_token= ?',
+      [tokenStore],next
+    );
   }
   /**
    * Get the Expiration Date for Token
-   * @param params
+   * @param tokenStore
    * @param next
    */
-  getResetPasswordTokenStoreExpiration = async (params, next: queryCallback): Promise<void> => {
-    await this.db.query('SELECT `expires` FROM token_reset_password where token_id = ?', [params],next);
+  getResetPasswordTokenStoreExpiration = async (tokenStore: string, next: queryCallback): Promise<Query> => {
+    return this.db.query(
+      'SELECT `expires` FROM token_reset_password where token_id = ?',
+      [tokenStore], next
+    );
   }
-  getResetPasswordTokenStore = async (params, next: queryCallback): Promise<void> => {
-    await this.db.query('SELECT `data` FROM token_reset_password where token_id = ?', [params],next);
+  getResetPasswordTokenStore = async (tokenStore: string, next: queryCallback): Promise<Query> => {
+    return this.db.query(
+      'SELECT `data` FROM token_reset_password where token_id = ?',
+      [tokenStore],next
+    );
   }
-  /*
+  /**
    * Updates Password Deletes token
    * @param params
    * @param next
    */
-  resetPassword = async (params: ResetPasswordModel, next: queryCallback): Promise<void> => {
-    await this.db.query(`UPDATE users SET reset_token= null, password = ? WHERE email = ?`, [params.password, params.email], next);
+  resetPassword = async (params: ResetPasswordModel, next: queryCallback): Promise<Query> => {
+    return this.db.query(`UPDATE users SET reset_token= null, password = ? WHERE email = ?`, [params.password, params.email], next);
   }
-  deleteResetTokenStore = async (params, next: queryCallback): Promise<void> => {
-    await this.db.query('DELETE FROM token_reset_password WHERE token_id= ?',
-      [params, params], next)
+  deleteResetTokenStore = async (tokenStore: string, next: queryCallback): Promise<Query> => {
+    return this.db.query('DELETE FROM token_reset_password WHERE token_id= ?',
+      [tokenStore], next)
   }
 }

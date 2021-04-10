@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import mysql from 'mysql';
+import mysql, { Query } from 'mysql';
 import { DB_CONFIG } from '../../../environments/variables';
 import { emit } from '../../../utilities/sockets';
 import { CommentEvents } from '../../../events/comment.events';
 import { CommentDb } from '../../../database/list/comment/comment.db';
-import { ListCommentEmitter, ListCommentModel } from '../../../models/list-comment.model';
+import { ListCommentEmitter, ListCommentModel, ListCommentQueryModel } from '../../../models/list-comment.model';
 import { ListDb } from '../../../database/list/list.db';
 
 
@@ -16,9 +16,9 @@ export class CommentController {
     this.db = new CommentDb(mysql.createPool(DB_CONFIG));
     this.listDb = new ListDb(mysql.createPool(DB_CONFIG));
   }
-  get = async (req: Request, res: Response): Promise<any> => {
-    const query = {'list_owner_username': req.params.owner_username, 'slug': req.params.slug}
-    await this.db.findListComments(query, (err, results) => {
+  get = (req: Request, res: Response): Promise<Query> => {
+    const commentQueryModel: ListCommentQueryModel = {'list_owner_username': req.params.owner_username, 'slug': req.params.slug}
+    return this.db.findListComments(commentQueryModel, (err, results) => {
       if (err) {
         console.log(err);
         return res.sendStatus(500).send(err.message).end();
@@ -35,7 +35,7 @@ export class CommentController {
    *    - Comment must be at least 160 characters long.
    *    - List must have comments enabled.
    */
-  post = async (req: Request, res: Response): Promise<any> => {
+  post = (req: Request, res: Response): Promise<any> => {
     let id;
     let parent;
     let commentMessage;
@@ -55,7 +55,7 @@ export class CommentController {
       creation_date: currentDate,
       parent_id: parent,
     };
-    await this.listDb.findListFromID(listComment.parent_id, async (listErr, listResults, _listFields) => {
+    return this.listDb.findListFromID(listComment.parent_id, async (listErr, listResults, _listFields) => {
       if (listErr) {
         return res.status(400).send(listErr).end();
       }

@@ -1,6 +1,6 @@
 import { DateUtil } from '../../utilities/date';
 import { Response, Request } from 'express';
-import mysql from 'mysql';
+import mysql, { Query } from 'mysql';
 import { DB_CONFIG } from '../../environments/variables';
 import { hashPassword } from '../../utilities/bcrypt';
 import { Crypto } from '../../utilities/crypto';
@@ -19,14 +19,14 @@ export class ResetTokenController {
       message: ''
     };
   }
-  checkToken = async (req: Request, res: Response): Promise<any> => {
-    const tokenStore = req.params.tokenStore;
-    await this.db.userResetPasswordToken([tokenStore], (err, results) => {
+  checkToken = (req: Request, res: Response): Promise<Query> => {
+    const tokenStore: string = req.params.tokenStore;
+    return this.db.userResetPasswordToken(tokenStore, (err, results) => {
       if (err) {
         return res.status(500).send(err).end();
       }
       return !results.length ?
-             res.status(401).send("Token doesn't exist or has expired.") : this.db.getResetPasswordTokenStoreExpiration([tokenStore], (tokenErr, tokenResults) => {
+             res.status(401).send("Token doesn't exist or has expired.") : this.db.getResetPasswordTokenStoreExpiration(tokenStore, (tokenErr, tokenResults) => {
           if (tokenErr) {
             return res.status(500).send(tokenErr).end();
           }
@@ -39,7 +39,7 @@ export class ResetTokenController {
     });
   }
 
-  resetPassword = async (req: Request, res: Response): Promise<any> => {
+  resetPassword = (req: Request, res: Response): Promise<Query> | void => {
     const tokenStore = req.params.tokenStore;
     const password = req.body.password;
     let newPassword: string;
@@ -49,7 +49,7 @@ export class ResetTokenController {
     } else {
       newPassword = hashPassword(password);
     }
-    await this.db.getResetPasswordTokenStore([tokenStore], (err, results) => {
+    return this.db.getResetPasswordTokenStore(tokenStore, (err, results) => {
       if (err) {
         return res.status(500).send(err).end();
       }
@@ -60,7 +60,7 @@ export class ResetTokenController {
         return this.crypto.decipher(result.data).email;
       })[0];
       console.log(userEmail);
-      return this.db.getResetPasswordTokenStoreExpiration([tokenStore], (tokenErr, tokenResults) => {
+      return this.db.getResetPasswordTokenStoreExpiration(tokenStore, (tokenErr, tokenResults) => {
         if (tokenErr) {
           return res.status(500).send(tokenErr).end();
         }

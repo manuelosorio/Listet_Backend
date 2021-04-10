@@ -1,6 +1,7 @@
 import { Db } from '../../db';
-import { Pool, queryCallback } from 'mysql';
+import { Pool, Query, queryCallback } from 'mysql';
 import { ListItemModel } from '../../../models/list-item.model';
+import { ListQueryModel } from '../../../models/list.model';
 
 export class ListItemDb extends Db{
   constructor(db: Pool) {
@@ -11,9 +12,9 @@ export class ListItemDb extends Db{
    * @param listID
    * @param next
    */
-   getListItemOwner = async (listID: number | any, next: queryCallback): Promise<void> => {
-    await this.db.query(
-      'SELECT `owner_id` from view_list_items where id = ?',
+   getListItemOwner = async (listID: number | any, next: queryCallback): Promise<Query> => {
+    return this.db.query(
+      'SELECT `owner_id` FROM view_list_items WHERE id = ?',
       listID,
       next
     )
@@ -23,11 +24,15 @@ export class ListItemDb extends Db{
    * @param query
    * @param next
    */
-  findListItems = async (query, next: queryCallback): Promise<void> => {
-    await this.db.query('Select id, item, deadline, completed, list_id, slug, username FROM view_list_items where username=? and slug= ?', [query.username, query.slug], next);
+  findListItems = async (query: ListQueryModel | any, next: queryCallback): Promise<Query> => {
+    return this.db.query(
+      `SELECT id, item, deadline, completed, list_id, slug, username
+        FROM view_list_items
+        WHERE username=? and slug= ?`,
+      [query.author_username, query.slug], next);
   }
-  async updateListItemStatus(listItem: {completed: number, id: number}, next: queryCallback): Promise<void> {
-    await this.db.query(
+  async updateListItemStatus(listItem: {completed: number, id: number}, next: queryCallback): Promise<Query> {
+    return this.db.query(
       `UPDATE view_list_items SET completed = ? WHERE id = ? `,
       [
         listItem.completed,
@@ -39,16 +44,16 @@ export class ListItemDb extends Db{
    * @param listId
    * @param next
    */
-  deleteListItem = async(listId: number, next: queryCallback): Promise<void> => {
-    this.db.query('DELETE FROM `list_items` WHERE id = ?', listId, next)
+  deleteListItem = async(listId: number, next: queryCallback): Promise<Query> => {
+    return this.db.query('DELETE FROM `list_items` WHERE id = ?', listId, next)
   }
   /**
    * create list items using Parent List ID
    * @param listItem
    * @param next
    */
-  addListItem = async(listItem: ListItemModel, next: queryCallback): Promise<void> => {
-    await this.db.query('INSERT INTO `list_items` (`item`, `deadline`, `completed`, `list_id`) VALUES (?, ?, ?, ?)',[listItem.item, listItem.deadline, listItem.completed, listItem.list_id], next);
+  addListItem = async(listItem: ListItemModel, next: queryCallback): Promise<Query> => {
+    return this.db.query('INSERT INTO `list_items` (`item`, `deadline`, `completed`, `list_id`) VALUES (?, ?, ?, ?)',[listItem.item, listItem.deadline, listItem.completed, listItem.list_id], next);
   }
 
 }

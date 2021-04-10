@@ -1,17 +1,17 @@
-import { DB_CONFIG, smtp } from '../../environments/variables';
-import { Mailer } from '../../utilities/nodemailer';
-import { Crypto } from '../../utilities/crypto';
+import chalk from 'chalk';
 import mysql from 'mysql';
 import { NextFunction, Request, Response } from 'express';
-import * as vars from '../../environments/variables';
+import { app, DB_CONFIG, smtp, token, variables } from '../../environments/variables';
+import { Mailer } from '../../utilities/nodemailer';
+import { Crypto } from '../../utilities/crypto';
 import { DateUtil } from '../../utilities/date';
-import chalk from 'chalk';
 import { UserModel } from '../../models/user.model';
 import { comparePassword, hashPassword } from '../../utilities/bcrypt';
 import { EmailDataModel } from '../../models/email-data.model';
 import { UserDb } from '../../database/user/user.db';
 import { VerificationTokenDb } from '../../database/token/verification-token.db';
 import { ResetTokenDb } from '../../database/token/reset-token.db';
+import { TokenModel } from '../../models/token.model';
 
 export class UserController {
   private readonly crypto;
@@ -32,7 +32,7 @@ export class UserController {
   }
 
   getAllUsers = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-    switch (vars.variables.nodeEnv) {
+    switch (variables.nodeEnv) {
       case 'Development':
       case 'development':
         await this.db.findAllUsers((err, results) => {
@@ -116,7 +116,7 @@ export class UserController {
           if (err) {
             return err;
           }
-          const num = parseInt(vars.token.verify_expire_time, 0);
+          const num = parseInt(token.verify_expire_time, 0);
           const expireDate = date.setExpire(num);
           console.log(expireDate);
           const data: Record<string, unknown> = {
@@ -129,7 +129,7 @@ export class UserController {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email,
-            token: 'https://' + vars.app.hostname + vars.app.path + '/verify-account/' + tokenStore
+            token: 'https://' + app.hostname + app.path + '/verify-account/' + tokenStore
           }
           const queryParams = {
             token: tokenStore,
@@ -141,13 +141,18 @@ export class UserController {
               console.error(chalk.bgRed.white(tokenErr))
               return res.status(500).send(tokenErr).end();
             }
-            return this.verifyTokenDb.verifyAccountTokenStore([tokenStore, expireDate.getTime(),encryptedToken], (tokenStoreErr, _tokenStoreResults) => {
+            const tokenModel: TokenModel = {
+              id: tokenStore,
+              expires: expireDate.getTime(),
+              token: encryptedToken
+            }
+            return this.verifyTokenDb.verifyAccountTokenStore(tokenModel, (tokenStoreErr, _tokenStoreResults) => {
               if (tokenStoreErr) {
                 console.error(chalk.bgRed.white(tokenStoreErr))
                 return res.status(500).send(tokenStoreErr).end();
               }
                this.responseMessage.message = 'User Created Successfully';
-              this.mailer.sendMail(vars.smtp.email, emailData, 'verify-email');
+              this.mailer.sendMail(smtp.email, emailData, 'verify-email');
               return res.status(200).send (this.responseMessage).end()
             });
           });
@@ -213,7 +218,7 @@ export class UserController {
          this.responseMessage.message = `If account exists, instructions to reset your password will be sent.`
         return res.status(200).send (this.responseMessage).end()
       }
-      const num = parseInt(vars.token.reset_expire_time, 0);
+      const num = parseInt(token.reset_expire_time, 0);
       const expireDate = date.setExpire(num);
       const data: Record<string, unknown> = {
         expires: expireDate,
@@ -225,7 +230,7 @@ export class UserController {
         firstName: results[0].firstName,
         lastName: results[0].lastName,
         email: results[0].email,
-        token: 'https://' + vars.app.hostname + vars.app.path + '/reset-password/' + tokenStore
+        token: 'https://' + app.hostname + app.path + '/reset-password/' + tokenStore
       }
       const queryParams = {
         token: tokenStore,
@@ -236,11 +241,16 @@ export class UserController {
         if (tokenErr) {
           return res.status(500).send(tokenErr).end();
         }
-        return this.resetTokenDb.resetPasswordTokenStore([tokenStore, expireDate.getTime(),encryptedToken], (tokenStoreErr, _tokenResults) => {
+        const tokenModel: TokenModel = {
+          id: tokenStore,
+          expires: expireDate.getTime(),
+          token: encryptedToken
+        }
+        return this.resetTokenDb.resetPasswordTokenStore(tokenModel, (tokenStoreErr, _tokenResults) => {
           if (tokenStoreErr) {
             return res.status(500).send(tokenStoreErr).end();
           }
-          this.mailer.sendMail(vars.smtp.email, emailData, 'reset-password');
+          this.mailer.sendMail(smtp.email, emailData, 'reset-password');
            this.responseMessage.message = `If account exists, instructions to reset your password will be sent.`
           return res.status(200).send (this.responseMessage).end()
         });
@@ -256,6 +266,6 @@ export class UserController {
       return {verified: result.verification_status === 1}
     });
     const user = req.session.user[0];
-    res.status(200).send({ authenticated: true, verified: sessionData[0].verified, username: user.username });
+    return res.status(200).send({ authenticated: true, verified: sessionData[0].verified, username: user.username });
   }
 }

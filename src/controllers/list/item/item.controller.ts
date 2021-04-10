@@ -1,4 +1,4 @@
-import mysql from 'mysql';
+import mysql, { Query } from 'mysql';
 import { DB_CONFIG } from '../../../environments/variables';
 import { NextFunction, Request, Response } from 'express';
 import { emit } from '../../../utilities/sockets';
@@ -15,9 +15,9 @@ export class ItemController {
     this.listDb = new ListDb(mysql.createPool(DB_CONFIG));
   }
 
-  get = async (req: Request, res: Response): Promise<any> => {
-    const query = {'username': req.params.owner_username, 'slug': req.params.slug}
-    await this.db.findListItems(query, (err, results) => {
+  get = (req: Request, res: Response): Promise<Query> => {
+    const query = {'author_username': req.params.owner_username, 'slug': req.params.slug}
+    return this.db.findListItems(query, (err, results) => {
       if (err) {
         console.log(err)
         return res.sendStatus(500).send(err.message).end();
@@ -25,7 +25,7 @@ export class ItemController {
       return res.status(200).send(results).end();
     });
   }
-  post = async (req: Request, res: Response): Promise<any> => {
+  post = (req: Request, res: Response): Promise<Query> => {
     const id = Number(req.body.list_id);
     const date = req.body.deadline ? req.body.deadline : null;
     const listItem: ListItemModel = {
@@ -36,7 +36,7 @@ export class ItemController {
       list_id: id,
       listInfo: req.body.listInfo
     }
-    await this.db.addListItem(listItem, (err, results, _fields) => {
+    return this.db.addListItem(listItem, (err, results, _fields) => {
       if (err) {
         console.error(err);
         return res.status(400).send(err).end();
@@ -46,11 +46,11 @@ export class ItemController {
       return res.status(201).send({message: 'List item added.'});
     });
   }
-  delete = async (req: Request, res: Response): Promise<any> =>  {
+  delete = (req: Request, res: Response): Promise<Query> =>  {
     const id = req.params.id as unknown as number;
     if (req.session.user) {
       const userID = req.session.user[0].id;
-      await this.db.getListItemOwner(id, ((err, result) => {
+      return this.db.getListItemOwner(id, ((err, result) => {
         if (err) {
           console.error(err.message);
           return res.status(500).send(err).end();
@@ -68,18 +68,18 @@ export class ItemController {
       }))
     }
   }
-  updateStatus = async (req: Request, res: Response): Promise<any> => {
+  updateStatus = (req: Request, res: Response): Promise<Query> => {
     const listItem: ListItemModel = req.body;
     if (req.session.user) {
       const userID = req.session.user[0].id;
       // TODO: Verify this works
-      await this.listDb.getListOwner(listItem.list_id, async (error, result) => {
+      return this.listDb.getListOwner(listItem.list_id, (error, result) => {
         if (error) {
           console.error(error)
           return res.status(500).send(error).end();
         }
         if (userID === result[0].owner_id) {
-          return await this.db.updateListItemStatus({
+          return this.db.updateListItemStatus({
             completed: listItem.completed,
             id: listItem.id
           }, (err, _) => {
@@ -94,7 +94,7 @@ export class ItemController {
       })
     }
   }
-  update = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
+  update = async (_req: Request, _res: Response, next: NextFunction): Promise<void> => {
     next('update list item route');
   }
 }

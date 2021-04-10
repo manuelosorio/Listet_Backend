@@ -4,6 +4,13 @@ export interface ListCommentModel {
   creation_date: Date;
   parent_id: number;
 }
+
+export interface ListCommentQueryModel {
+  list_owner_username: string;
+  slug: string;
+}
+
+
 export interface ListCommentEmitter {
   comment: string;
   creation_date: Date | string;
