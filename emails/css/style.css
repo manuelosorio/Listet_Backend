@@ -1,0 +1,78 @@
+/*$primary: #edd135*/
+/*$primary-darken: darken($primary, 12%)*/
+/*$black: #131313*/
+/*$black-darken: darken($black, 100%)*/
+/*$bg: #F8F8F8*/
+/*$grey: #707070*/
+/*$silver: #EDEDED*/
+/*$disabled: darken($silver, 5%)*/
+/*$disabled-text: lighten($black, 30%)*/
+/*$green: #2A9D32*/
+/*$red: #E83518*/
+@import url('https://use.typekit.net/ape0zgx.css');
+* {
+  box-sizing: border-box;
+}
+html {
+  font-size: 100%;
+  line-height: 1.2;
+}
+body {
+  background: #EDEDED;
+}
+table.wrapper {
+  background: #EDEDED;
+  /*min-width: 320px;*/
+  width: 90%;
+  max-width: 620px;
+  padding: 0;
+  margin: 0;
+}
+table, th, td {
+  /*border: 1px solid #c1c1c1;*/
+  /*border-collapse: collapse;*/
+  font-family: 'Fira Sans', Arial, Helvetica, sans-serif;
+}
+h1, h2, h3, h4, h5, h6, p {
+  padding: 0;
+  margin: 0;
+}
+h1 {
+  font-size: 175%;
+}
+.container {
+  width: 90%;
+  background: #EDEDED;
+  padding: 10px;
+  margin: 0;
+}
+.container > td, .container > th, .content, .header {
+  background: #FEFEFE;
+  width: 90%;
+  padding: 0;
+  margin: 0;
+}
+.button {
+  background: #edd135;
+  color: #131313;
+  border-radius: 50px;
+}
+.button a {
+  background: #edd135;
+  color: #131313;
+  text-decoration: none;
+  display: block;
+}
+
+.container th {
+  font-size: 0;
+  line-height: 0;
+}
+
+tr {
+  padding: 10px;
+}
+td.empty {
+  font-size: 0;
+  line-height: 0;
+}
