@@ -22,7 +22,8 @@ export function getIoInstance(): SocketIO.Server {
   return ioInstance;
 }
 
-export function emit(event: string | CommentEvents | ListItemEvents, data) {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const emit = (event: string | CommentEvents | ListItemEvents, data) => {
   const io = getIoInstance();
   try {
     switch (event) {
@@ -56,12 +57,12 @@ export class Sockets {
         credentials: CORS.credentials
       },
       path: '/socket-io',
-
-    }))
+      transports: ['polling']
+    }));
     console.log(chalk.bgYellow.black('Websocket Initialized!'));
     setIoInstance(this.io);
   }
-  connect() {
+  connect(): void {
     this.io.on('connection', async (socket: Socket) => {
       console.log(chalk.bgYellow.black(`Client #${socket.id} Connected.`))
       setSocketInstance(socket);

@@ -6,7 +6,8 @@
     "jsRules": {},
     "rules": {
         "no-console": false,
-        "no-string-literal": false
+        "no-string-literal": false,
+        "no-empty": false
     },
     "rulesDirectory": []
 }
