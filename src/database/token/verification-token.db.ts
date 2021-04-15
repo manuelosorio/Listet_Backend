@@ -41,7 +41,7 @@ export class VerificationTokenDb extends Db{
    verifyAccountTokenStore = async (params: TokenModel, next: queryCallback): Promise<Query> => {
     return this.db.query(
       'INSERT INTO `token_verify_account` (token_id, expires, data) VALUES (?, ?, ?)',
-      params, next
+      [params.id, params.expires, params.token], next
     );
   }
   /**
