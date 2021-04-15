@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import mysql, { Query } from 'mysql';
+import mysql, { MysqlError, Query } from 'mysql';
 import { DB_CONFIG } from '../../../environments/variables';
 import { emit } from '../../../utilities/sockets';
 import { CommentEvents } from '../../../events/comment.events';
@@ -18,10 +18,10 @@ export class CommentController {
   }
   get = (req: Request, res: Response): Promise<Query> => {
     const commentQueryModel: ListCommentQueryModel = {'list_owner_username': req.params.owner_username, 'slug': req.params.slug}
-    return this.db.findListComments(commentQueryModel, (err, results) => {
+    return this.db.findListComments(commentQueryModel, (err: MysqlError, results) => {
       if (err) {
-        console.log(err);
-        return res.sendStatus(500).send(err.message).end();
+        console.error(err);
+        return res.sendStatus(500).end();
       }
       const updatedResults = results.map((result) => {
         return result;
@@ -55,9 +55,10 @@ export class CommentController {
       creation_date: currentDate,
       parent_id: parent,
     };
-    return this.listDb.findListFromID(listComment.parent_id, async (listErr, listResults, _listFields) => {
+    return this.listDb.findListFromID(listComment.parent_id, async (listErr: MysqlError, listResults, _listFields) => {
       if (listErr) {
-        return res.status(400).send(listErr).end();
+        console.error(listErr)
+        return res.status(500).end();
       }
       const listOwner = listResults[0].owner_username;
       const slug = listResults[0].slug;
@@ -65,9 +66,10 @@ export class CommentController {
       if (listResults[0].allow_comments === 0) {
         res.status(400).send('Comments are disabled').end();
       }
-      return await this.db.createListComments(listComment, (commentErr, results, _fields) => {
+      return await this.db.createListComments(listComment, (commentErr: MysqlError, results, _fields) => {
         if (commentErr) {
-          return res.status(400).send(commentErr).end();
+          console.error(commentErr)
+          return res.status(500).end();
         }
         console.log(results);
         const user = req.session.user[0];

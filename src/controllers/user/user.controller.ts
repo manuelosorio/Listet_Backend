@@ -98,7 +98,7 @@ export class UserController {
       return this.db.findUserFromEmail(req.body.email, (emailErr, emailRes) => {
         if (emailErr) {
           console.error(chalk.red('Find by Email Error: ') + emailErr.message);
-          return res.status(500).send(emailErr.message).end();
+          return res.status(500).end();
         }
         // Does email exist?
         if (emailRes.length) {
@@ -139,7 +139,7 @@ export class UserController {
           return this.verifyTokenDb.verifyAccountToken(queryParams, (tokenErr, _tokenResults) => {
             if (tokenErr) {
               console.error(chalk.bgRed.white(tokenErr))
-              return res.status(500).send(tokenErr).end();
+              return res.status(500).end();
             }
             const tokenModel: TokenModel = {
               id: tokenStore,
@@ -149,7 +149,7 @@ export class UserController {
             return this.verifyTokenDb.verifyAccountTokenStore(tokenModel, (tokenStoreErr, _tokenStoreResults) => {
               if (tokenStoreErr) {
                 console.error(chalk.bgRed.white(tokenStoreErr))
-                return res.status(500).send(tokenStoreErr).end();
+                return res.status(500).end();
               }
                this.responseMessage.message = 'User Created Successfully';
               this.mailer.sendMail(smtp.email, emailData, 'verify-email');
@@ -175,7 +175,7 @@ export class UserController {
     await this.db.getPassword(email, (err, result) => {
       if (err) {
         console.log(err);
-        return res.status(500).send(err).end();
+        return res.status(500).end();
       } else {
         try {
           if (comparePassword(password, result[0].password) === false) {
