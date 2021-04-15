@@ -28,8 +28,7 @@ export class CommentDb extends Db{
    */
   createListComments = async (listComment: ListCommentModel, next: queryCallback): Promise<Query> => {
     return this.db.query(
-      `INSERT INTO 'list_comments' ('user_id', 'comment', 'creation_date', 'list_id')
-        VALUES (?, ?, ?, ?)`,
+      'INSERT INTO `list_comments` (`user_id`, `comment`, `creation_date`, `list_id`) VALUES (?, ?, ?, ?)',
       [
         listComment.author_id,
         listComment.comment_message,
