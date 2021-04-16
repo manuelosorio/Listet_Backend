@@ -19,8 +19,8 @@ export class ItemController {
     const query = {'author_username': req.params.owner_username, 'slug': req.params.slug}
     return this.db.findListItems(query, (err, results) => {
       if (err) {
-        console.log(err)
-        return res.sendStatus(500).send(err.message).end();
+        console.error(err)
+        return res.sendStatus(500).end();
       }
       return res.status(200).send(results).end();
     });
@@ -39,7 +39,7 @@ export class ItemController {
     return this.db.addListItem(listItem, (err, results, _fields) => {
       if (err) {
         console.error(err);
-        return res.status(400).send(err).end();
+        return res.status(500).end();
       }
       listItem.id = results.insertId;
       emit(ListItemEvents.ADD_ITEM, listItem);
@@ -53,13 +53,13 @@ export class ItemController {
       return this.db.getListItemOwner(id, ((err, result) => {
         if (err) {
           console.error(err.message);
-          return res.status(500).send(err).end();
+          return res.status(500).end();
         }
         if (userID === result[0].owner_id) {
           this.db.deleteListItem(id, error => {
             if (error) {
               console.error(error.message);
-              return res.status(500).send(error).end();
+              return res.status(500).end();
             }
             emit(ListItemEvents.DELETE_ITEM, id);
             return res.send({message: 'Item Deleted'}).status(202);
@@ -76,7 +76,7 @@ export class ItemController {
       return this.listDb.getListOwner(listItem.list_id, (error, result) => {
         if (error) {
           console.error(error)
-          return res.status(500).send(error).end();
+          return res.status(500).end();
         }
         if (userID === result[0].owner_id) {
           return this.db.updateListItemStatus({
@@ -84,8 +84,8 @@ export class ItemController {
             id: listItem.id
           }, (err, _) => {
             if (err) {
-              console.error(err)
-              return res.status(500).send(err).end();
+              console.error(err);
+              return res.status(500).end();
             }
             emit(ListItemEvents.COMPLETE_ITEM, listItem);
             return res.status(201).send({ message: "Updated Item Status" }).end();

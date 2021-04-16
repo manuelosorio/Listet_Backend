@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import mysql from 'mysql';
+import mysql, { MysqlError } from 'mysql';
 import { NextFunction, Request, Response } from 'express';
 import { app, DB_CONFIG, smtp, token, variables } from '../../environments/variables';
 import { Mailer } from '../../utilities/nodemailer';
@@ -237,18 +237,20 @@ export class UserController {
         id: results[0].id
       }
 
-      this.resetTokenDb.resetPasswordToken(queryParams, (tokenErr, _results) => {
+      this.resetTokenDb.resetPasswordToken(queryParams, (tokenErr: MysqlError, _results) => {
         if (tokenErr) {
-          return res.status(500).send(tokenErr).end();
+          console.error(tokenErr)
+          return res.status(500).end();
         }
         const tokenModel: TokenModel = {
           id: tokenStore,
           expires: expireDate.getTime(),
           token: encryptedToken
         }
-        return this.resetTokenDb.resetPasswordTokenStore(tokenModel, (tokenStoreErr, _tokenResults) => {
+        return this.resetTokenDb.resetPasswordTokenStore(tokenModel, (tokenStoreErr: MysqlError, _tokenResults) => {
           if (tokenStoreErr) {
-            return res.status(500).send(tokenStoreErr).end();
+            console.error(tokenStoreErr)
+            return res.status(500).end();
           }
           this.mailer.sendMail(smtp.email, emailData, 'reset-password');
            this.responseMessage.message = `If account exists, instructions to reset your password will be sent.`

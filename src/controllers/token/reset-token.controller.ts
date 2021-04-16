@@ -23,12 +23,14 @@ export class ResetTokenController {
     const tokenStore: string = req.params.tokenStore;
     return this.db.userResetPasswordToken(tokenStore, (err, results) => {
       if (err) {
-        return res.status(500).send(err).end();
+        console.error(err);
+        return res.status(500).end();
       }
       return !results.length ?
              res.status(401).send("Token doesn't exist or has expired.") : this.db.getResetPasswordTokenStoreExpiration(tokenStore, (tokenErr, tokenResults) => {
           if (tokenErr) {
-            return res.status(500).send(tokenErr).end();
+            console.error(tokenErr);
+            return res.status(500).end();
           }
           const expires = tokenResults.map(result => {
             return result.expires;
@@ -51,7 +53,8 @@ export class ResetTokenController {
     }
     return this.db.getResetPasswordTokenStore(tokenStore, (err, results) => {
       if (err) {
-        return res.status(500).send(err).end();
+        console.error(err)
+        return res.status(500).end();
       }
       if (!results.length) {
         return res.status(401).send("Token doesn't exist or has expired.");
@@ -62,7 +65,7 @@ export class ResetTokenController {
       console.log(userEmail);
       return this.db.getResetPasswordTokenStoreExpiration(tokenStore, (tokenErr, tokenResults) => {
         if (tokenErr) {
-          return res.status(500).send(tokenErr).end();
+          return res.status(500).send().end();
         }
         const expires = tokenResults.map(result => {
           return result.expires;
@@ -77,12 +80,13 @@ export class ResetTokenController {
         } else {
           return this.db.deleteResetTokenStore(tokenStore, (deleteStoreErr, _) => {
             if (deleteStoreErr) {
-              return res.send(deleteStoreErr);
+              console.error(deleteStoreErr);
+              return res.status(500);
             }
             return this.db.resetPassword(data, (resetPasswordErr, _resetPasswordResults) => {
               if (resetPasswordErr) {
                 console.log(resetPasswordErr);
-                return res.status(401).send(resetPasswordErr).end();
+                return res.status(401).end();
               }
               return res.status(200).send({message: 'Password has been reset.'}).end();
             });

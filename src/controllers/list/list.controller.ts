@@ -18,8 +18,8 @@ export class ListController {
     await this.db.findAllLists((err, results)  => {
       if (err) {
         const errorMessage = `We failed to query lists ${err}`;
-        console.log(err);
-        return res.sendStatus(500).send(errorMessage);
+        console.error(errorMessage);
+        return res.sendStatus(500).end();
       }
       const updatedResults = results.map((result) => {
         const creationDate = new DateUtil(result.creation_date);
@@ -35,11 +35,12 @@ export class ListController {
     });
   }
 
-  getSingle = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  getSingle = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
     const query = {'owner_username': req.params.owner_username, 'slug': req.params.slug}
     await this.db.findListFromSlug(query,  async (err, results) => {
       if (err) {
-        return next(err);
+        console.error(err)
+        return res.status(500).end();
       }
       return !results.length ? res.status(404).send("List Doesn't Exist.").end() : res.status(200).send(results).end();
     })
@@ -69,8 +70,10 @@ export class ListController {
       const verified = userResults[0].verification_status;
       if (!verified) return res.status(403).send({ message: "Your account must be verified to send create a new list." }).end();
       return await this.db.createList(list, (err, _results, _fields) => {
-        if (err) return res.status(400).send(err).end();
-
+        if (err) {
+          console.error(err);
+          return res.status(500).send(err).end();
+        }
         return res.status(201).send({ message: 'List created.', url: `${username}/${list.slug}`})
       });
     })

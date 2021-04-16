@@ -24,7 +24,8 @@ export class VerificationTokenController {
     const tokenStore = req.params.tokenStore;
     await this.db.getVerifyAccountTokenStore(tokenStore, (err, results) => {
       if (err) {
-        return res.status(500).send(err).end();
+        console.error(err)
+        return res.status(500).end();
       }
       let userEmail = null;
       try {
@@ -36,9 +37,10 @@ export class VerificationTokenController {
       }
       return !results.length && !!userEmail ?
              res.status(401).send("Token doesn't exist or has expired.")
-                                            : this.db.getVerifyAccountTokenStoreExpiration(tokenStore, (tokenErr, tokenResults) => {
+             : this.db.getVerifyAccountTokenStoreExpiration(tokenStore, (tokenErr, tokenResults) => {
           if (tokenErr) {
-            return res.status(500).send(tokenErr).end();
+            console.error(tokenErr);
+            return res.status(500).end();
           }
           const expires = tokenResults.map(result => {
             return result.expires;
