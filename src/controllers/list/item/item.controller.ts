@@ -1,4 +1,4 @@
-import mysql, { Query } from 'mysql';
+import mysql, { MysqlError, Query } from 'mysql';
 import { DB_CONFIG } from '../../../environments/variables';
 import { NextFunction, Request, Response } from 'express';
 import { emit } from '../../../utilities/sockets';
@@ -16,8 +16,7 @@ export class ItemController {
   }
 
   get = (req: Request, res: Response): Promise<Query> => {
-    const query = {'author_username': req.params.owner_username, 'slug': req.params.slug}
-    return this.db.findListItems(query, (err, results) => {
+    return this.db.findListItems(req.params.slug, (err, results) => {
       if (err) {
         console.error(err)
         return res.sendStatus(500).end();
@@ -56,14 +55,14 @@ export class ItemController {
           return res.status(500).end();
         }
         if (userID === result[0].owner_id) {
-          this.db.deleteListItem(id, error => {
+          this.db.deleteListItem(id, (error: MysqlError) => {
             if (error) {
               console.error(error.message);
               return res.status(500).end();
             }
             emit(ListItemEvents.DELETE_ITEM, id);
             return res.send({message: 'Item Deleted'}).status(202);
-          })
+          }).then();
         }
       }))
     }
@@ -72,7 +71,6 @@ export class ItemController {
     const listItem: ListItemModel = req.body;
     if (req.session.user) {
       const userID = req.session.user[0].id;
-      // TODO: Verify this works
       return this.listDb.getListOwner(listItem.list_id, (error, result) => {
         if (error) {
           console.error(error)

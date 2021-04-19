@@ -34,7 +34,7 @@ export class ListDb extends Db{
    * @param next`
    */
   findListFromSlug = async (query: string | any, next: queryCallback): Promise<Query> => {
-    return this.db.query('Select id, slug, name, description, creation_date, is_complete, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_username=? and slug= ?', [query.owner_username, query.slug], next);
+    return this.db.query('Select id, slug, name, description, creation_date, is_complete, deadline, is_private, allow_comments, firstName, lastName, owner_id, owner_username FROM view_lists where slug= ?', query, next);
   }
 
   /**
@@ -53,6 +53,9 @@ export class ListDb extends Db{
    */
   createList = async (list: ListModel, next: queryCallback): Promise<Query> => {
     return this.db.query('INSERT INTO `lists` (`slug`, `name`, `description`, `creation_date`, `deadline`, `is_private`, `allow_comments`, `user_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [list.slug, list.name, list.description, list.creation_date, list.deadline, list.isPrivate, list.allowComments, list.author_id], next)
+  }
+  doesSlugExist = async (slug: string, next: queryCallback): Promise<Query> => {
+    return this.db.query('SELECT 1 from `lists` WHERE `slug` = ?', slug, next);
   }
 
 }

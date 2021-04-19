@@ -28,7 +28,7 @@ export const emit = (event: string | CommentEvents | ListItemEvents, data) => {
   try {
     switch (event) {
       case ListItemEvents.COMPLETE_ITEM: {
-        io.sockets.to(`${data.username}-${data.slug}`).emit(event, data);
+        io.sockets.to(`${data.slug}`).emit(event, data);
         break;
       }
       case ListItemEvents.DELETE_ITEM: {

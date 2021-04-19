@@ -1,4 +1,4 @@
-import mysql from 'mysql';
+import mysql, { Query } from 'mysql';
 import { DB_CONFIG } from '../../environments/variables';
 import { NextFunction, Request, Response } from 'express';
 import { DateUtil } from '../../utilities/date';
@@ -36,14 +36,23 @@ export class ListController {
   }
 
   getSingle = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-    const query = {'owner_username': req.params.owner_username, 'slug': req.params.slug}
-    await this.db.findListFromSlug(query,  async (err, results) => {
+    return await this.db.findListFromSlug(req.params.slug,  async (err, results) => {
       if (err) {
         console.error(err)
         return res.status(500).end();
       }
+      // const list: ListOwnerModel = results.map((result) => {
+      //   const updatedResult = result[0];
+      //   if (req.session.user) {
+      //     console.log(req.session.user[0].id);
+      //     // updatedResult.isOwner = req.session.user[0].id === updatedResult.owner_id;
+      //     // return result;
+      //   }
+      //   updatedResult.isOwner = false;
+      //   return updatedResult;
+      // })
       return !results.length ? res.status(404).send("List Doesn't Exist.").end() : res.status(200).send(results).end();
-    })
+    });
   }
 
   post = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
@@ -53,10 +62,9 @@ export class ListController {
     const listPrivate = req.body.is_private === true ? 1 : 0;
     const listAllowsComments = req.body.allow_comments === true ? 1 : 0;
     const url = req.body.title.toLowerCase().split(' ').join('-');
-    console.log(url);
     const list: ListModel = {
-      slug: url,
-      name:  req.body.title,
+      slug: `${username}-${url}`,
+      name: req.body.title,
       description: req.body.description,
       creation_date: new Date(),
       deadline: deadlineDate,
@@ -64,7 +72,21 @@ export class ListController {
       allowComments: listAllowsComments,
       author_id: id
     }
-    if (!req.session) return res.status(401).send({ message: "You must be logged in to make a list"}).end();
+    if (!req.session) return res.status(401).send({ message: "You must be logged in to make a list" }).end();
+    this.testSlug(list.slug).then((r) => {
+      if (r) {
+        return res.status(409).send({ message: "A list by that name already exists." }).end();
+      }
+      this.createList(req, res, list);
+    });
+  }
+  update = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
+    return next('update list route');
+  }
+  delete = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
+    return next('delete list route');
+  }
+  createList = async (req: Request, res: Response, list: ListModel): Promise<Query> => {
     return this.userDB.findUserFromUsername(req.session.user[0].username, async (userError, userResults) => {
       if (userError) return res.status(500).end();
       const verified = userResults[0].verification_status;
@@ -74,16 +96,16 @@ export class ListController {
           console.error(err);
           return res.status(500).send(err).end();
         }
-        return res.status(201).send({ message: 'List created.', url: `${username}/${list.slug}`})
+        return res.status(201).send({ message: 'List created.', url: `${list.slug}`})
       });
     })
-
   }
 
-  update = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
-    return next('update list route');
-  }
-  delete = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
-    return next('delete list route');
+  private testSlug = async (slug: string): Promise<boolean> => {
+    return new Promise(resolve => {
+      this.db.doesSlugExist(slug, (_, results) => {
+        return resolve(results.length > 0);
+      });
+    })
   }
 }

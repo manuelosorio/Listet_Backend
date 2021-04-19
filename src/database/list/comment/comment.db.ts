@@ -1,6 +1,6 @@
 import { Db } from '../../db';
 import { Pool, Query, queryCallback } from 'mysql';
-import { ListCommentModel, ListCommentQueryModel } from '../../../models/list-comment.model';
+import { ListCommentModel } from '../../../models/list-comment.model';
 
 export class CommentDb extends Db{
   constructor(db: Pool) {
@@ -9,16 +9,15 @@ export class CommentDb extends Db{
 
   /**
    * Find all comments using list owner username and slug
-   * @param commentQueryModel
+   * @param slug
    * @param next
    */
-  findListComments = async (commentQueryModel: ListCommentQueryModel, next: queryCallback): Promise<Query> => {
+  findListComments = async (slug:string, next: queryCallback): Promise<Query> => {
     return this.db.query(
       `SELECT comment, creation_date, firstName, lastName, username
         FROM view_comments
-        WHERE list_owner_username=?
-        AND slug= ? ORDER BY creation_date DESC`,
-      [commentQueryModel.list_owner_username, commentQueryModel.slug], next);
+        WHERE slug= ? ORDER BY creation_date DESC`,
+      slug, next);
   }
 
   /**

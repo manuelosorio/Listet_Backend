@@ -6,7 +6,7 @@ export interface ListCommentModel {
 }
 
 export interface ListCommentQueryModel {
-  list_owner_username: string;
+  list_owner_username?: string;
   slug: string;
 }
 

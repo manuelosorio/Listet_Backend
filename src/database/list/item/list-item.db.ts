@@ -21,15 +21,15 @@ export class ListItemDb extends Db{
   }
   /**
    * Find all list items using list owner username and slug
-   * @param query
+   * @param slug
    * @param next
    */
-  findListItems = async (query: ListQueryModel | any, next: queryCallback): Promise<Query> => {
+  findListItems = async (slug: ListQueryModel | any, next: queryCallback): Promise<Query> => {
     return this.db.query(
       `SELECT id, item, deadline, completed, list_id, slug, username
         FROM view_list_items
-        WHERE username=? and slug= ?`,
-      [query.author_username, query.slug], next);
+        WHERE slug= ?`,
+      slug, next);
   }
   async updateListItemStatus(listItem: {completed: number, id: number}, next: queryCallback): Promise<Query> {
     return this.db.query(

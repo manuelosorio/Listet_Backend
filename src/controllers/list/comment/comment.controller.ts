@@ -4,7 +4,7 @@ import { DB_CONFIG } from '../../../environments/variables';
 import { emit } from '../../../utilities/sockets';
 import { CommentEvents } from '../../../events/comment.events';
 import { CommentDb } from '../../../database/list/comment/comment.db';
-import { ListCommentEmitter, ListCommentModel, ListCommentQueryModel } from '../../../models/list-comment.model';
+import { ListCommentEmitter, ListCommentModel } from '../../../models/list-comment.model';
 import { ListDb } from '../../../database/list/list.db';
 
 
@@ -17,8 +17,7 @@ export class CommentController {
     this.listDb = new ListDb(mysql.createPool(DB_CONFIG));
   }
   get = (req: Request, res: Response): Promise<Query> => {
-    const commentQueryModel: ListCommentQueryModel = {'list_owner_username': req.params.owner_username, 'slug': req.params.slug}
-    return this.db.findListComments(commentQueryModel, (err: MysqlError, results) => {
+    return this.db.findListComments(req.params.slug, (err: MysqlError, results) => {
       if (err) {
         console.error(err);
         return res.sendStatus(500).end();
@@ -55,12 +54,12 @@ export class CommentController {
       creation_date: currentDate,
       parent_id: parent,
     };
-    return this.listDb.findListFromID(listComment.parent_id, async (listErr: MysqlError, listResults, _listFields) => {
+    return this.listDb.findListFromID(listComment.parent_id,
+      async (listErr: MysqlError, listResults, _listFields) => {
       if (listErr) {
         console.error(listErr)
         return res.status(500).end();
       }
-      const listOwner = listResults[0].owner_username;
       const slug = listResults[0].slug;
       console.log(listComment);
       if (listResults[0].allow_comments === 0) {
@@ -80,7 +79,7 @@ export class CommentController {
           lastName: user.lastName,
           creation_date: listComment.creation_date,
         };
-        commentData.listInfo = `${listOwner}-${slug}`;
+        commentData.listInfo = `${slug}`;
         emit(CommentEvents.CREATE_COMMENT, commentData);
         return res.status(201).send({ message: 'Comment created.' }).end();
       });
