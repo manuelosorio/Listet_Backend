@@ -205,13 +205,14 @@ export class UserController {
     })
   }
 
-  resetPassword = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+  resetPassword = async (req: Request, res: Response): Promise<any> => {
     if (!req.body.email)
       return res.status(400).send('Email is required').end();
     const email = req.body.email;
     await this.db.findUserFromEmail(email, (err, results) => {
       if (err) {
-        return res.status(500).send(err).end();
+        console.error(err);
+        return res.status(500).end();
       }
       const date = new DateUtil(new Date());
       if (!results.length){
