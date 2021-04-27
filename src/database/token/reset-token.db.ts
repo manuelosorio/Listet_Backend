@@ -26,7 +26,7 @@ export class ResetTokenDb extends Db{
   resetPasswordTokenStore = async (tokenStore: TokenModel, next: queryCallback): Promise<Query> => {
     return this.db.query(
       'INSERT INTO `token_reset_password` (token_id, expires, data) VALUES (?, ?, ?)',
-      [tokenStore], next
+      [tokenStore.id, tokenStore.expires, tokenStore.token], next
     );
   }
   /**
