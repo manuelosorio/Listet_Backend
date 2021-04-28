@@ -5,6 +5,8 @@ import { DateUtil } from '../../utilities/date';
 import { ListDb } from '../../database/list/list.db';
 import { ListModel } from '../../models/list.model';
 import { UserDb } from '../../database/user/user.db';
+import { emit } from '../../utilities/sockets';
+import { ListEvents } from '../../events/list.events';
 
 export class ListController {
   private readonly db: ListDb;
@@ -83,9 +85,32 @@ export class ListController {
   update = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
     return next('update list route');
   }
-  delete = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
-    return next('delete list route');
+
+  delete = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+    console.log(req.session);
+    const listId = req.params.id as unknown as number
+    const userID = req.session.user[0].id;
+
+    if (req.session.user) {
+      return this.db.getListOwner(listId, (err, results)=> {
+        if (err) {
+          console.error(err.message);
+          return res.status(500).end();
+        }
+        if (userID === results[0].owner_id) {
+          this.db.deleteList(listId , (listErr, _) => {
+            if (listErr) {
+              console.error(listErr.message);
+              return res.status(500).end();
+            }
+            emit(ListEvents.DELETE_List, listId);
+            return res.send('list deleted');
+          })
+        }
+      })
+    }
   }
+
   createList = async (req: Request, res: Response, list: ListModel): Promise<Query> => {
     return this.userDB.findUserFromUsername(req.session.user[0].username, async (userError, userResults) => {
       if (userError) return res.status(500).end();

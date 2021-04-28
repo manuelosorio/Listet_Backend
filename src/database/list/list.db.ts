@@ -23,7 +23,7 @@ export class ListDb extends Db{
    * Retrieve all public lists.
    * @param next
    */
-   findAllLists = async (next: queryCallback): Promise<Query> => {
+  findAllLists = async (next: queryCallback): Promise<Query> => {
     return this.db.query('SELECT slug, name, description, creation_date, deadline, is_private, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where is_private=0', null, next);
   }
 
@@ -57,5 +57,12 @@ export class ListDb extends Db{
   doesSlugExist = async (slug: string, next: queryCallback): Promise<Query> => {
     return this.db.query('SELECT 1 from `lists` WHERE `slug` = ?', slug, next);
   }
-
+  /**
+   * Delete List
+   * @param listId
+   * @param next
+   */
+  deleteList = async(listId: number, next: queryCallback): Promise<Query> => {
+    return this.db.query('DELETE FROM `lists` WHERE id = ?', listId, next)
+  }
 }
