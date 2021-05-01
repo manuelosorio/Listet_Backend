@@ -43,16 +43,6 @@ export class ListController {
         console.error(err)
         return res.status(500).end();
       }
-      // const list: ListOwnerModel = results.map((result) => {
-      //   const updatedResult = result[0];
-      //   if (req.session.user) {
-      //     console.log(req.session.user[0].id);
-      //     // updatedResult.isOwner = req.session.user[0].id === updatedResult.owner_id;
-      //     // return result;
-      //   }
-      //   updatedResult.isOwner = false;
-      //   return updatedResult;
-      // })
       return !results.length ? res.status(404).send("List Doesn't Exist.").end() : res.status(200).send(results).end();
     });
   }
@@ -89,9 +79,9 @@ export class ListController {
   delete = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
     console.log(req.session);
     const listId = req.params.id as unknown as number
-    const userID = req.session.user[0].id;
 
     if (req.session.user) {
+      const userID = req.session.user[0].id;
       return this.db.getListOwner(listId, (err, results)=> {
         if (err) {
           console.error(err.message);
@@ -104,7 +94,7 @@ export class ListController {
               return res.status(500).end();
             }
             emit(ListEvents.DELETE_List, listId);
-            return res.send('list deleted');
+            return res.status(200).send('list deleted');
           })
         }
       })

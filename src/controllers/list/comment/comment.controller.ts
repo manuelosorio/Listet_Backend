@@ -61,7 +61,6 @@ export class CommentController {
         return res.status(500).end();
       }
       const slug = listResults[0].slug;
-      console.log(listComment);
       if (listResults[0].allow_comments === 0) {
         res.status(400).send('Comments are disabled').end();
       }
@@ -70,9 +69,9 @@ export class CommentController {
           console.error(commentErr)
           return res.status(500).end();
         }
-        console.log(results);
         const user = req.session.user[0];
         const commentData: ListCommentEmitter = {
+          id: results.insertId,
           comment: listComment.comment_message,
           username: user.username,
           firstName: user.firstName,
@@ -85,10 +84,66 @@ export class CommentController {
       });
     });
   }
-  update = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
+  update = async (_req: Request, res: Response, next: NextFunction): Promise<any> => {
     next('update comment route');
   }
-  delete = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
-    await next('delete comment route');
+  delete = async (req: Request, res: Response): Promise<unknown> => {
+    const commentID = req.params.id as unknown as number;
+    if (req.session.user) {
+      const userID = req.session.user[0].id;
+      return this.getListId(commentID).then(async (value: any) => {
+        if (value !== undefined) {
+          const listID = value.list_id as unknown as number;
+          const isListOwner = await this.isListOwner(userID, listID);
+          if (isListOwner) {
+            return this.deleteComment(commentID, res);
+          }
+          const isCommentOwner = await this.isCommentOwner(userID, commentID);
+          if (isCommentOwner) {
+            return this.deleteComment(commentID, res);
+          }
+        }
+      }, ((reason: MysqlError) => {
+        console.error(reason)
+        return res.status(500).end();
+      }))
+    }
+  }
+  private getListId = async (commentID: number): Promise<Query> => {
+    return new Promise((resolve, reject): Promise<Query> => {
+      return this.db.query(`SELECT list_id FROM list_comments WHERE id = ?`,
+        commentID, (err, results) => {
+          if (err) {
+            return reject(err)
+          }
+          return resolve(results[0]);
+        })
+    })
+  }
+  private deleteComment(id: number, res) {
+    return this.db.deleteComment(id, (error, _results) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).end();
+      }
+      emit(CommentEvents.DELETE_COMMENT, id);
+      return res.status(200).send('Comment Deleted').end();
+    })
+  }
+  private isListOwner = async (userID: number, listID: number): Promise<boolean> => {
+    return new Promise((resolve, _reject) => {
+      return this.listDb.getListOwner(listID, (err, results) => {
+        const listOwnerID = results[0].owner_id as unknown as number;
+        return resolve(listOwnerID === userID);
+      })
+    });
+  }
+  private async isCommentOwner(userID: any, commentID: number) {
+    return new Promise(resolve => {
+      return this.db.getCommentOwner(commentID, (_, results) => {
+        const ownerID = results[0].user_id as unknown as number;
+        return resolve(ownerID === userID);
+      })
+    });
   }
 }

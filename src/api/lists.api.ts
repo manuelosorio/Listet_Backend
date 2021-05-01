@@ -25,5 +25,5 @@ listApi.put('/update-item', itemController.update);
 listApi.get('/list/:slug/comments', commentController.get);
 listApi.post('/create-comment', commentController.post);
 listApi.put('/update-comment', commentController.update);
-listApi.delete('/delete-comment', commentController.delete);
+listApi.delete('/delete-comment/:id', commentController.delete);
 export default listApi;

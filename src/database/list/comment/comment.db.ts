@@ -14,7 +14,7 @@ export class CommentDb extends Db{
    */
   findListComments = async (slug:string, next: queryCallback): Promise<Query> => {
     return this.db.query(
-      `SELECT comment, creation_date, firstName, lastName, username
+      `SELECT id, comment, creation_date, firstName, lastName, username
         FROM view_comments
         WHERE slug= ? ORDER BY creation_date DESC`,
       slug, next);
@@ -27,7 +27,12 @@ export class CommentDb extends Db{
    */
   createListComments = async (listComment: ListCommentModel, next: queryCallback): Promise<Query> => {
     return this.db.query(
-      'INSERT INTO `list_comments` (`user_id`, `comment`, `creation_date`, `list_id`) VALUES (?, ?, ?, ?)',
+      `INSERT INTO list_comments
+          (user_id,
+          comment,
+          creation_date,
+          list_id)
+          VALUES (?, ?, ?, ?)`,
       [
         listComment.author_id,
         listComment.comment_message,
@@ -36,5 +41,12 @@ export class CommentDb extends Db{
       ], next);
   }
 
+  deleteComment = async (id: number, next: queryCallback): Promise<Query> => {
+   return this.db.query(`DELETE FROM list_comments
+      WHERE id = ?`, id, next);
+  }
 
+  getCommentOwner = async (commentID: number, next: queryCallback): Promise<Query> => {
+    return this.db.query('SELECT `user_id` FROM list_comments WHERE id = ?', commentID, next);
+  }
 }

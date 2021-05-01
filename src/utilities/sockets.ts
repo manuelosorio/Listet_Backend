@@ -1,9 +1,9 @@
-import SocketIO, { Server, Socket } from "socket.io";
-import http from "http";
-import chalk from "chalk";
-import { CORS } from "../environments/variables";
-import { CommentEvents } from "../events/comment.events";
-import { ListItemEvents } from "../events/list-item.events";
+import SocketIO, { Server, Socket } from 'socket.io';
+import http from 'http';
+import chalk from 'chalk';
+import { CORS } from '../environments/variables';
+import { CommentEvents } from '../events/comment.events';
+import { ListItemEvents } from '../events/list-item.events';
 import { ListCommentEmitter } from '../models/list-comment.model';
 import { ListItemModel } from '../models/list-item.model';
 import { ListEvents } from '../events/list.events';
@@ -34,12 +34,10 @@ export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents
         io.sockets.to(`${(data as ListItemModel).slug}`).emit(event, data);
         break;
       }
-      case ListItemEvents.DELETE_ITEM: {
+      case ListItemEvents.DELETE_ITEM:
+      case ListEvents.DELETE_List:
+      case CommentEvents.DELETE_COMMENT: {
         console.log(chalk.bgCyan.black(event, 'emitted'));
-        io.sockets.emit(event, data);
-        break;
-      }
-      case ListEvents.DELETE_List: {
         io.sockets.emit(event, data)
         break;
       }
