@@ -78,7 +78,7 @@ export class ListController {
 
   delete = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
     console.log(req.session);
-    const listId = req.params.id as unknown as number
+    const listId = req.params.id as unknown as number;
 
     if (req.session.user) {
       const userID = req.session.user[0].id;
@@ -94,10 +94,10 @@ export class ListController {
               return res.status(500).end();
             }
             emit(ListEvents.DELETE_List, listId);
-            return res.status(200).send('list deleted');
-          })
+            return res.status(200).send({message: 'list deleted'});
+          });
         }
-      })
+      });
     }
   }
 

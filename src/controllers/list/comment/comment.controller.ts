@@ -127,7 +127,7 @@ export class CommentController {
         return res.status(500).end();
       }
       emit(CommentEvents.DELETE_COMMENT, id);
-      return res.status(200).send('Comment Deleted').end();
+      return res.status(200).send({message: 'Comment Deleted'}).end();
     })
   }
   private isListOwner = async (userID: number, listID: number): Promise<boolean> => {
