@@ -1,9 +1,12 @@
-import SocketIO, { Server, Socket } from "socket.io";
-import http from "http";
-import chalk from "chalk";
-import { CORS } from "../environments/variables";
-import { CommentEvents } from "../events/comment.events";
-import { ListItemEvents } from "../events/list-item.events";
+import SocketIO, { Server, Socket } from 'socket.io';
+import http from 'http';
+import chalk from 'chalk';
+import { CORS } from '../environments/variables';
+import { CommentEvents } from '../events/comment.events';
+import { ListItemEvents } from '../events/list-item.events';
+import { ListCommentEmitter } from '../models/list-comment.model';
+import { ListItemModel } from '../models/list-item.model';
+import { ListEvents } from '../events/list.events';
 
 let socketInstance: SocketIO.Socket;
 let ioInstance: SocketIO.Server;
@@ -22,23 +25,27 @@ export function getIoInstance(): SocketIO.Server {
   return ioInstance;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const emit = (event: string | CommentEvents | ListItemEvents, data) => {
+
+export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents, data: Partial<number | ListCommentEmitter | ListItemModel>): void => {
   const io = getIoInstance();
   try {
     switch (event) {
       case ListItemEvents.COMPLETE_ITEM: {
-        io.sockets.to(`${data.slug}`).emit(event, data);
+        io.sockets.to(`${(data as ListItemModel).slug}`).emit(event, data);
         break;
       }
-      case ListItemEvents.DELETE_ITEM: {
+      case ListItemEvents.DELETE_ITEM:
+      case ListEvents.DELETE_List:
+      case CommentEvents.DELETE_COMMENT: {
         console.log(chalk.bgCyan.black(event, 'emitted'));
-        io.sockets.emit(event, data);
+        io.sockets.emit(event, data)
         break;
       }
       default: {
         console.log(chalk.bgCyan.black(event, 'emitted'));
-        io.to(data.listInfo).sockets.emit(event, data);
+        if (typeof data !== 'number') {
+          io.to(data.listInfo).sockets.emit(event, data);
+        }
         break;
       }
     }

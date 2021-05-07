@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import { UserController } from '../controllers/user/user.controller';
 
 const userApi = Router();

@@ -10,8 +10,8 @@ export interface ListCommentQueryModel {
   slug: string;
 }
 
-
 export interface ListCommentEmitter {
+  id?: number;
   comment: string;
   creation_date: Date | string;
   firstName: string;

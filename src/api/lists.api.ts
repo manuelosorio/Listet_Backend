@@ -14,7 +14,7 @@ listApi.get('/lists', listController.getAll);
 listApi.get('/list/:slug', listController.getSingle);
 listApi.post('/create-list', listController.post)
 listApi.put('/update', listController.update);
-listApi.delete('/delete-list', listController.delete);
+listApi.delete('/delete-list/:id', listController.delete);
 /********** Items *************/
 listApi.get('/list/:slug/items', itemController.get);
 listApi.post('/add-item', itemController.post);
@@ -25,5 +25,5 @@ listApi.put('/update-item', itemController.update);
 listApi.get('/list/:slug/comments', commentController.get);
 listApi.post('/create-comment', commentController.post);
 listApi.put('/update-comment', commentController.update);
-listApi.delete('/delete-comment', commentController.delete);
+listApi.delete('/delete-comment/:id', commentController.delete);
 export default listApi;

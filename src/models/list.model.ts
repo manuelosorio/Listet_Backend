@@ -9,6 +9,18 @@ export interface ListModel {
   author_id: number;
   author_username?: string;
 }
+export interface ListOwnerModel {
+  slug: string;
+  name: string;
+  description: string;
+  creation_date: Date;
+  deadline: Date;
+  isPrivate: number;
+  allowComments: number;
+  owner_id: number;
+  owner_username?: string;
+  isOwner: boolean;
+}
 
 export interface ListQueryModel {
   slug?: string;
