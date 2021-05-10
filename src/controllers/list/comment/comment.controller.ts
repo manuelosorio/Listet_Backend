@@ -37,55 +37,56 @@ export class CommentController {
    *    - Comment must be at least 160 characters long.
    *    - List must have comments enabled.
    */
-  post = (req: Request, res: Response): Promise<any> => {
+  post = (req: Request, res: Response): Promise<any> | Response => {
     let id;
     let parent;
     let commentMessage;
     const currentDate = new Date();
-    if (req.session.user[0].id !== undefined) {
-      id = Number(req.session.user[0].id);
-    }
     if (req.body.list_id !== undefined) {
       parent = Number(req.body.list_id);
     }
     if (req.body.comment !== undefined) {
       commentMessage = req.body.comment;
     }
-    const listComment: ListCommentModel = {
-      author_id: id,
-      comment_message: commentMessage,
-      creation_date: currentDate,
-      parent_id: parent,
-    };
-    return this.listDb.findListFromID(listComment.parent_id,
-      async (listErr: MysqlError, listResults, _listFields) => {
-        if (listErr) {
-          console.error(listErr)
-          return res.status(500).end();
-        }
-        const slug = listResults[0].slug;
-        if (listResults[0].allow_comments === 0) {
-          res.status(400).send('Comments are disabled').end();
-        }
-        return await this.db.createListComments(listComment, (commentErr: MysqlError, results, _fields) => {
-          if (commentErr) {
-            console.error(commentErr)
+    if (req.session.user) {
+      const user = req.session.user[0];
+      id = Number(req.session.user[0].id);
+      const listComment: ListCommentModel = {
+        author_id: id,
+        comment_message: commentMessage,
+        creation_date: currentDate,
+        parent_id: parent,
+      };
+      return this.listDb.findListFromID(listComment.parent_id,
+        async (listErr: MysqlError, listResults, _listFields) => {
+          if (listErr) {
+            console.error(listErr)
             return res.status(500).end();
           }
-          const user = req.session.user[0];
-          const commentData: ListCommentEmitter = {
-            id: results.insertId,
-            comment: listComment.comment_message,
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            creation_date: listComment.creation_date,
-          };
-          commentData.listInfo = `${slug}`;
-          emit(CommentEvents.CREATE_COMMENT, commentData);
-          return res.status(201).send({ message: 'Comment created.' }).end();
+          const slug = listResults[0].slug;
+          if (listResults[0].allow_comments === 0) {
+            res.status(400).send('Comments are disabled').end();
+          }
+          return await this.db.createListComments(listComment, (commentErr: MysqlError, results, _fields) => {
+            if (commentErr) {
+              console.error(commentErr)
+              return res.status(500).end();
+            }
+            const commentData: ListCommentEmitter = {
+              id: results.insertId,
+              comment: listComment.comment_message,
+              username: user.username,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              creation_date: listComment.creation_date,
+            };
+            commentData.listInfo = `${slug}`;
+            emit(CommentEvents.CREATE_COMMENT, commentData);
+            return res.status(201).send({ message: 'Comment created.' }).end();
+          });
         });
-      });
+    }
+    return res.status(400).send({message: 'You must be authenticated to create a new comment.'})
   }
   update = async (_req: Request, res: Response, next: NextFunction): Promise<any> => {
     next('update comment route');
