@@ -6,13 +6,16 @@ import { ListItemEvents } from '../../../events/list-item.events';
 import { ListItemModel } from '../../../models/list-item.model';
 import { ListItemDb } from '../../../database/list/item/list-item.db';
 import { ListDb } from '../../../database/list/list.db';
+import { ListService } from '../../../services/list.service';
 
 export class ItemController {
   private readonly db: ListItemDb;
   private readonly listDb: ListDb
+  private readonly listService: ListService;
   constructor() {
     this.db = new ListItemDb(mysql.createPool(DB_CONFIG));
     this.listDb = new ListDb(mysql.createPool(DB_CONFIG));
+    this.listService = new ListService();
   }
 
   get = (req: Request, res: Response): Promise<Query> => {
@@ -24,7 +27,7 @@ export class ItemController {
       return res.status(200).send(results).end();
     });
   }
-  post = (req: Request, res: Response): Promise<Query> => {
+  post = async (req: Request, res: Response): Promise<Query | void | Response> => {
     const id = Number(req.body.list_id);
     const date = req.body.deadline ? req.body.deadline : null;
     const listItem: ListItemModel = {
@@ -35,15 +38,22 @@ export class ItemController {
       list_id: id,
       listInfo: req.body.listInfo
     }
-    return this.db.addListItem(listItem, (err, results, _fields) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).end();
-      }
-      listItem.id = results.insertId;
-      emit(ListItemEvents.ADD_ITEM, listItem);
-      return res.status(201).send({message: 'List item added.'});
-    });
+    if (req.session.user) {
+      const userId = req.session.user[0].id;
+      const isOwner = await this.listService.isListOwner(userId, id);
+      if (isOwner) return this.db.addListItem(listItem,
+        (err, results, _fields) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).end();
+          }
+          listItem.id = results.insertId;
+          emit(ListItemEvents.ADD_ITEM, listItem);
+          return res.status(201).send({message: 'List item added.'});
+        });
+      return res.status(400).send({message: "You don't have permission to add items to this list."}).end();
+    }
+    return res.status(400).send({message: "You must be authenticated to add items to a list."})
   }
   delete = (req: Request, res: Response): Promise<Query> =>  {
     const id = req.params.id as unknown as number;
