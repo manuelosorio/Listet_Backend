@@ -44,7 +44,7 @@ export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents
       default: {
         console.log(chalk.bgCyan.black(event, 'emitted'));
         if (typeof data !== 'number') {
-          io.to(data.listInfo).sockets.emit(event, data);
+          io.to(data.listInfo).emit(event, data);
         }
         break;
       }
