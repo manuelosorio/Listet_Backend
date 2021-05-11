@@ -31,7 +31,7 @@ export class ListItemDb extends Db{
         WHERE slug= ?`,
       slug, next);
   }
-  async updateListItemStatus(listItem: {completed: number, id: number}, next: queryCallback): Promise<Query> {
+  updateListItemStatus = async (listItem: {completed: number, id: number}, next: queryCallback): Promise<Query> => {
     return this.db.query(
       `UPDATE view_list_items SET completed = ? WHERE id = ? `,
       [

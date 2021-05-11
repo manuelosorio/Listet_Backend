@@ -1,14 +1,16 @@
 export interface ListModel {
-  slug: string;
+  id?: number;
+  slug?: string;
   name: string;
   description: string;
-  creation_date: Date;
+  creation_date?: Date;
   deadline: Date;
   isPrivate: number;
   allowComments: number;
-  author_id: number;
+  author_id?: number;
   author_username?: string;
 }
+
 export interface ListOwnerModel {
   slug: string;
   name: string;

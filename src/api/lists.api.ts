@@ -13,17 +13,17 @@ const commentController = new CommentController();
 listApi.get('/lists', listController.getAll);
 listApi.get('/list/:slug', listController.getSingle);
 listApi.post('/create-list', listController.post)
-listApi.put('/update', listController.update);
+listApi.put('/update-list/:id', listController.update);
 listApi.delete('/delete-list/:id', listController.delete);
 /********** Items *************/
 listApi.get('/list/:slug/items', itemController.get);
 listApi.post('/add-item', itemController.post);
 listApi.delete('/delete-item/:id', itemController.delete);
 listApi.put('/update-item-status', itemController.updateStatus);
-listApi.put('/update-item', itemController.update);
+listApi.put('/update-item/:id', itemController.update);
 /********** Comments **********/
 listApi.get('/list/:slug/comments', commentController.get);
 listApi.post('/create-comment', commentController.post);
-listApi.put('/update-comment', commentController.update);
+listApi.put('/update-comment/:id', commentController.update);
 listApi.delete('/delete-comment/:id', commentController.delete);
 export default listApi;

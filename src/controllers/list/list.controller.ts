@@ -72,12 +72,44 @@ export class ListController {
       this.createList(req, res, list);
     });
   }
-  update = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
-    return next('update list route');
+  update = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+    const list: ListModel = req.body;
+
+    if (req.session.user) {
+      const userID = req.session.user[0].id;
+      const listID = req.params.id;
+      const username = req.session.user[0].username;
+      const url = list.name.toLowerCase().split(' ').join('-');
+      return this.db.getListOwner(listID, (error, result) => {
+        const listUpdate: ListModel = {
+          id: listID as unknown as number,
+          name: list.name,
+          slug: `${username}-${url}`,
+          description: list.description,
+          isPrivate: list.isPrivate,
+          deadline: list.deadline,
+          allowComments: list.allowComments,
+        }
+        if (error) {
+          console.error('Error Getting List Owner\n', error.message);
+          return res.status(500).end();
+        }
+        console.log(listUpdate)
+        if (userID === result[0].owner_id) {
+          return this.db.updateList(listUpdate, (err, _) => {
+            if (err) {
+              console.error('Error Updating List\n', err.message)
+              return res.status(500).end();
+            }
+            emit(ListEvents.UPDATE_LIST, listUpdate);
+            return res.status(201).send({ message: "List Updated." }).end();
+          })
+        }
+      })
+    }
   }
 
   delete = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-    console.log(req.session);
     const listId = req.params.id as unknown as number;
 
     if (req.session.user) {
@@ -93,7 +125,7 @@ export class ListController {
               console.error(listErr.message);
               return res.status(500).end();
             }
-            emit(ListEvents.DELETE_List, listId);
+            emit(ListEvents.DELETE_LIST, listId);
             return res.status(200).send({message: 'list deleted'});
           });
         }

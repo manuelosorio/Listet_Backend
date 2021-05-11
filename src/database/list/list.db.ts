@@ -65,4 +65,18 @@ export class ListDb extends Db{
   deleteList = async(listId: number, next: queryCallback): Promise<Query> => {
     return this.db.query('DELETE FROM `lists` WHERE id = ?', listId, next)
   }
+  updateList = async(listData: ListModel, next: queryCallback): Promise<Query> => {
+    return this.db.query(
+      `UPDATE lists SET
+        slug= ?,
+        name= ?,
+        description= ?,
+        deadline= ?,
+        is_private= ?,
+        allow_comments= ?
+        where id = ?
+        `,
+      [listData.slug, listData.name, listData.description, listData.deadline, listData.isPrivate, listData.allowComments, listData.id],
+      next);
+  }
 }
