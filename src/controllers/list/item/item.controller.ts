@@ -77,7 +77,7 @@ export class ItemController {
       }))
     }
   }
-  updateStatus = (req: Request, res: Response): Promise<Query> => {
+  updateStatus = (req: Request, res: Response): Promise<Query> | Response => {
     const listItem: ListItemModel = req.body;
     if (req.session.user) {
       const userID = req.session.user[0].id;
@@ -101,8 +101,32 @@ export class ItemController {
         }
       })
     }
+    return res.status(403).send({message: 'You must be authenticated to complete this action. '})
   }
-  update = async (_req: Request, _res: Response, next: NextFunction): Promise<void> => {
-    next('update list item route');
+  update = async (req: Request, res: Response, _next: NextFunction): Promise<Query | void> => {
+    const listItem: ListItemModel = req.body;
+    listItem.id = req.params.id as unknown as number;
+    console.log(listItem)
+    if (req.session.user) {
+      const userID = req.session.user[0].id;
+      return this.listDb.getListOwner(listItem.list_id, (error: MysqlError, result) => {
+        if (error) {
+          console.error(error)
+          return res.status(500).end();
+        }
+        if (userID === result[0].owner_id) {
+
+          return this.db.updateListItem(listItem, (updateErr: MysqlError, _) => {
+            if (updateErr) {
+              console.error(updateErr)
+              return res.status(500).end();
+            }
+            emit(ListItemEvents.UPDATE_ITEM, listItem);
+            return res.status(201).send({ message: "Item Updated" }).end();
+          });
+        }
+      });
+    }
+    res.status(403).send({message: 'You must be authenticated to complete this action. '})
   }
 }
