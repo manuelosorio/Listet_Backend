@@ -45,8 +45,19 @@ export class CommentDb extends Db{
    return this.db.query(`DELETE FROM list_comments
       WHERE id = ?`, id, next);
   }
-
   getCommentOwner = async (commentID: number, next: queryCallback): Promise<Query> => {
     return this.db.query('SELECT `user_id` FROM list_comments WHERE id = ?', commentID, next);
+  }
+
+  update = async (comment: ListCommentModel, next: queryCallback): Promise<Query> => {
+    return this.db.query(
+      `UPDATE list_comments
+      SET comment = ?, date_updated = ?
+      WHERE id = ?`,
+      [
+        comment.comment_message,
+        comment.date_updated,
+        comment.id
+      ], next);
   }
 }

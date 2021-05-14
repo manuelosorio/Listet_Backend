@@ -115,7 +115,6 @@ export class ItemController {
           return res.status(500).end();
         }
         if (userID === result[0].owner_id) {
-
           return this.db.updateListItem(listItem, (updateErr: MysqlError, _) => {
             if (updateErr) {
               console.error(updateErr)
@@ -127,6 +126,6 @@ export class ItemController {
         }
       });
     }
-    res.status(403).send({message: 'You must be authenticated to complete this action. '})
+    res.status(403).send({message: 'You must be authenticated to complete this action.'})
   }
 }
