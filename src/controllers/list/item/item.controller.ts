@@ -30,6 +30,7 @@ export class ItemController {
   post = async (req: Request, res: Response): Promise<Query | void | Response> => {
     const id = Number(req.body.list_id);
     const date = req.body.deadline ? req.body.deadline : null;
+    if (req.body.item.length < 1) return res.status(403).send({message: "Item Can't be empty."});
     const listItem: ListItemModel = {
       id: 0,
       deadline: date,
@@ -103,10 +104,11 @@ export class ItemController {
     }
     return res.status(403).send({message: 'You must be authenticated to complete this action. '})
   }
-  update = async (req: Request, res: Response, _next: NextFunction): Promise<Query | void> => {
+  update = async (req: Request, res: Response, _next: NextFunction): Promise<Query | Response |void> => {
     const listItem: ListItemModel = req.body;
+    listItem.deadline = new Date(req.body.deadline);
     listItem.id = req.params.id as unknown as number;
-    console.log(listItem)
+    if (req.body.item.length < 1) return res.status(403).send({message: "Item Can't be empty."});
     if (req.session.user) {
       const userID = req.session.user[0].id;
       return this.listDb.getListOwner(listItem.list_id, (error: MysqlError, result) => {
