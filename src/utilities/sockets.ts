@@ -31,8 +31,12 @@ export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents
   const io = getIoInstance();
   try {
     switch (event) {
+      case ListItemEvents.ADD_ITEM: {
+        io.sockets.to((data as ListItemModel).slug).emit(event, data);
+        break;
+      }
       case ListItemEvents.COMPLETE_ITEM: {
-        io.sockets.to(`${(data as ListItemModel).slug}`).emit(event, data);
+        io.sockets.to((data as ListItemModel).slug).emit(event, data);
         break;
       }
       case ListItemEvents.UPDATE_ITEM: {

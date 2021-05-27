@@ -33,11 +33,11 @@ export class ItemController {
     if (req.body.item.length < 1) return res.status(403).send({message: "Item Can't be empty."});
     const listItem: ListItemModel = {
       id: 0,
-      deadline: date,
       item: req.body.item,
+      deadline: date,
       completed: 0,
       list_id: id,
-      listInfo: req.body.listInfo
+      slug: req.body.slug
     }
     if (req.session.user) {
       const userId = req.session.user[0].id;
