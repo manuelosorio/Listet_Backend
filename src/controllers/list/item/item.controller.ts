@@ -58,25 +58,24 @@ export class ItemController {
   }
   delete = (req: Request, res: Response): Promise<Query> =>  {
     const id = req.params.id as unknown as number;
-    if (req.session.user) {
-      const userID = req.session.user[0].id;
-      return this.db.getListItemOwner(id, ((err, result) => {
-        if (err) {
-          console.error(err.message);
-          return res.status(500).end();
-        }
-        if (userID === result[0].owner_id) {
-          this.db.deleteListItem(id, (error: MysqlError) => {
-            if (error) {
-              console.error(error.message);
-              return res.status(500).end();
-            }
-            emit(ListItemEvents.DELETE_ITEM, id);
-            return res.send({message: 'Item Deleted'}).status(202);
-          }).then();
-        }
-      }))
-    }
+    const userID = req.session.user[0].id;
+    console.log(req.session)
+    return this.db.getListItemOwner(id, ((err, result) => {
+      if (err) {
+        console.error(err.message);
+        return res.status(500).end();
+      }
+      if (userID === result[0].owner_id) {
+        this.db.deleteListItem(id, (error: MysqlError) => {
+          if (error) {
+            console.error(error.message);
+            return res.status(500).end();
+          }
+          emit(ListItemEvents.DELETE_ITEM, id);
+          return res.send({message: 'Item Deleted'}).status(202);
+        }).then();
+      }
+    }))
   }
   updateStatus = (req: Request, res: Response): Promise<Query> | Response => {
     const listItem: ListItemModel = req.body;
@@ -104,7 +103,7 @@ export class ItemController {
     }
     return res.status(403).send({message: 'You must be authenticated to complete this action. '})
   }
-  update = async (req: Request, res: Response, _next: NextFunction): Promise<Query | Response |void> => {
+  update = async (req: Request, res: Response, _next: NextFunction): Promise<Query | Response | void> => {
     const listItem: ListItemModel = req.body;
     listItem.deadline = new Date(req.body.deadline);
     listItem.id = req.params.id as unknown as number;

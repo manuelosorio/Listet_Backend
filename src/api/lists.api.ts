@@ -18,7 +18,7 @@ listApi.delete('/delete-list/:id', listController.delete);
 /********** Items *************/
 listApi.get('/list/:slug/items', itemController.get);
 listApi.post('/add-item', itemController.post);
-listApi.delete('/delete-item/:id', itemController.delete);
+listApi.delete('/delete-item/:id', isAuthed, itemController.delete);
 listApi.put('/update-item-status', itemController.updateStatus);
 listApi.put('/update-item/:id', itemController.update);
 /********** Comments **********/
@@ -27,3 +27,10 @@ listApi.post('/create-comment', commentController.post);
 listApi.put('/update-comment/:id', commentController.update);
 listApi.delete('/delete-comment/:id', commentController.delete);
 export default listApi;
+
+function isAuthed(req, res, next) {
+  if (req.session.user) {
+    return next();
+  }
+  return res.status(403).send({message: 'You must be authenticated to complete that action.'})
+}
