@@ -1,6 +1,7 @@
 export interface ListModel {
   id?: number;
   slug?: string;
+  prevSlug?: string;
   name: string;
   description: string;
   creation_date?: Date;
