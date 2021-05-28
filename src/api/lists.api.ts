@@ -12,8 +12,8 @@ const commentController = new CommentController();
 /********** List **************/
 listApi.get('/lists', listController.getAll);
 listApi.get('/list/:slug', listController.getSingle);
-listApi.post('/create-list', listController.post)
-listApi.put('/update-list/:id', listController.update);
+listApi.post('/create-list', checkListTitle, listController.post)
+listApi.put('/update-list/:id', checkListTitle, listController.update);
 listApi.delete('/delete-list/:id', listController.delete);
 /********** Items *************/
 listApi.get('/list/:slug/items', itemController.get);
@@ -33,4 +33,11 @@ function isAuthed(req, res, next) {
     return next();
   }
   return res.status(403).send({message: 'You must be authenticated to complete that action.'})
+}
+function checkListTitle(req, res, next) {
+  console.log(req.body.title.length)
+  if (req.body.title.length > 0) {
+    return next();
+  }
+  return res.status(400).send({ message: "Title can't be empty"})
 }

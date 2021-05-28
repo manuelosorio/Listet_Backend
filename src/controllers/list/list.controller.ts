@@ -74,21 +74,23 @@ export class ListController {
   }
   update = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
     const list: ListModel = req.body;
-
+    const listPrivate = req.body.is_private === true ? 1 : 0;
+    const listAllowsComments = req.body.allow_comments === true ? 1 : 0;
     if (req.session.user) {
       const userID = req.session.user[0].id;
       const listID = req.params.id;
       const username = req.session.user[0].username;
-      const url = list.name.toLowerCase().split(' ').join('-');
+      const url = req.body.title.toLowerCase().split(' ').join('-');
       return this.db.getListOwner(listID, (error, result) => {
         const listUpdate: ListModel = {
           id: listID as unknown as number,
-          name: list.name,
+          name: req.body.title,
           slug: `${username}-${url}`,
+          prevSlug: req.body.prevSlug,
           description: list.description,
-          isPrivate: list.isPrivate,
-          deadline: list.deadline,
-          allowComments: list.allowComments,
+          deadline: new Date(list.deadline),
+          isPrivate: listPrivate,
+          allowComments: listAllowsComments,
         }
         if (error) {
           console.error('Error Getting List Owner\n', error.message);
