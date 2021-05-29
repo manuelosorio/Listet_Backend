@@ -60,8 +60,8 @@ export class ListController {
       description: req.body.description,
       creation_date: new Date(),
       deadline: deadlineDate,
-      isPrivate: listPrivate,
-      allowComments: listAllowsComments,
+      is_private: listPrivate,
+      allow_comments: listAllowsComments,
       author_id: id
     }
     if (!req.session) return res.status(401).send({ message: "You must be logged in to make a list" }).end();
@@ -89,8 +89,8 @@ export class ListController {
           prevSlug: req.body.prevSlug,
           description: list.description,
           deadline: new Date(list.deadline),
-          isPrivate: listPrivate,
-          allowComments: listAllowsComments,
+          is_private: listPrivate,
+          allow_comments: listAllowsComments,
         }
         if (error) {
           console.error('Error Getting List Owner\n', error.message);

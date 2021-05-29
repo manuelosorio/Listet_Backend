@@ -6,8 +6,8 @@ export interface ListModel {
   description: string;
   creation_date?: Date;
   deadline: Date;
-  isPrivate: number;
-  allowComments: number;
+  is_private: number;
+  allow_comments: number;
   author_id?: number;
   author_username?: string;
 }
@@ -18,11 +18,11 @@ export interface ListOwnerModel {
   description: string;
   creation_date: Date;
   deadline: Date;
-  isPrivate: number;
-  allowComments: number;
+  is_private: number;
+  allow_comments: number;
   owner_id: number;
   owner_username?: string;
-  isOwner: boolean;
+  is_owner: boolean;
 }
 
 export interface ListQueryModel {

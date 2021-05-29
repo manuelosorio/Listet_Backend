@@ -52,7 +52,7 @@ export class ListDb extends Db{
    * @param next
    */
   createList = async (list: ListModel, next: queryCallback): Promise<Query> => {
-    return this.db.query('INSERT INTO `lists` (`slug`, `name`, `description`, `creation_date`, `deadline`, `is_private`, `allow_comments`, `user_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [list.slug, list.name, list.description, list.creation_date, list.deadline, list.isPrivate, list.allowComments, list.author_id], next)
+    return this.db.query('INSERT INTO `lists` (`slug`, `name`, `description`, `creation_date`, `deadline`, `is_private`, `allow_comments`, `user_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [list.slug, list.name, list.description, list.creation_date, list.deadline, list.is_private, list.allow_comments, list.author_id], next)
   }
   doesSlugExist = async (slug: string, next: queryCallback): Promise<Query> => {
     return this.db.query('SELECT 1 from `lists` WHERE `slug` = ?', slug, next);
@@ -75,8 +75,8 @@ export class ListDb extends Db{
         is_private= ?,
         allow_comments= ?
         where id = ?
-        `,
-      [listData.slug, listData.name, listData.description, listData.deadline, listData.isPrivate, listData.allowComments, listData.id],
+      `,
+      [listData.slug, listData.name, listData.description, listData.deadline, listData.is_private, listData.allow_comments, listData.id],
       next);
   }
 }
