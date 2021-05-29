@@ -53,7 +53,7 @@ export class ListController {
     const deadlineDate = new Date(req.body.deadline);
     const listPrivate = req.body.is_private === true ? 1 : 0;
     const listAllowsComments = req.body.allow_comments === true ? 1 : 0;
-    const url = req.body.title.toLowerCase().split(' ').join('-');
+    const url = req.body.title.toLowerCase().replace(/[^a-zA-Z ]/g, "").split(' ').join('-');
     const list: ListModel = {
       slug: `${username}-${url}`,
       name: req.body.title,
@@ -80,7 +80,7 @@ export class ListController {
       const userID = req.session.user[0].id;
       const listID = req.params.id;
       const username = req.session.user[0].username;
-      const url = req.body.title.toLowerCase().split(' ').join('-');
+      const url = req.body.title.toLowerCase().replace(/[^a-zA-Z ]/g, "").split(' ').join('-');
       return this.db.getListOwner(listID, (error, result) => {
         const listUpdate: ListModel = {
           id: listID as unknown as number,
@@ -96,7 +96,6 @@ export class ListController {
           console.error('Error Getting List Owner\n', error.message);
           return res.status(500).end();
         }
-        console.log(listUpdate)
         if (userID === result[0].owner_id) {
           return this.db.updateList(listUpdate, (err, _) => {
             if (err) {
