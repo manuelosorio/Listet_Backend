@@ -46,7 +46,7 @@ export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents
       case ListEvents.UPDATE_LIST: {
         console.log(chalk.bgCyan.black(event, 'emitted'));
         console.log(data);
-        io.sockets.to((data as ListModel).slug).emit(event, data);
+        io.sockets.to((data as ListModel).prevSlug).emit(event, data);
         break;
       }
       case ListItemEvents.DELETE_ITEM:
