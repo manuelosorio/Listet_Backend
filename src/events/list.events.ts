@@ -1,4 +1,4 @@
 export enum ListEvents {
-  UPDATE_List = 'UpdateList',
-  DELETE_List = 'DeleteList',
+  UPDATE_LIST = 'UpdateList',
+  DELETE_LIST = 'DeleteList',
 }

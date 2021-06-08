@@ -53,7 +53,7 @@ export class CommentController {
       id = Number(req.session.user[0].id);
       const listComment: ListCommentModel = {
         author_id: id,
-        comment_message: commentMessage,
+        comment: commentMessage,
         creation_date: currentDate,
         parent_id: parent,
       };
@@ -74,7 +74,7 @@ export class CommentController {
             }
             const commentData: ListCommentEmitter = {
               id: results.insertId,
-              comment: listComment.comment_message,
+              comment: listComment.comment,
               username: user.username,
               firstName: user.firstName,
               lastName: user.lastName,
@@ -88,8 +88,26 @@ export class CommentController {
     }
     return res.status(400).send({message: 'You must be authenticated to create a new comment.'})
   }
-  update = async (_req: Request, res: Response, next: NextFunction): Promise<any> => {
-    next('update comment route');
+  update = async (req: Request, res: Response, _next: NextFunction): Promise<Query | Response | void> => {
+    const comment: ListCommentModel = req.body;
+    comment.date_updated = new Date();
+    comment.id = req.params.id as unknown as number;
+    if (req.session.user) {
+      const userID = req.session.user[0].id;
+      const isCommentOwner = await this.listService.isCommentOwner(userID, comment.id);
+      if (isCommentOwner) {
+        return this.db.update(comment, (err, _) => {
+          if (err) {
+            console.error(err.message);
+            return res.status(500).end();
+          }
+          emit(CommentEvents.UPDATE_COMMENT, comment);
+          return res.status(201).send({ message: 'Comment Updated' });
+        });
+      }
+      return res.status(409).send({message: "You must be the comment owner to complete this action"}).end();
+    }
+    return res.status(409).send({message: "You must be authenticated to complete this action"}).end();
   }
   delete = async (req: Request, res: Response): Promise<unknown> => {
     const commentID = req.params.id as unknown as number;

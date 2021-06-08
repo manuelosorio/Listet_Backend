@@ -7,6 +7,7 @@ import { ListItemEvents } from '../events/list-item.events';
 import { ListCommentEmitter } from '../models/list-comment.model';
 import { ListItemModel } from '../models/list-item.model';
 import { ListEvents } from '../events/list.events';
+import { ListModel } from '../models/list.model';
 
 let socketInstance: SocketIO.Socket;
 let ioInstance: SocketIO.Server;
@@ -26,16 +27,31 @@ export function getIoInstance(): SocketIO.Server {
 }
 
 
-export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents, data: Partial<number | ListCommentEmitter | ListItemModel>): void => {
+export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents, data: Partial<number | ListModel | ListCommentEmitter | ListItemModel>): void => {
   const io = getIoInstance();
   try {
     switch (event) {
+      case ListItemEvents.ADD_ITEM: {
+        io.sockets.to((data as ListItemModel).slug).emit(event, data);
+        break;
+      }
       case ListItemEvents.COMPLETE_ITEM: {
-        io.sockets.to(`${(data as ListItemModel).slug}`).emit(event, data);
+        io.sockets.to((data as ListItemModel).slug).emit(event, data);
+        break;
+      }
+      case CommentEvents.UPDATE_COMMENT:
+      case ListItemEvents.UPDATE_ITEM: {
+        io.sockets.emit(event, data);
+        break;
+      }
+      case ListEvents.UPDATE_LIST: {
+        console.log(chalk.bgCyan.black(event, 'emitted'));
+        console.log(data);
+        io.sockets.to((data as ListModel).prevSlug).emit(event, data);
         break;
       }
       case ListItemEvents.DELETE_ITEM:
-      case ListEvents.DELETE_List:
+      case ListEvents.DELETE_LIST:
       case CommentEvents.DELETE_COMMENT: {
         console.log(chalk.bgCyan.black(event, 'emitted'));
         io.sockets.emit(event, data)
@@ -44,7 +60,9 @@ export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents
       default: {
         console.log(chalk.bgCyan.black(event, 'emitted'));
         if (typeof data !== 'number') {
-          io.to(data.listInfo).emit(event, data);
+          if ('listInfo' in data) {
+            io.to(data.listInfo).emit(event, data);
+          }
         }
         break;
       }

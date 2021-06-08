@@ -1,25 +1,28 @@
 export interface ListModel {
-  slug: string;
+  id?: number;
+  slug?: string;
+  prevSlug?: string;
   name: string;
   description: string;
-  creation_date: Date;
+  creation_date?: Date;
   deadline: Date;
-  isPrivate: number;
-  allowComments: number;
-  author_id: number;
+  is_private: number;
+  allow_comments: number;
+  author_id?: number;
   author_username?: string;
 }
+
 export interface ListOwnerModel {
   slug: string;
   name: string;
   description: string;
   creation_date: Date;
   deadline: Date;
-  isPrivate: number;
-  allowComments: number;
+  is_private: number;
+  allow_comments: number;
   owner_id: number;
   owner_username?: string;
-  isOwner: boolean;
+  is_owner: boolean;
 }
 
 export interface ListQueryModel {

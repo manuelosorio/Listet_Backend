@@ -53,15 +53,15 @@ export class ListController {
     const deadlineDate = new Date(req.body.deadline);
     const listPrivate = req.body.is_private === true ? 1 : 0;
     const listAllowsComments = req.body.allow_comments === true ? 1 : 0;
-    const url = req.body.title.toLowerCase().split(' ').join('-');
+    const url = req.body.title.toLowerCase().replace(/[^a-zA-Z ]/g, "").split(' ').join('-');
     const list: ListModel = {
       slug: `${username}-${url}`,
       name: req.body.title,
       description: req.body.description,
       creation_date: new Date(),
       deadline: deadlineDate,
-      isPrivate: listPrivate,
-      allowComments: listAllowsComments,
+      is_private: listPrivate,
+      allow_comments: listAllowsComments,
       author_id: id
     }
     if (!req.session) return res.status(401).send({ message: "You must be logged in to make a list" }).end();
@@ -72,12 +72,45 @@ export class ListController {
       this.createList(req, res, list);
     });
   }
-  update = async (_req: Request, _res: Response, next: NextFunction): Promise<any> => {
-    return next('update list route');
+  update = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+    const list: ListModel = req.body;
+    const listPrivate = req.body.is_private === true ? 1 : 0;
+    const listAllowsComments = req.body.allow_comments === true ? 1 : 0;
+    if (req.session.user) {
+      const userID = req.session.user[0].id;
+      const listID = req.params.id;
+      const username = req.session.user[0].username;
+      const url = req.body.title.toLowerCase().replace(/[^a-zA-Z ]/g, "").split(' ').join('-');
+      return this.db.getListOwner(listID, (error, result) => {
+        const listUpdate: ListModel = {
+          id: listID as unknown as number,
+          name: req.body.title,
+          slug: `${username}-${url}`,
+          prevSlug: req.body.prevSlug,
+          description: list.description,
+          deadline: new Date(list.deadline),
+          is_private: listPrivate,
+          allow_comments: listAllowsComments,
+        }
+        if (error) {
+          console.error('Error Getting List Owner\n', error.message);
+          return res.status(500).end();
+        }
+        if (userID === result[0].owner_id) {
+          return this.db.updateList(listUpdate, (err, _) => {
+            if (err) {
+              console.error('Error Updating List\n', err.message)
+              return res.status(500).end();
+            }
+            emit(ListEvents.UPDATE_LIST, listUpdate);
+            return res.status(201).send({ message: "List Updated." }).end();
+          })
+        }
+      })
+    }
   }
 
   delete = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-    console.log(req.session);
     const listId = req.params.id as unknown as number;
 
     if (req.session.user) {
@@ -93,7 +126,7 @@ export class ListController {
               console.error(listErr.message);
               return res.status(500).end();
             }
-            emit(ListEvents.DELETE_List, listId);
+            emit(ListEvents.DELETE_LIST, listId);
             return res.status(200).send({message: 'list deleted'});
           });
         }
