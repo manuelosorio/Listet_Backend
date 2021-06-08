@@ -1,9 +1,9 @@
 export interface ListCommentModel {
   id?: number;
   author_id: number;
-  comment_message: string;
+  comment: string;
   creation_date: Date;
-  date_updated?: Date
+  date_updated?: Date;
   parent_id: number;
 }
 

@@ -39,11 +39,11 @@ export class ListDb extends Db{
 
   /**
    * Directly find a list from its ID.
-   * @param query
+   * @param listID
    * @param next
    */
-  findListFromID = async (query: number, next: queryCallback): Promise<Query> => {
-    return this.db.query('Select id, slug, name, description, creation_date, is_complete, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where id= ?', query, next);
+  findListFromID = async (listID: number, next: queryCallback): Promise<Query> => {
+    return this.db.query('Select id, slug, name, description, creation_date, is_complete, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where id= ?', listID, next);
   }
 
   /**

@@ -39,6 +39,7 @@ export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents
         io.sockets.to((data as ListItemModel).slug).emit(event, data);
         break;
       }
+      case CommentEvents.UPDATE_COMMENT:
       case ListItemEvents.UPDATE_ITEM: {
         io.sockets.emit(event, data);
         break;
