@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { ItemController } from '../controllers/list/item/item.controller';
 import { CommentController } from '../controllers/list/comment/comment.controller';
 import { ListController } from '../controllers/list/list.controller';
-import { isAuth } from '../middleware/auth.middleware';
+import { isAuth, isVerified } from '../middleware/auth.middleware';
 import { checkListTitle, isItemEmpty, isListOwner } from '../middleware/list.middleware';
 
 const listApi = Router();
@@ -14,9 +14,11 @@ const commentController = new CommentController();
 /********** List **************/
 listApi.get('/lists', listController.getAll);
 listApi.get('/list/:slug', listController.getSingle);
-listApi.post('/create-list', checkListTitle, listController.post)
-listApi.put('/update-list/:id', checkListTitle, listController.update);
-listApi.delete('/delete-list/:id', listController.delete);
+
+
+listApi.post('/create-list', isAuth, isVerified, checkListTitle, listController.post)
+listApi.put('/update-list/:id', isAuth, isListOwner, checkListTitle, listController.update);
+listApi.delete('/delete-list/:id', isAuth, isListOwner, listController.delete);
 /********** Items *************/
 listApi.get('/list/:slug/items', itemController.get);
 listApi.post('/add-item', isAuth, isListOwner, isItemEmpty, itemController.post);
@@ -29,4 +31,3 @@ listApi.post('/create-comment', commentController.post);
 listApi.put('/update-comment/:id', commentController.update);
 listApi.delete('/delete-comment/:id', commentController.delete);
 export default listApi;
-

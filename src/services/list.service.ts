@@ -15,6 +15,7 @@ export class ListService {
   public isListOwner = async (userID: number, listID: number): Promise<boolean> => {
     return new Promise((resolve, _reject) => {
       return this.listDb.getListOwner(listID, (err, results) => {
+        console.log(results)
         const listOwnerID = results[0].owner_id as unknown as number;
         return resolve(listOwnerID === userID);
       })
@@ -27,5 +28,12 @@ export class ListService {
         return resolve(ownerID === userID);
       })
     });
+  }
+  public async testSlug(slug: string): Promise<boolean> {
+    return new Promise(resolve => {
+      this.listDb.doesSlugExist(slug, (_, results) => {
+        return resolve(results.length > 0);
+      });
+    })
   }
 }
