@@ -4,6 +4,7 @@ import { CommentController } from '../controllers/list/comment/comment.controlle
 import { ListController } from '../controllers/list/list.controller';
 import { isAuth, isVerified } from '../middleware/auth.middleware';
 import { checkListTitle, isItemEmpty, isListOwner } from '../middleware/list.middleware';
+import { canDeleteComment, isCommentBodyEmpty, isCommentOwner } from '../middleware/comment.middleware';
 
 const listApi = Router();
 const listController = new ListController();
@@ -14,8 +15,6 @@ const commentController = new CommentController();
 /********** List **************/
 listApi.get('/lists', listController.getAll);
 listApi.get('/list/:slug', listController.getSingle);
-
-
 listApi.post('/create-list', isAuth, isVerified, checkListTitle, listController.post)
 listApi.put('/update-list/:id', isAuth, isListOwner, checkListTitle, listController.update);
 listApi.delete('/delete-list/:id', isAuth, isListOwner, listController.delete);
@@ -27,7 +26,7 @@ listApi.put('/update-item-status', isAuth, isListOwner, itemController.updateSta
 listApi.put('/update-item/:id', isAuth, isListOwner, isItemEmpty, itemController.update);
 /********** Comments **********/
 listApi.get('/list/:slug/comments', commentController.get);
-listApi.post('/create-comment', commentController.post);
-listApi.put('/update-comment/:id', commentController.update);
-listApi.delete('/delete-comment/:id', commentController.delete);
+listApi.post('/create-comment', isAuth, isCommentBodyEmpty, commentController.post);
+listApi.put('/update-comment/:id', isAuth, isCommentOwner, commentController.update);
+listApi.delete('/delete-comment/:id', isAuth, canDeleteComment,commentController.delete);
 export default listApi;

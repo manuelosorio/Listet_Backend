@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import { ListService } from '../services/list.service';
 const listService = new ListService();
 export function checkListTitle(req: Request, res: Response, next: NextFunction): void | Response {
-  console.log(req.body.title.length)
   if (req.body.title.length > 0) {
     return next();
   }
@@ -15,9 +14,7 @@ export function isItemEmpty(req: Request, res: Response, next: NextFunction): vo
 }
 
 export const isListOwner = async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
-  console.log(req.body, req.params)
   const isOwner = await listService.isListOwner(req.session.user[0].id, req.body.list_id ?? req.params.id);
-  console.log("is owner:",isOwner)
   if (isOwner) {
     return next();
   }
