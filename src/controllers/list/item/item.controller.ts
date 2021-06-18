@@ -30,7 +30,6 @@ export class ItemController {
   post = async (req: Request, res: Response): Promise<Query | void | Response> => {
     const id = Number(req.body.list_id);
     const date = req.body.deadline ? req.body.deadline : null;
-    if (req.body.item.length < 1) return res.status(403).send({message: "Item Can't be empty."});
     const listItem: ListItemModel = {
       id: 0,
       item: req.body.item,
@@ -39,94 +38,49 @@ export class ItemController {
       list_id: id,
       slug: req.body.slug
     }
-    if (req.session.user) {
-      const userId = req.session.user[0].id;
-      const isOwner = await this.listService.isListOwner(userId, id);
-      if (isOwner) return this.db.addListItem(listItem,
-        (err, results, _fields) => {
-          if (err) {
-            console.error(err);
-            return res.status(500).end();
-          }
-          listItem.id = results.insertId;
-          emit(ListItemEvents.ADD_ITEM, listItem);
-          return res.status(201).send({message: 'List item added.'});
-        });
-      return res.status(400).send({message: "You don't have permission to add items to this list."}).end();
-    }
-    return res.status(400).send({message: "You must be authenticated to add items to a list."})
+    return this.db.addListItem(listItem, (err, results, _fields) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).end();
+      }
+      listItem.id = results.insertId;
+      emit(ListItemEvents.ADD_ITEM, listItem);
+      return res.status(201).send({message: 'List item added.'});
+    });
   }
   delete = (req: Request, res: Response): Promise<Query> =>  {
     const id = req.params.id as unknown as number;
-    const userID = req.session.user[0].id;
-    console.log(req.session)
-    return this.db.getListItemOwner(id, ((err, result) => {
-      if (err) {
-        console.error(err.message);
+    return this.db.deleteListItem(id, (error: MysqlError) => {
+      if (error) {
+        console.error(error.message);
         return res.status(500).end();
       }
-      if (userID === result[0].owner_id) {
-        this.db.deleteListItem(id, (error: MysqlError) => {
-          if (error) {
-            console.error(error.message);
-            return res.status(500).end();
-          }
-          emit(ListItemEvents.DELETE_ITEM, id);
-          return res.send({message: 'Item Deleted'}).status(202);
-        }).then();
-      }
-    }))
+      emit(ListItemEvents.DELETE_ITEM, id);
+      return res.send({message: 'Item Deleted'}).status(202);
+    });
   }
   updateStatus = (req: Request, res: Response): Promise<Query> | Response => {
     const listItem: ListItemModel = req.body;
-    if (req.session.user) {
-      const userID = req.session.user[0].id;
-      return this.listDb.getListOwner(listItem.list_id, (error, result) => {
-        if (error) {
-          console.error(error)
-          return res.status(500).end();
-        }
-        if (userID === result[0].owner_id) {
-          return this.db.updateListItemStatus({
-            completed: listItem.completed,
-            id: listItem.id
-          }, (err, _) => {
-            if (err) {
-              console.error(err);
-              return res.status(500).end();
-            }
-            emit(ListItemEvents.COMPLETE_ITEM, listItem);
-            return res.status(201).send({ message: "Updated Item Status" }).end();
-          })
-        }
-      })
-    }
-    return res.status(403).send({message: 'You must be authenticated to complete this action. '})
+    return this.db.updateListItemStatus(listItem, (err, _) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).end();
+      }
+      emit(ListItemEvents.COMPLETE_ITEM, listItem);
+      return res.status(201).send({ message: "Updated Item Status" }).end();
+    })
   }
   update = async (req: Request, res: Response, _next: NextFunction): Promise<Query | Response | void> => {
     const listItem: ListItemModel = req.body;
     listItem.deadline = new Date(req.body.deadline);
     listItem.id = req.params.id as unknown as number;
-    if (req.body.item.length < 1) return res.status(403).send({message: "Item Can't be empty."});
-    if (req.session.user) {
-      const userID = req.session.user[0].id;
-      return this.listDb.getListOwner(listItem.list_id, (error: MysqlError, result) => {
-        if (error) {
-          console.error(error)
+      return this.db.updateListItem(listItem, (updateErr: MysqlError, _) => {
+        if (updateErr) {
+          console.error(updateErr)
           return res.status(500).end();
         }
-        if (userID === result[0].owner_id) {
-          return this.db.updateListItem(listItem, (updateErr: MysqlError, _) => {
-            if (updateErr) {
-              console.error(updateErr)
-              return res.status(500).end();
-            }
-            emit(ListItemEvents.UPDATE_ITEM, listItem);
-            return res.status(201).send({ message: "Item Updated" }).end();
-          });
-        }
+        emit(ListItemEvents.UPDATE_ITEM, listItem);
+        return res.status(201).send({ message: "Item Updated" }).end();
       });
-    }
-    res.status(403).send({message: 'You must be authenticated to complete this action.'})
   }
 }

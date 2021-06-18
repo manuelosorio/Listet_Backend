@@ -17,7 +17,7 @@ export class UserDb extends Db{
     return this.db.query('Select username, firstName, lastName FROM users', null, next);
   }
   /**
-   * Retrieve userdata [id, email, username, firstName, lastName] from username.
+   * Retrieve userdata [id, email, username, firstName, lastName, verification_status] from username.
    * @param username
    * @param next
    */
