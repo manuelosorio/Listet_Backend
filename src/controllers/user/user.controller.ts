@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import mysql, { MysqlError } from 'mysql';
+import mysql, { MysqlError, Query } from 'mysql';
 import { NextFunction, Request, Response } from 'express';
 import { app, DB_CONFIG, smtp, token, variables } from '../../environments/variables';
 import { Mailer } from '../../utilities/nodemailer';
@@ -64,27 +64,6 @@ export class UserController {
 
   register = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
     const date = new DateUtil(new Date());
-    if (!req.body.firstName)
-      return res.status(422).send({ message: 'First Name is required' }).end();
-    if (!req.body.lastName)
-      return res.status(422).send({ message: 'Last Name is required' }).end();
-    if (!req.body.username)
-      return res.status(422).send({ message: 'Username is required' }).end()
-    if (!req.body.username.match(/^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/))
-      return res.status(422).send({ message: '' }).end();
-    if (!req.body.email)
-      return res.status(422).send({ message: 'Email is required' }).end();
-    if (!req.body.email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]{2,4}$/))
-      return res.status(422).send({ message: 'Email is invalid' }).end();
-    if (!req.body.password) {
-      return res.status(422).send({ message: 'Password is required'}).end();
-    }
-    if (!req.body.password.match(/^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/))
-      return res.status(422).send(
-        {
-          message: 'passwords must be at least 8 characters long, contain 1 capital letter, ' +
-            'a special character (@ $ ! % * # ? &), and at least one number.'
-        }).end();
     return this.db.findUserFromUsername(req.body.username, (usernameErr, usernameRes) => {
       if (usernameErr) {
         return res.status(500).send({ message: usernameErr.message }).end();
@@ -104,7 +83,6 @@ export class UserController {
         if (emailRes.length) {
           return res.status(401).send({ message: 'Email Already exists' }).end();
         }
-        // if email doesn't exist create user
         const user: UserModel = {
           firstName: req.body.firstName,
           lastName: req.body.lastName,
@@ -118,7 +96,6 @@ export class UserController {
           }
           const num = parseInt(token.verify_expire_time, 0);
           const expireDate = date.setExpire(num);
-          console.log(expireDate);
           const data: Record<string, unknown> = {
             expires: expireDate,
             email: req.body.email
@@ -164,14 +141,6 @@ export class UserController {
   login = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
     const email: string = req.body.email;
     const password: string = req.body.password;
-    if (email === '') {
-       this.responseMessage.message = "Email is required.";
-      return res.status(409).send (this.responseMessage).end();
-    }
-    if (password === '') {
-       this.responseMessage.message = "Password is required.";
-      return res.status(409).send (this.responseMessage).end();
-    }
     await this.db.getPassword(email, (err, result) => {
       if (err) {
         console.log(err);
@@ -205,11 +174,9 @@ export class UserController {
     })
   }
 
-  resetPassword = async (req: Request, res: Response): Promise<any> => {
-    if (!req.body.email)
-      return res.status(400).send('Email is required').end();
+  resetPassword = async (req: Request, res: Response): Promise<Query | void> => {
     const email = req.body.email;
-    await this.db.findUserFromEmail(email, (err, results) => {
+    return await this.db.findUserFromEmail(email, (err, results) => {
       if (err) {
         console.error(err);
         return res.status(500).end();
