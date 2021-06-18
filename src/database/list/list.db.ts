@@ -36,7 +36,7 @@ export class ListDb extends Db{
    * @param next
    */
   findAllLists = async (next: queryCallback): Promise<Query> => {
-    return this.db.query('SELECT slug, name, description, creation_date, deadline, is_private, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where is_private=0', null, next);
+    return this.db.query('SELECT slug, name, description, creation_date, deadline, is_private, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where is_private=0 ORDER BY creation_date DESC', null, next);
   }
 
 
