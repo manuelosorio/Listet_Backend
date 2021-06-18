@@ -20,6 +20,14 @@ export const isListOwner = async (req: Request, res: Response, next: NextFunctio
   }
   return res.status(400).send({message: "You don't have permission to complete that action."}).end();
 }
+export const isListItemOwner = async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
+  const itemID = req.params.id as unknown as number;
+  const isOwner = await listService.isListItemOwner(req.session.user[0].id, itemID);
+  if (isOwner) {
+    return next();
+  }
+  return res.status(400).send({message: "You don't have permission to complete that action."}).end();
+}
 
 export const doesListExist = async(req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
   listService.testSlug(req.body.slug).then((r) => {

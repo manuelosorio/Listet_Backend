@@ -14,9 +14,27 @@ export class ListService {
 
   public isListOwner = async (userID: number, listID: number): Promise<boolean> => {
     return new Promise((resolve, _reject) => {
+      console.log(listID);
       return this.listDb.getListOwner(listID, (err, results) => {
-        const listOwnerID = results[0].owner_id as unknown as number;
-        return resolve(listOwnerID === userID);
+        try {
+          const listOwnerID = results[0].owner_id as unknown as number;
+          return resolve(listOwnerID === userID);
+        } catch (e) {
+          console.log("results: ", results);
+        }
+      })
+    });
+  }
+  public isListItemOwner = async (userID: number, itemID: number): Promise<boolean> => {
+    return new Promise((resolve, _reject) => {
+      console.log(itemID);
+      return this.listDb.getListItemOwner(itemID, (err, results) => {
+        try {
+          const listOwnerID = results[0].owner_id as unknown as number;
+          return resolve(listOwnerID === userID);
+        } catch (e) {
+          console.log("results: ", results);
+        }
       })
     });
   }
@@ -35,4 +53,5 @@ export class ListService {
       });
     })
   }
+
 }

@@ -20,6 +20,18 @@ export class ListDb extends Db{
     )
   }
   /**
+   * Check if user Owns list
+   * @param itemID
+   * @param next
+   */
+  getListItemOwner = async (itemID: number | any, next: queryCallback): Promise<Query> => {
+    return this.db.query(
+      'SELECT `owner_id` FROM view_list_items WHERE id = ?',
+      itemID,
+      next
+    )
+  }
+  /**
    * Retrieve all public lists.
    * @param next
    */

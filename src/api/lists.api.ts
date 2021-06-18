@@ -3,7 +3,7 @@ import { ItemController } from '../controllers/list/item/item.controller';
 import { CommentController } from '../controllers/list/comment/comment.controller';
 import { ListController } from '../controllers/list/list.controller';
 import { isAuth, isVerified } from '../middleware/auth.middleware';
-import { checkListTitle, isItemEmpty, isListOwner } from '../middleware/list.middleware';
+import { checkListTitle, isItemEmpty, isListItemOwner, isListOwner } from '../middleware/list.middleware';
 import { canDeleteComment, isCommentBodyEmpty, isCommentOwner } from '../middleware/comment.middleware';
 
 const listApi = Router();
@@ -21,7 +21,7 @@ listApi.delete('/delete-list/:id', isAuth, isListOwner, listController.delete);
 /********** Items *************/
 listApi.get('/list/:slug/items', itemController.get);
 listApi.post('/add-item', isAuth, isListOwner, isItemEmpty, itemController.post);
-listApi.delete('/delete-item/:id', isAuth, isListOwner, itemController.delete);
+listApi.delete('/delete-item/:id', isAuth, isListItemOwner, itemController.delete);
 listApi.put('/update-item-status', isAuth, isListOwner, itemController.updateStatus);
 listApi.put('/update-item/:id', isAuth, isListOwner, isItemEmpty, itemController.update);
 /********** Comments **********/
