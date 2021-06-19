@@ -1,4 +1,4 @@
-import mysql, { Query } from 'mysql';
+import mysql, { MysqlError, Query } from 'mysql';
 import { DB_CONFIG } from '../../environments/variables';
 import { NextFunction, Request, Response } from 'express';
 import { DateUtil } from '../../utilities/date';
@@ -38,7 +38,16 @@ export class ListController {
       return res.status(200).send(updatedResults).end();
     });
   }
-
+  getUserList = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
+    const userID = req.session.user[0].id;
+    return await this.db.findAuthenticatedUserLists(userID, (err: MysqlError, results) => {
+      if (err) {
+        console.error(err.message);
+      }
+      console.log(results)
+      return res.status(200).send(results).end();
+    })
+  }
   getSingle = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
     return await this.db.findListFromSlug(req.params.slug,  async (err, results) => {
       if (err) {

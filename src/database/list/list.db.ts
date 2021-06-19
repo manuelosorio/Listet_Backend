@@ -38,7 +38,9 @@ export class ListDb extends Db{
   findAllLists = async (next: queryCallback): Promise<Query> => {
     return this.db.query('SELECT slug, name, description, creation_date, deadline, is_private, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where is_private=0 ORDER BY creation_date DESC', null, next);
   }
-
+  async findAuthenticatedUserLists(ownerID: string, next: queryCallback): Promise<Query>  {
+    return this.db.query(`SELECT slug, name, description, creation_date, deadline, is_private, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_id = ?`, ownerID, next);
+  }
 
   /**
    * Find list that belongs to a particular user using a slug.
