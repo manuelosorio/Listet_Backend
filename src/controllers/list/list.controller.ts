@@ -38,7 +38,7 @@ export class ListController {
       return res.status(200).send(updatedResults).end();
     });
   }
-  getUserList = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
+  getAuthUserLists = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
     const userID = req.session.user[0].id;
     return await this.db.findAuthenticatedUserLists(userID, (err: MysqlError, results) => {
       if (err) {

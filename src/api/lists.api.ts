@@ -14,7 +14,7 @@ const commentController = new CommentController();
 
 /********** List **************/
 listApi.get('/lists', listController.getAll);
-listApi.get('/your-lists', isAuth, listController.getUserList)
+listApi.get('/your-lists', isAuth, listController.getAuthUserLists)
 listApi.get('/list/:slug', listController.getSingle);
 listApi.post('/create-list', isAuth, isVerified, checkListTitle, listController.post)
 listApi.put('/update-list/:id', isAuth, isListOwner, checkListTitle, listController.update);
