@@ -6,7 +6,7 @@ import { ListDb } from '../../database/list/list.db';
 import { ListModel } from '../../models/list.model';
 import { UserDb } from '../../database/user/user.db';
 import { emit } from '../../utilities/sockets';
-import { ListEvents } from '../../events/list.events';
+import { ListEvents } from '../../helper/events/list.events';
 import { ListService } from '../../services/list.service';
 
 export class ListController {
@@ -67,7 +67,7 @@ export class ListController {
       description: req.body.description,
       creation_date: new Date(),
       deadline: new Date(req.body.deadline),
-      is_private: req.body.is_private === true ? 1 : 0,
+      visibility: req.body.visibility ?? 2,
       allow_comments: req.body.allow_comments === true ? 1 : 0,
       author_id: req.session.user[0].id as unknown as number
     }
@@ -89,7 +89,7 @@ export class ListController {
       prevSlug: req.body.prevSlug,
       description: req.body.description,
       deadline: new Date(req.body.deadline),
-      is_private: req.body.is_private === true ? 1 : 0,
+      visibility: req.body.visibility,
       allow_comments: req.body.allow_comments === true ? 1 : 0,
     }
     return this.db.updateList(listUpdate, (err, _) => {

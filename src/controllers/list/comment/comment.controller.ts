@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import mysql, { MysqlError, Query } from 'mysql';
 import { DB_CONFIG } from '../../../environments/variables';
 import { emit } from '../../../utilities/sockets';
-import { CommentEvents } from '../../../events/comment.events';
+import { CommentEvents } from '../../../helper/events/comment.events';
 import { CommentDb } from '../../../database/list/comment/comment.db';
 import { ListCommentEmitter, ListCommentModel } from '../../../models/list-comment.model';
 import { ListDb } from '../../../database/list/list.db';

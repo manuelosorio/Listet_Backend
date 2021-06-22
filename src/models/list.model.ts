@@ -6,7 +6,7 @@ export interface ListModel {
   description: string;
   creation_date?: Date;
   deadline: Date;
-  is_private: number;
+  visibility: number;
   allow_comments: number;
   author_id?: number;
   author_username?: string;
@@ -18,7 +18,7 @@ export interface ListOwnerModel {
   description: string;
   creation_date: Date;
   deadline: Date;
-  is_private: number;
+  visibility: number;
   allow_comments: number;
   owner_id: number;
   owner_username?: string;
