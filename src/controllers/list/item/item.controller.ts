@@ -2,7 +2,7 @@ import mysql, { MysqlError, Query } from 'mysql';
 import { DB_CONFIG } from '../../../environments/variables';
 import { NextFunction, Request, Response } from 'express';
 import { emit } from '../../../utilities/sockets';
-import { ListItemEvents } from '../../../events/list-item.events';
+import { ListItemEvents } from '../../../helper/events/list-item.events';
 import { ListItemModel } from '../../../models/list-item.model';
 import { ListItemDb } from '../../../database/list/item/list-item.db';
 import { ListDb } from '../../../database/list/list.db';

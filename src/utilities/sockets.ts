@@ -2,11 +2,11 @@ import SocketIO, { Server, Socket } from 'socket.io';
 import http from 'http';
 import chalk from 'chalk';
 import { CORS } from '../environments/variables';
-import { CommentEvents } from '../events/comment.events';
-import { ListItemEvents } from '../events/list-item.events';
+import { CommentEvents } from '../helper/events/comment.events';
+import { ListItemEvents } from '../helper/events/list-item.events';
 import { ListCommentEmitter } from '../models/list-comment.model';
 import { ListItemModel } from '../models/list-item.model';
-import { ListEvents } from '../events/list.events';
+import { ListEvents } from '../helper/events/list.events';
 import { ListModel } from '../models/list.model';
 
 let socketInstance: SocketIO.Socket;

@@ -36,10 +36,10 @@ export class ListDb extends Db{
    * @param next
    */
   findAllLists = async (next: queryCallback): Promise<Query> => {
-    return this.db.query('SELECT slug, name, description, creation_date, deadline, is_private, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where is_private=0 ORDER BY creation_date DESC', null, next);
+    return this.db.query('SELECT slug, name, description, creation_date, deadline, visibility, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where visibility=2 ORDER BY creation_date DESC', null, next);
   }
   async findAuthenticatedUserLists(ownerID: string, next: queryCallback): Promise<Query>  {
-    return this.db.query(`SELECT slug, name, description, creation_date, deadline, is_private, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_id = ?`, ownerID, next);
+    return this.db.query(`SELECT slug, name, description, creation_date, deadline, visibility, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_id = ?`, ownerID, next);
   }
 
   /**
@@ -48,7 +48,7 @@ export class ListDb extends Db{
    * @param next`
    */
   findListFromSlug = async (query: string | any, next: queryCallback): Promise<Query> => {
-    return this.db.query('Select id, slug, name, description, creation_date, is_complete, deadline, is_private, allow_comments, firstName, lastName, owner_id, owner_username FROM view_lists where slug= ?', query, next);
+    return this.db.query('Select id, slug, name, description, creation_date, is_complete, deadline, visibility, allow_comments, firstName, lastName, owner_id, owner_username FROM view_lists where slug= ?', query, next);
   }
 
   /**
@@ -57,7 +57,7 @@ export class ListDb extends Db{
    * @param next
    */
   findListFromID = async (listID: number, next: queryCallback): Promise<Query> => {
-    return this.db.query('Select id, slug, name, description, creation_date, is_complete, deadline, is_private, allow_comments, firstName, lastName, owner_username FROM view_lists where id= ?', listID, next);
+    return this.db.query('Select id, slug, name, description, creation_date, is_complete, deadline, visibility, allow_comments, firstName, lastName, owner_username FROM view_lists where id= ?', listID, next);
   }
 
   /**
@@ -66,7 +66,7 @@ export class ListDb extends Db{
    * @param next
    */
   createList = async (list: ListModel, next: queryCallback): Promise<Query> => {
-    return this.db.query('INSERT INTO `lists` (`slug`, `name`, `description`, `creation_date`, `deadline`, `is_private`, `allow_comments`, `user_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [list.slug, list.name, list.description, list.creation_date, list.deadline, list.is_private, list.allow_comments, list.author_id], next)
+    return this.db.query('INSERT INTO `lists` (`slug`, `name`, `description`, `creation_date`, `deadline`, `visibility`, `allow_comments`, `user_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [list.slug, list.name, list.description, list.creation_date, list.deadline, list.visibility, list.allow_comments, list.author_id], next)
   }
   doesSlugExist = async (slug: string, next: queryCallback): Promise<Query> => {
     return this.db.query('SELECT 1 from `lists` WHERE `slug` = ?', slug, next);
@@ -86,11 +86,11 @@ export class ListDb extends Db{
         name= ?,
         description= ?,
         deadline= ?,
-        is_private= ?,
+        visibility= ?,
         allow_comments= ?
         where id = ?
       `,
-      [listData.slug, listData.name, listData.description, listData.deadline, listData.is_private, listData.allow_comments, listData.id],
+      [listData.slug, listData.name, listData.description, listData.deadline, listData.visibility, listData.allow_comments, listData.id],
       next);
   }
 }
