@@ -93,4 +93,8 @@ export class ListDb extends Db{
       [listData.slug, listData.name, listData.description, listData.deadline, listData.visibility, listData.allow_comments, listData.id],
       next);
   }
+
+  checkVisibilityStatus = async (slug: string, next: queryCallback): Promise<Query> => {
+    return this.db.query(`select id, visibility from view_lists where slug = ?`, slug, next)
+  }
 }

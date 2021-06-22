@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { ListService } from '../services/list.service';
+import { ListVisibility } from '../helper/list-visibility';
 const listService = new ListService();
 export function checkListTitle(req: Request, res: Response, next: NextFunction): void | Response {
   if (req.body.title.length > 0) {
@@ -36,4 +37,22 @@ export const doesListExist = async(req: Request, res: Response, next: NextFuncti
     }
     return next();
   });
+}
+
+export const isListPrivate = async(req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
+  return listService.checkVisibilityStatus(req.params.slug).then(async (results) => {
+    if (Number(results.visibility) == ListVisibility.private) {
+      if (req.session.user) {
+        const isOwner = await listService.isListOwner(req.session.user[0].id as unknown as number, results.id as unknown as number);
+        console.log("isOwner: ", isOwner)
+        return isOwner ? next() : res.status(403).send({ message: 'You must own this list to view it' }).end();
+      }
+      return res.status(403).send({ message: 'You must own this list to view it' }).end();
+    }
+    return next();
+  }).catch(reason => {
+    console.error(reason);
+    return res.status(500).end();
+  })
+
 }
