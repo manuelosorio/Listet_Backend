@@ -75,17 +75,17 @@ export class CommentController {
       });
   }
   update = async (req: Request, res: Response, _next: NextFunction): Promise<Query | Response | void> => {
-    const comment: ListCommentModel = req.body;
-    comment.id = req.params.id as unknown as number;
-    comment.date_updated = new Date();
-    comment.comment = comment.comment.trim();
-    console.log(comment)
-    return this.db.update(comment, (err, _) => {
+    const commentModel: ListCommentModel = req.body;
+    commentModel.id = req.params.id as unknown as number;
+    commentModel.date_updated = new Date();
+    commentModel.comment = commentModel.comment.trim();
+    console.log(commentModel)
+    return this.db.update(commentModel, (err, _) => {
       if (err) {
         console.error(err.message);
         return res.status(500).end();
       }
-      emit(CommentEvents.UPDATE_COMMENT, comment);
+      emit(CommentEvents.UPDATE_COMMENT, commentModel);
       return res.status(201).send({ message: 'Comment Updated' });
     });
   }

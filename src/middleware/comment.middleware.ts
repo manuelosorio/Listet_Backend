@@ -14,11 +14,26 @@ export const canDeleteComment = async (req: Request, res: Response, next: NextFu
   });
 }
 export function isCommentBodyEmpty(req: Request, res: Response, next: NextFunction): void | Response {
-  if (req.body.comment !== undefined) {
+  if (req.body.comment !== undefined && req.body.comment.trim().length !== 0) {
     return next();
   }
   return res.status(400).send({message: "Comments can't be empty."})
 }
+
+export function commentHasMinCharacters(req: Request, res: Response, next: NextFunction): void | Response {
+  if (req.body.comment.length > 20) {
+    return next();
+  }
+  return res.status(400).send({message: "Comments must contain at least 20 chars"})
+}
+
+export function commentNotLargerThanMaxCharacters(req: Request, res: Response, next: NextFunction): void | Response {
+  if (req.body.comment.length < 500) {
+    return next();
+  }
+  return res.status(400).send({message: "Comments can't exceed 500 characters"})
+}
+
 
 export const isCommentOwner = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   const userID = req.session.user[0].id;

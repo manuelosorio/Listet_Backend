@@ -10,7 +10,7 @@ import {
   isListOwner,
   isListPrivate,
 } from '../middleware/list.middleware';
-import { canDeleteComment, isCommentBodyEmpty, isCommentOwner } from '../middleware/comment.middleware';
+import { canDeleteComment, isCommentBodyEmpty, isCommentOwner, commentHasMinCharacters, commentNotLargerThanMaxCharacters } from '../middleware/comment.middleware';
 
 const listApi = Router();
 const listController = new ListController();
@@ -33,7 +33,7 @@ listApi.put('/update-item-status', isAuth, isListOwner, itemController.updateSta
 listApi.put('/update-item/:id', isAuth, isListOwner, isItemEmpty, itemController.update);
 /********** Comments **********/
 listApi.get('/list/:slug/comments', isListPrivate, commentController.get);
-listApi.post('/create-comment', isAuth, isCommentBodyEmpty, commentController.post);
-listApi.put('/update-comment/:id', isAuth, isCommentOwner, commentController.update);
+listApi.post('/create-comment', isAuth, isCommentBodyEmpty, commentHasMinCharacters, commentNotLargerThanMaxCharacters, commentController.post);
+listApi.put('/update-comment/:id', isAuth, isCommentOwner, isCommentBodyEmpty, commentHasMinCharacters, commentNotLargerThanMaxCharacters, commentController.update);
 listApi.delete('/delete-comment/:id', isAuth, canDeleteComment,commentController.delete);
 export default listApi;
