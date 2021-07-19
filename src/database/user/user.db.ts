@@ -69,7 +69,6 @@ export class UserDb extends Db{
    */
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   userSession(req: Request, sessionData): Promise<Query> {
-    console.log(sessionData)
     return req.session.user = sessionData;
   }
 }

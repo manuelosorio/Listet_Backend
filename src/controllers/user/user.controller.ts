@@ -143,7 +143,7 @@ export class UserController {
     const password: string = req.body.password;
     await this.db.getPassword(email, (err, result) => {
       if (err) {
-        console.log(err);
+        console.error(err);
         return res.status(500).end();
       } else {
         try {
@@ -156,11 +156,19 @@ export class UserController {
               return res.status(500).send(error).end();
             }
             this.db.userSession(req, results);
-             this.responseMessage.message = 'Login Successful';
-            return res.status(200).send (this.responseMessage).end();
+            this.responseMessage.message = 'Login Successful';
+            const user: UserModel = results[0];
+            return res.status(200).send({
+              response: this.responseMessage,
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              username: user.username,
+              verified: results[0].verification_status
+            }).end();
           });
         } catch (e) {
-          console.log(e);
+          console.error(e);
           return e;
         }
       }
@@ -236,6 +244,12 @@ export class UserController {
       return {verified: result.verification_status === 1}
     });
     const user = req.session.user[0];
-    return res.status(200).send({ authenticated: true, verified: sessionData[0].verified, username: user.username });
+    return res.status(200).send({
+      authenticated: true,
+      verified: sessionData[0].verified,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
   }
 }
