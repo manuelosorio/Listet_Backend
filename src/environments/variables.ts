@@ -26,14 +26,8 @@ export const app = {
 }
 export const CORS = {
   origin: [
-    `http://${app.url}`,
     `https://${app.url}`,
-    `http://${app.url2}`,
     `https://${app.url2}`,
-    `http://localhost:4200`,
-    `https://localhost:4200`,
-    `http://localhost:4000`,
-    `https://localhost:4000`
   ],
   credentials: true,
 }
@@ -50,11 +44,11 @@ export const smtp: SmtpModel = process.env.SMTP_POOL === 'true' ?
     email: process.env.SMTP_EMAIL
   } : {
     host: process.env.SMTP_HOST,
-    'port': process.env.SMTP_PORT as unknown as number,
-    'secure': process.env.SMTP_SECURE as unknown as boolean || false,
-    'auth': {
-      'username': process.env.SMTP_USERNAME,
-      'password': process.env.SMTP_PASSWORD,
+    port: process.env.SMTP_PORT as unknown as number,
+    secure: process.env.SMTP_SECURE as unknown as boolean || false,
+    auth: {
+      username: process.env.SMTP_USERNAME,
+      password: process.env.SMTP_PASSWORD,
   },
   email: process.env.SMTP_EMAIL
 };
