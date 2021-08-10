@@ -256,8 +256,16 @@ export class UserController {
   updateAccountInfo = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
   }
-  changePassword = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
+  changePassword = async (req: Request, res: Response, _next: NextFunction): Promise<Query | void> => {
     const password: NewPasswordModel = req.body;
+    if (!password.newPassword.match(/^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/)) {
+      return res.status(422).send(
+        {
+          message: 'passwords must be at least 8 characters long, contain 1 capital letter, ' +
+            'a special character (@ $ ! % * # ? &), and at least one number.'
+        }
+      ).end();
+    }
     if (password.newPassword === password.confirmPassword) {
       const queryData = {
         userID: req.session.user[0].id,
@@ -275,7 +283,7 @@ export class UserController {
     }
     res.status(401).send({
       message: "Password does not match."
-    })
+    }).end();
   }
   deactivateUser = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
     const user: UserModel = req.session.user[0];
