@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import mysql, { MysqlError, Query } from 'mysql';
+import mysql, { MysqlError, Query, queryCallback } from 'mysql';
 import { NextFunction, Request, Response } from 'express';
 import { app, DB_CONFIG, smtp, token, variables } from '../../environments/variables';
 import { Mailer } from '../../utilities/nodemailer';
@@ -12,6 +12,7 @@ import { UserDb } from '../../database/user/user.db';
 import { VerificationTokenDb } from '../../database/token/verification-token.db';
 import { ResetTokenDb } from '../../database/token/reset-token.db';
 import { TokenModel } from '../../models/token.model';
+import { NewPasswordModel } from '../../models/new-password.model';
 
 export class UserController {
   private readonly crypto;
@@ -138,39 +139,38 @@ export class UserController {
     });
   }
 
-  login = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+  login = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
     const email: string = req.body.email;
     const password: string = req.body.password;
-    await this.db.getPassword(email, (err, result) => {
+    return await this.db.getPassword(email, (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).end();
-      } else {
-        try {
-          if (comparePassword(password, result[0].password) === false) {
-             this.responseMessage.message = "Login Details Incorrect. Please Try Again.";
-            return res.status(403).send (this.responseMessage).end();
-          }
-          return this.db.findUserFromEmail(email, (error, results) => {
-            if (error) {
-              return res.status(500).send(error).end();
-            }
-            this.db.userSession(req, results);
-            this.responseMessage.message = 'Login Successful';
-            const user: UserModel = results[0];
-            return res.status(200).send({
-              response: this.responseMessage,
-              email: user.email,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              username: user.username,
-              verified: results[0].verification_status
-            }).end();
-          });
-        } catch (e) {
-          console.error(e);
-          return e;
+      }
+      try {
+        if (comparePassword(password, result[0].password) === false) {
+           this.responseMessage.message = "Login Details Incorrect. Please Try Again.";
+          return res.status(403).send (this.responseMessage).end();
         }
+        return this.db.findUserFromEmail(email, (error, results) => {
+          if (error) {
+            return res.status(500).send(error).end();
+          }
+          this.db.userSession(req, results);
+          this.responseMessage.message = 'Login Successful';
+          const user: UserModel = results[0];
+          return res.status(200).send({
+            response: this.responseMessage,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            username: user.username,
+            verified: results[0].verification_status
+          }).end();
+        });
+      } catch (e) {
+        console.error(e);
+        return e;
       }
     })
   }
@@ -251,5 +251,57 @@ export class UserController {
       firstName: user.firstName,
       lastName: user.lastName,
     });
+  }
+
+  updateAccountInfo = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
+  }
+  changePassword = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
+    const password: NewPasswordModel = req.body;
+    if (password.newPassword === password.confirmPassword) {
+      const queryData = {
+        userID: req.session.user[0].id,
+        password: hashPassword(password.newPassword)
+      }
+      console.log(queryData);
+      return this.db.updatePassword(queryData, (error, _results) => {
+        if (error) {
+          console.error(error.message);
+          res.status(500);
+        }
+        res.status(200).send({
+          message: "Your password has been changed."
+        })
+      });
+    }
+  }
+  deactivateUser = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
+    const user: UserModel = req.session.user[0];
+    return this.db.deactivate(user, (error: MysqlError, results) => {
+      if (error) {
+        console.error(error.message);
+        return res.status(500).end();
+      }
+      return results.changedRows === 1 ? res.status(200).send({
+        message: "Your account has been deactivated."
+       }).end() : res.status(200).send({
+        message: "No changes where made to your account. It is possible that your account has been already deactivated."
+       }).end();
+    });
+  }
+  reactivateUser = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
+    const user: UserModel = req.session.user[0];
+    return this.db.reactivate(user, (error: MysqlError, results) => {
+      if (error) {
+        console.error(error.message);
+        return res.status(500).end();
+      }
+      return results.changedRows === 1 ? res.status(200).send({
+        message: "Your account has been reactivated."
+      }).end() : res.status(200).send({
+        message: "No changes where made to your account. It is possible that your account has been already reactivated."
+      }).end();
+    });
+
   }
 }
