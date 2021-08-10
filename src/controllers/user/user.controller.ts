@@ -263,7 +263,6 @@ export class UserController {
         userID: req.session.user[0].id,
         password: hashPassword(password.newPassword)
       }
-      console.log(queryData);
       return this.db.updatePassword(queryData, (error, _results) => {
         if (error) {
           console.error(error.message);
@@ -274,6 +273,9 @@ export class UserController {
         })
       });
     }
+    res.status(401).send({
+      message: "Password does not match."
+    })
   }
   deactivateUser = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
     const user: UserModel = req.session.user[0];

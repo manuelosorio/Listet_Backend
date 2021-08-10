@@ -23,7 +23,6 @@ export class UserService {
         if (error) {
           return reject(error.message);
         }
-        console.log(results)
         return resolve(results[0].password);
       })
     })

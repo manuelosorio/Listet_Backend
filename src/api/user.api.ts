@@ -24,7 +24,7 @@ userApi.post('/logout', userController.logout);
 userApi.post('/reset-password', containsEmail, userController.resetPassword);
 userApi.get('/session', userController.session);
 
-userApi.post('/update-password', isAuth, matchesAccountPassword, userController.changePassword);
+userApi.put('/update-password', isAuth, matchesAccountPassword, userController.changePassword);
 userApi.put('/update-account-info', isAuth, userController.reactivateUser);
 userApi.put('/deactivate-account', isAuth, userController.deactivateUser);
 userApi.put('/reactivate-account', isAuth, userController.reactivateUser);
