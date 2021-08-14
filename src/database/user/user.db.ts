@@ -83,6 +83,10 @@ export class UserDb extends Db{
     return this.db.query(`UPDATE users SET password = ? WHERE id = ?`, [data.password, data.userID], next);
   }
 
+  updateAccountInfo = async (user: UserModel, next: queryCallback) => {
+    this.db.query(`UPDATE users SET firstName = ?, lastName = ?, email = ? WHERE id = ?`, [], next);
+  }
+
   /**
    * Apply session data to the requested session user.
    * @param req

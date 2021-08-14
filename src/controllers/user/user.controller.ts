@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import mysql, { MysqlError, Query, queryCallback } from 'mysql';
+import mysql, { MysqlError, Query } from 'mysql';
 import { NextFunction, Request, Response } from 'express';
 import { app, DB_CONFIG, smtp, token, variables } from '../../environments/variables';
 import { Mailer } from '../../utilities/nodemailer';
@@ -71,7 +71,7 @@ export class UserController {
       }
       // Does username exist?
       if (usernameRes.length) {
-         this.responseMessage.message = 'Username already exists';
+        this.responseMessage.message = 'Username already exists';
         return res.status(401).send (this.responseMessage).end();
       }
       // If user doesn't exist Check for email.
@@ -129,7 +129,7 @@ export class UserController {
                 console.error(chalk.bgRed.white(tokenStoreErr))
                 return res.status(500).end();
               }
-               this.responseMessage.message = 'User Created Successfully';
+              this.responseMessage.message = 'User Created Successfully';
               this.mailer.sendMail(smtp.email, emailData, 'verify-email');
               return res.status(200).send (this.responseMessage).end()
             });
@@ -253,8 +253,21 @@ export class UserController {
     });
   }
 
-  updateAccountInfo = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-
+  updateAccountInfo = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+    const accountInfo: UserModel = req.body;
+    accountInfo.id = req.session.users[0].id;
+    console.log(accountInfo);
+    return this.db.updateAccountInfo(accountInfo, (err, _results) => {
+      if (err) {
+        console.error(err.message);
+        return res.status(500);
+      }
+      return res.status(200).send(
+        {
+          message: "Your account info has been updated."
+        }
+      ).end();
+    });
   }
   changePassword = async (req: Request, res: Response, _next: NextFunction): Promise<Query | void> => {
     const password: NewPasswordModel = req.body;
