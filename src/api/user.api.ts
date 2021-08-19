@@ -24,11 +24,11 @@ userApi.post('/logout', userController.logout);
 userApi.post('/reset-password', containsEmail, userController.resetPassword);
 userApi.get('/session', userController.session);
 
-userApi.put('/update-password', isAuth, matchesAccountPassword, userController.changePassword);
+userApi.put('/update-password', isAuth, containsPassword, matchesAccountPassword, userController.changePassword);
 userApi.put('/update-account-info', isAuth, containsFirstName, containsLastName,
   containsUsername, containsEmail, isEmailValid, userController.updateAccountInfo);
-userApi.put('/deactivate-account', isAuth, userController.deactivateUser);
-userApi.put('/reactivate-account', isAuth, userController.reactivateUser);
+userApi.put('/deactivate-account', isAuth, containsPassword, matchesAccountPassword, userController.deactivateUser);
+userApi.put('/reactivate-account', isAuth, containsPassword, matchesAccountPassword, userController.reactivateUser);
 
 
 export default userApi;

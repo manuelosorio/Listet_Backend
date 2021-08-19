@@ -11,6 +11,6 @@ export const matchesAccountPassword = async (req: Request, res: Response, next: 
   const password = req.body.currentPassword || req.body.password;
   const doesPasswordMatch = comparePassword(password, accountPassword);
   return doesPasswordMatch ? next() : res.status(401).send({
-    message: "Incorrect password."
-  });
+      message: 'The password is incorrect. Please try again.',
+  }).end();
 }

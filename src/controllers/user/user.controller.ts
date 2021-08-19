@@ -308,6 +308,7 @@ export class UserController {
       return results.changedRows === 1 ? res.status(200).send({
         message: "Your account has been deactivated."
        }).end() : res.status(200).send({
+        status: 304,
         message: "No changes where made to your account. It is possible that your account has been already deactivated."
        }).end();
     });
