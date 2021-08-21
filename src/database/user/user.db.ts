@@ -84,7 +84,7 @@ export class UserDb extends Db{
   }
 
   updateAccountInfo = async (user: UserModel, next: queryCallback) => {
-    this.db.query(`UPDATE users SET firstName = ?, lastName = ?, email = ? WHERE id = ?`, [], next);
+    this.db.query(`UPDATE users SET firstName = ?, lastName = ?, email = ? WHERE id = ?`, [user.firstName, user.lastName, user.email, user.id], next);
   }
 
   /**

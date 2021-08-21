@@ -256,7 +256,7 @@ export class UserController {
 
   updateAccountInfo = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const accountInfo: UserModel = req.body;
-    accountInfo.id = req.session.users[0].id;
+    accountInfo.id = req.session.user[0].id;
     console.log(accountInfo);
     return this.db.updateAccountInfo(accountInfo, (err, _results) => {
       if (err) {

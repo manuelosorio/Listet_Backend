@@ -26,7 +26,7 @@ userApi.get('/session', userController.session);
 
 userApi.put('/update-password', isAuth, containsPassword, matchesAccountPassword, userController.changePassword);
 userApi.put('/update-account-info', isAuth, containsFirstName, containsLastName,
-  containsUsername, containsEmail, isEmailValid, userController.updateAccountInfo);
+  containsEmail, isEmailValid, userController.updateAccountInfo);
 userApi.put('/deactivate-account', isAuth, containsPassword, matchesAccountPassword, userController.deactivateUser);
 userApi.put('/reactivate-account', isAuth, containsPassword, matchesAccountPassword, userController.reactivateUser);
 
