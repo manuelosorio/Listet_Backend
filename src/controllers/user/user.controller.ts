@@ -256,13 +256,18 @@ export class UserController {
 
   updateAccountInfo = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const accountInfo: UserModel = req.body;
-    accountInfo.id = req.session.user[0].id;
+    const currentUser = req.session.user[0];
+    accountInfo.id = currentUser.id;
     console.log(accountInfo);
     return this.db.updateAccountInfo(accountInfo, (err, _results) => {
       if (err) {
         console.error(err.message);
         return res.status(500);
       }
+      currentUser.firstName = accountInfo.firstName;
+      currentUser.lastName = accountInfo.lastName;
+      currentUser.email = accountInfo.email;
+      console.log(req.session.user);
       return res.status(200).send(
         {
           message: "Your account info has been updated."
