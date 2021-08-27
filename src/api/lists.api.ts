@@ -20,9 +20,9 @@ const commentController = new CommentController();
 
 /********** List **************/
 listApi.get('/lists', listController.getAll);
-listApi.get('/your-lists', isAuth, listController.getAuthUserLists)
+listApi.get('/your-lists', isAuth, listController.getAuthUserLists);
 listApi.get('/list/:slug', isListPrivate, listController.getSingle);
-listApi.post('/create-list', isAuth, isVerified, checkListTitle, listController.post)
+listApi.post('/create-list', isAuth, isVerified, checkListTitle, listController.post);
 listApi.put('/update-list/:id', isAuth, isListOwner, checkListTitle, listController.update);
 listApi.delete('/delete-list/:id', isAuth, isListOwner, listController.delete);
 /********** Items *************/

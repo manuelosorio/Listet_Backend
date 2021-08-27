@@ -44,7 +44,6 @@ export class ListController {
       if (err) {
         console.error(err.message);
       }
-      console.log(results)
       return res.status(200).send(results).end();
     })
   }

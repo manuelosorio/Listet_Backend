@@ -18,7 +18,7 @@ export const isVerified = async (req: Request, res: Response, next: NextFunction
 }
 
 export function containsPassword(req: Request, res: Response, next: NextFunction): void {
-  if (!req.body.password)
+  if (!(req.body.password || req.body.currentPassword))
     return res.status(422).send({ message: 'Password is required'}).end();
   return next();
 }

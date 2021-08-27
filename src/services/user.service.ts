@@ -17,4 +17,18 @@ export class UserService {
       });
     })
   }
+  /*
+   * @param options (email)
+   * @returns A promise string containing hashed account password
+   */
+  public accountPassword = async (email: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      return this.userDB.getPassword(email, async (error, results) => {
+        if (error) {
+          return reject(error.message);
+        }
+        return resolve(results[0].password);
+      });
+    });
+  }
 }
