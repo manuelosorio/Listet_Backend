@@ -28,7 +28,7 @@ export class ListItemDb extends Db{
     return this.db.query(
       `SELECT id, item, deadline, completed, list_id, slug, username
         FROM view_list_items
-        WHERE slug= ?`,
+        WHERE (slug= ? AND deactivated= 0)`,
       slug, next);
   }
   updateListItemStatus = async (listItem: ListItemModel, next: queryCallback): Promise<Query> => {

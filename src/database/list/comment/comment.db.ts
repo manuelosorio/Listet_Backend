@@ -14,9 +14,9 @@ export class CommentDb extends Db{
    */
   findListComments = async (slug:string, next: queryCallback): Promise<Query> => {
     return this.db.query(
-      `SELECT id, comment, creation_date, date_updated, firstName, lastName, username
+      `SELECT id, comment, creation_date, date_updated, firstName, lastName, username, deactivated
         FROM view_comments
-        WHERE slug= ? ORDER BY creation_date DESC`,
+        WHERE (slug= ? AND deactivated= 0) ORDER BY creation_date DESC`,
       slug, next);
   }
 

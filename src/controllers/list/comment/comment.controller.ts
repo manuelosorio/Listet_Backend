@@ -28,7 +28,7 @@ export class CommentController {
       const updatedResults = results.map((result) => {
         return result;
       });
-      return res.status(200).send(updatedResults).end();
+      return !updatedResults.length ? res.status(404).send("List is doesn't exist").end() : res.status(200).send(updatedResults).end();
     });
   }
   /**
