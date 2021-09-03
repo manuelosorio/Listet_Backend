@@ -24,7 +24,7 @@ export class ItemController {
         console.error(err)
         return res.sendStatus(500).end();
       }
-      return !results.length ? res.status(404).send("List is doesn't exist").end() : res.status(200).send(results).end();
+      return res.status(200).send(results).end();
     });
   }
   post = async (req: Request, res: Response): Promise<Query | void | Response> => {
