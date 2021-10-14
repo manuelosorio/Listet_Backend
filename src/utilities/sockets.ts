@@ -77,7 +77,7 @@ export class Sockets {
   constructor(server: http.Server) {
     this.io = new SocketIO.Server(server, ({
       cors: {
-        origin: CORS.origin,
+        origin: `${CORS.origin}`,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: CORS.credentials
       },
