@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import { SmtpModel } from '../models/smtp.model';
-import { CorsOptions } from "cors";
 dotenv.config()
 
 export const variables: any = {
@@ -31,7 +30,7 @@ export const app = {
   // url: process.env.APP_URL.split,
   path: process.env.APP_PATH
 }
-export const CORS: CorsOptions = {
+export const CORS = {
   origin: corsOrigin,
   credentials: true,
   optionsSuccessStatus: 200

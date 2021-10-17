@@ -8,6 +8,7 @@ import { ListCommentEmitter } from '../models/list-comment.model';
 import { ListItemModel } from '../models/list-item.model';
 import { ListEvents } from '../helper/events/list.events';
 import { ListModel } from '../models/list.model';
+import { CorsOptions } from "cors";
 
 let socketInstance: SocketIO.Socket;
 let ioInstance: SocketIO.Server;
@@ -77,7 +78,7 @@ export class Sockets {
   constructor(server: http.Server) {
     this.io = new SocketIO.Server(server, ({
       cors: {
-        origin: `${CORS.origin}`,
+        origin: CORS.origin,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: CORS.credentials
       },
