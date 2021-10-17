@@ -6,6 +6,7 @@ import { variables } from './environments/variables';
 import listApi from './api/lists.api';
 import tokensApi from './api/tokens.api';
 import userApi from './api/user.api';
+import searchApi from './api/search.api';
 import { Sockets } from "./utilities/sockets";
 
 
@@ -21,6 +22,7 @@ app.use(Flash());
 app.use(userApi);
 app.use(listApi);
 app.use(tokensApi);
+app.use('/search', searchApi);
 
 
 // TODO: Delete functions for default path
