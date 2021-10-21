@@ -8,15 +8,21 @@ export class SearchController {
     this.searchDb = new SearchDb(mysql.createPool(DB_CONFIG));
   }
   list = async (req, res) => {
-
-  }
-  user = async (req, res) => {
-    this.searchDb.searchUser(req.params.query, (err, results) => {
+    return this.searchDb.searchList(req.params.query, (err, results) => {
       if (err) {
         console.error(err);
-        res.send(err.message)
+        res.send(err.message);
       }
-      res.send(results)
+      res.send(results);
+    });
+  }
+  user = async (req, res) => {
+    return this.searchDb.searchUser(req.params.query, (err, results) => {
+      if (err) {
+        console.error(err);
+        res.send(err.message);
+      }
+      res.send(results);
     });
   }
 }
