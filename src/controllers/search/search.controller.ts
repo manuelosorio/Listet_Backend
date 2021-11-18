@@ -13,7 +13,7 @@ export class SearchController {
         console.error(err);
         res.send(err.message);
       }
-      res.send(results);
+      res.status(200).send(results).end();
     });
   }
   user = async (req, res) => {
@@ -22,7 +22,7 @@ export class SearchController {
         console.error(err);
         res.send(err.message);
       }
-      res.send(results);
+      res.status(200).send(results).end();
     });
   }
 }
