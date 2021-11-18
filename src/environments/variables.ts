@@ -4,7 +4,6 @@ dotenv.config()
 
 export const variables: any = {
   nodeEnv: process.env.NODE_ENV,
-  httpPort: process.env.HTTP_PORT,
   port: process.env.HTTP_PORT,
   httpsPort: process.env.HTTPS_PORT,
   hostname: process.env.HOSTNAME,
