@@ -53,7 +53,8 @@ export class Mailer {
         to: `${data.firstName} ${data.lastName} <${data.email}>`
       },
       locals: data
-    }).then(console.log)
-      .catch(console.error);
+    }).catch(err => {
+        console.error(err);
+      });
   }
 }

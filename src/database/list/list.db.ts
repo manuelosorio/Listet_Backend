@@ -36,7 +36,7 @@ export class ListDb extends Db{
    * @param next
    */
   findAllLists = async (next: queryCallback): Promise<Query> => {
-    return this.db.query('SELECT slug, name, description, creation_date, deadline, visibility, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where visibility=2 ORDER BY creation_date DESC', null, next);
+    return this.db.query('SELECT slug, name, description, creation_date, deadline, visibility, featured, allow_comments, firstName, lastName, owner_username FROM view_lists WHERE visibility=2 AND deactivated=0 ORDER BY creation_date DESC', null, next);
   }
   async findAuthenticatedUserLists(ownerID: string, next: queryCallback): Promise<Query>  {
     return this.db.query(`SELECT slug, name, description, creation_date, deadline, visibility, featured, allow_comments, firstName, lastName, owner_username FROM view_lists where owner_id = ?`, ownerID, next);
@@ -48,7 +48,7 @@ export class ListDb extends Db{
    * @param next`
    */
   findListFromSlug = async (query: string | any, next: queryCallback): Promise<Query> => {
-    return this.db.query('Select id, slug, name, description, creation_date, is_complete, deadline, visibility, allow_comments, firstName, lastName, owner_id, owner_username FROM view_lists where slug= ?', query, next);
+    return this.db.query('SELECT id, slug, name, description, creation_date, is_complete, deadline, visibility, allow_comments, firstName, lastName, owner_id, owner_username FROM view_lists WHERE (slug=? AND deactivated=0)', query, next);
   }
 
   /**

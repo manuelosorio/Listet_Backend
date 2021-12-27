@@ -8,6 +8,7 @@ import { ListCommentEmitter } from '../models/list-comment.model';
 import { ListItemModel } from '../models/list-item.model';
 import { ListEvents } from '../helper/events/list.events';
 import { ListModel } from '../models/list.model';
+import { CorsOptions } from "cors";
 
 let socketInstance: SocketIO.Socket;
 let ioInstance: SocketIO.Server;
