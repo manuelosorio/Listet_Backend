@@ -41,7 +41,7 @@
     "cors": "^2.8.5",
     "dotenv": "^9.0.2",
     "email-templates": "^8.0.8",
-    "express": "^4.17.1",
+    "express": "^4.17.2",
     "express-flash": "0.0.2",
     "express-mysql-session": "^2.1.7",
     "express-session": "^1.17.2",
