@@ -40,7 +40,7 @@
     "concurrently": "^6.4.0",
     "cors": "^2.8.5",
     "dotenv": "^9.0.2",
-    "email-templates": "^8.0.8",
+    "email-templates": "^8.0.9",
     "express": "^4.17.2",
     "express-flash": "0.0.2",
     "express-mysql-session": "^2.1.7",
