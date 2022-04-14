@@ -28,6 +28,7 @@ userApi.put('/update-account-info', isAuth, containsFirstName, containsLastName,
   containsEmail, isEmailValid, userController.updateAccountInfo);
 userApi.put('/deactivate-account', isAuth, containsPassword, matchesAccountPassword, userController.deactivateUser);
 userApi.put('/reactivate-account', isAuth, containsPassword, matchesAccountPassword, userController.reactivateUser);
+userApi.delete('/delete-account', isAuth, containsPassword, matchesAccountPassword, userController.deleteUser)
 
 
 export default userApi;

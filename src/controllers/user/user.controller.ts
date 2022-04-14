@@ -288,9 +288,12 @@ export class UserController {
         console.error(error.message);
         return res.status(500).end();
       }
-      return results.changedRows === 1 ? res.status(200).send({
-        message: "Your account has been deactivated."
-       }).end() : res.status(200).send({
+      return results.changedRows === 1 ?     req.session.destroy((err) => {
+        err ? res.status(500).send({ message: 'Could not logout.' }).end() :
+        res.status(200).send({
+          message: "Your account has been deactivated."
+        }).end()
+      }) :  res.status(200).send({
         status: 304,
         message: "No changes where made to your account. It is possible that your account has been already deactivated."
        }).end();
@@ -309,6 +312,23 @@ export class UserController {
         message: "No changes where made to your account. It is possible that your account has been already reactivated."
       }).end();
     });
-
+  }
+  deleteUser = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
+    const user: UserModel = req.session.user[0];
+    return this.db.delete(user, (error: MysqlError, results) => {
+      if (error) {
+        console.error(error.message);
+        return res.status(500).end();
+      }
+      console.log(results)
+      return results.affectedRows > 0 ? req.session.destroy((err) => {
+        err ? res.status(500).send({ message: 'Could not logout.' }).end() :
+        res.status(200).send({
+          message: "Your account has been deleted."
+        }).end()
+      }) : res.status(200).send({
+        message: "No changes where made to your account. It is possible that your account has been already reactivated."
+      }).end();
+    });
   }
 }

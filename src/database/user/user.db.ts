@@ -78,7 +78,14 @@ export class UserDb extends Db{
   reactivate = async (user: UserModel, next: queryCallback): Promise<Query> => {
     return this.db.query(`UPDATE users SET deactivated = 0 WHERE id = ?`, user.id, next);
   }
-
+  delete = async (user: UserModel, next: queryCallback): Promise<Query> => {
+    return this.db.query(`CALL delete_user(?)`, user.id, next)
+  }
+  /**
+   * Update Users Password
+   * @param data
+   * @param next
+   */
   updatePassword = async (data: {userID: number, password: string}, next: queryCallback): Promise<Query> => {
     return this.db.query(`UPDATE users SET password = ? WHERE id = ?`, [data.password, data.userID], next);
   }
@@ -92,6 +99,7 @@ export class UserDb extends Db{
    * @param req
    * @param sessionData
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   userSession(req: Request, sessionData): Promise<Query> {
     return req.session.user = sessionData;
   }
