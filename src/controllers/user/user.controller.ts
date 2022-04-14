@@ -124,32 +124,32 @@ export class UserController {
         console.error(err.message);
         return res.status(500).end();
       }
-      try {
-        if (comparePassword(password, result[0].password) === false) {
-           this.responseMessage.message = "Login Details Incorrect. Please Try Again.";
-          return res.status(403).send (this.responseMessage).end();
-        }
-        return this.db.findUserFromEmail(email, (error, results) => {
-          if (error) {
-            return res.status(500).send(error).end();
-          }
-          this.db.userSession(req, results);
-          this.responseMessage.message = 'Login Successful';
-          const user: UserModel = results[0];
-          return res.status(200).send({
-            response: this.responseMessage,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            username: user.username,
-            verified: results[0].verification_status
-          }).end();
-        });
-      } catch (e) {
-        console.error(e);
-        return e;
+      if (!result.length) {
+        this.responseMessage.message = "Login Details Incorrect. Please Try Again.";
+        return res.status(403).send (this.responseMessage).end();
       }
-    })
+      if (comparePassword(password, result[0].password) === false) {
+         this.responseMessage.message = "Login Details Incorrect. Please Try Again.";
+        return res.status(403).send(this.responseMessage).end();
+      }
+      return this.db.findUserFromEmail(email, (error, results) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).send(error.message).end();
+        }
+        this.db.userSession(req, results);
+        this.responseMessage.message = 'Login Successful';
+        const user: UserModel = results[0];
+        return res.status(200).send({
+          response: this.responseMessage,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          verified: results[0].verification_status
+        }).end();
+      });
+    });
   }
 
   logout = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {

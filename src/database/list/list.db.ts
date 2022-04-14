@@ -14,7 +14,7 @@ export class ListDb extends Db{
    */
   getListOwner = async (listID: number | any, next: queryCallback): Promise<Query> => {
     return this.db.query(
-      'SELECT `owner_id` FROM view_lists WHERE id = ?',
+      'SELECT `owner_id` FROM view_lists WHERE id = ? and deactivated = 0',
       listID,
       next
     )
