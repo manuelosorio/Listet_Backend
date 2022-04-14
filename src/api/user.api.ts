@@ -13,7 +13,6 @@ import { matchesAccountPassword } from '../middleware/password.middleware';
 const userApi = Router();
 const userController = new UserController()
 
-userApi.get('/users', userController.getAllUsers);
 userApi.get('/user/:username', userController.getUser);
 
 userApi.post('/register', containsFirstName,

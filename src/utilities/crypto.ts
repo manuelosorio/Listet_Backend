@@ -32,8 +32,7 @@ export class Crypto {
    * Decrypt and parse token data
    * @param encryptedToken
    */
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  decipher(encryptedToken): any {
+  decipher(encryptedToken: string): void {
     try {
       const tokenParts = encryptedToken.split(':');
       const iv = Buffer.from(tokenParts.shift(), 'hex');

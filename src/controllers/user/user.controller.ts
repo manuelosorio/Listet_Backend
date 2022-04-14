@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import mysql, { MysqlError, Query } from 'mysql';
 import { NextFunction, Request, Response } from 'express';
-import { app, DB_CONFIG, smtp, token, variables } from '../../environments/variables';
+import { app, DB_CONFIG, smtp, token } from '../../environments/variables';
 import { Mailer } from '../../utilities/nodemailer';
 import { Crypto } from '../../utilities/crypto';
 import { DateUtil } from '../../utilities/date';
@@ -32,33 +32,10 @@ export class UserController {
     }
   }
 
-  getAllUsers = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-    switch (variables.nodeEnv) {
-      case 'Development':
-      case 'development':
-        await this.db.findAllUsers((err, results) => {
-          if (err) {
-            const errorMessage = `we failed to query users ${err}`;
-            return res.sendStatus(500).send(errorMessage).end();
-          }
-          return res.status(200).send(results).end();
-        });
-        break;
-      case 'Production':
-      case 'production':
-        res.status(200).send([{
-          "username": "ForSecurityPurposes",
-          "firstName": "Users are not",
-          "lastName": "Shown in production"
-        }]).end();
-        break;
-    }
-  }
-
   getUser = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
     const userName = req.params.username;
     await this.db.findUserFromUsername(userName, (err, results) => {
-      return err ? res.status(403).send(err).end() :
+      return err ? res.status(403).send(err.message).end() :
              !results.length ? res.status(404).send({message: 'User does not exist'}).end() : res.status(200).send(results).end();
     });
   }
@@ -144,7 +121,7 @@ export class UserController {
     const password: string = req.body.password;
     return await this.db.getPassword(email, (err, result) => {
       if (err) {
-        console.error(err);
+        console.error(err.message);
         return res.status(500).end();
       }
       try {
@@ -240,7 +217,7 @@ export class UserController {
     if (!req.session.user) {
       return res.status(200).send({authenticated: false}).end();
     }
-    const sessionData = req.session.user.map(result => {
+    const sessionData = req.session.user.map((result: UserModel) => {
       return {verified: result.verification_status === 1}
     });
     const user = req.session.user[0];
@@ -254,7 +231,7 @@ export class UserController {
     });
   }
 
-  updateAccountInfo = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+  updateAccountInfo = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
     const accountInfo: UserModel = req.body;
     const currentUser = req.session.user[0];
     accountInfo.id = currentUser.id;

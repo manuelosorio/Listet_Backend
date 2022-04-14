@@ -25,13 +25,6 @@ export class ListController {
         return res.sendStatus(500).end();
       }
       const updatedResults = results.map((result) => {
-        // const creationDate = new DateUtil(result.creation_date);
-        // result.creation_date = creationDate.format();
-
-        // if (result.deadline) {
-        //   const deadline = new DateUtil(result.deadline);
-        //   result.deadline = deadline.format();
-        // }
         return result;
       });
       return res.status(200).send(updatedResults).end();
@@ -117,7 +110,7 @@ export class ListController {
     return await this.db.createList(list, (err, _results, _fields) => {
       if (err) {
         console.error(err);
-        return res.status(500).send(err).end();
+        return res.status(500).send(err.message).end();
       }
       return res.status(201).send({ message: 'List created.', url: list.slug }).end();
     });

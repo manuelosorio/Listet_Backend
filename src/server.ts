@@ -1,22 +1,26 @@
 import express from 'express';
 import Flash from 'express-flash';
 import http from 'http';
+import helmet from 'helmet';
 import environment from './environments/environment';
 import { variables } from './environments/variables';
 import listApi from './api/lists.api';
 import tokensApi from './api/tokens.api';
 import userApi from './api/user.api';
 import searchApi from './api/search.api';
-import { Sockets } from "./utilities/sockets";
+import { Sockets } from './utilities/sockets';
 
 
 if (variables.nodeEnv === 'production') {
   console.log = () => {return}
 }
 const app = express();
+
 const server = new http.Server(app);
 
 app.set('port', variables.port || 3000);
+app.use(helmet());
+app.use(express.json())
 app.use(environment);
 app.use(Flash());
 app.use(userApi);

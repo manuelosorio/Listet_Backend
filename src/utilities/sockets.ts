@@ -8,7 +8,6 @@ import { ListCommentEmitter } from '../models/list-comment.model';
 import { ListItemModel } from '../models/list-item.model';
 import { ListEvents } from '../helper/events/list.events';
 import { ListModel } from '../models/list.model';
-import { CorsOptions } from "cors";
 
 let socketInstance: SocketIO.Socket;
 let ioInstance: SocketIO.Server;
@@ -28,7 +27,7 @@ export function getIoInstance(): SocketIO.Server {
 }
 
 
-export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents, data: Partial<number | ListModel | ListCommentEmitter | ListItemModel>): void => {
+export const emit = (event: string | ListEvents | CommentEvents | ListItemEvents, data: Partial<number | ListModel | ListCommentEmitter | ListItemModel> | any): void => {
   const io = getIoInstance();
   try {
     switch (event) {
@@ -95,7 +94,7 @@ export class Sockets {
 
       socket.on('join', (res) => {
         console.log(chalk.bgYellow.black(`Client #${socket.id} joined: ${res}  \n`));
-        socket.join(res);
+        return socket.join(res);
       });
       socket.on('disconnect', reason => {
         console.log(chalk.bgYellow.black(`Client #${socket.id} Disconnected: ${reason}. \n`))

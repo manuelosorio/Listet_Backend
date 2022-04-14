@@ -1,4 +1,4 @@
-import express from 'express'
+import { Router } from 'express'
 import bodyParser from "body-parser";
 
 import {variables} from './variables';
@@ -6,7 +6,7 @@ import development from './environment.dev';
 import production from './environment.prod';
 
 
-const environment = express();
+const environment = Router();
 const env = variables.nodeEnv;
 
 environment.use(bodyParser.json());
