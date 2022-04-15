@@ -27,7 +27,7 @@ for (let i = 0; i < appURL.length; + i++) {
 export const app = {
   hostname: process.env.APP_HOSTNAME,
   // url: process.env.APP_URL.split,
-  path: process.env.APP_PATH
+  path: process.env.APP_PATH ?? ''
 }
 export const CORS = {
   origin: corsOrigin,
