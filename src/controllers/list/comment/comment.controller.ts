@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import mysql, { MysqlError, Query } from 'mysql';
 import { DB_CONFIG } from '../../../environments/variables';
-import { emit } from '../../../utilities/sockets';
+import { Sockets } from '../../../utilities/sockets';
 import { CommentEvents } from '../../../helper/events/comment.events';
 import { CommentDb } from '../../../database/list/comment/comment.db';
 import { ListCommentEmitter, ListCommentModel } from '../../../models/list-comment.model';
@@ -69,7 +69,7 @@ export class CommentController {
             creation_date: listComment.creation_date,
           };
           commentData.listInfo = slug;
-          emit(CommentEvents.CREATE_COMMENT, commentData);
+          Sockets.emit(CommentEvents.CREATE_COMMENT, commentData);
           return res.status(201).send({ message: 'Comment created.' }).end();
         });
       });
@@ -85,7 +85,7 @@ export class CommentController {
         console.error(err.message);
         return res.status(500).end();
       }
-      emit(CommentEvents.UPDATE_COMMENT, commentModel);
+      Sockets.emit(CommentEvents.UPDATE_COMMENT, commentModel);
       return res.status(201).send({ message: 'Comment Updated' });
     });
   }
@@ -96,7 +96,7 @@ export class CommentController {
         console.error(error);
         return res.status(500).end();
       }
-      emit(CommentEvents.DELETE_COMMENT, commentID);
+      Sockets.emit(CommentEvents.DELETE_COMMENT, commentID);
       return res.status(200).send({message: 'Comment Deleted'}).end();
     });
   }

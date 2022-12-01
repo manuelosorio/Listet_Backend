@@ -1,7 +1,7 @@
 import mysql, { MysqlError, Query } from 'mysql';
 import { DB_CONFIG } from '../../../environments/variables';
 import { NextFunction, Request, Response } from 'express';
-import { emit } from '../../../utilities/sockets';
+import { Sockets } from '../../../utilities/sockets';
 import { ListItemEvents } from '../../../helper/events/list-item.events';
 import { ListItemModel } from '../../../models/list-item.model';
 import { ListItemDb } from '../../../database/list/item/list-item.db';
@@ -44,7 +44,7 @@ export class ItemController {
         return res.status(500).end();
       }
       listItem.id = results.insertId;
-      emit(ListItemEvents.ADD_ITEM, listItem);
+      Sockets.emit(ListItemEvents.ADD_ITEM, listItem);
       return res.status(201).send({message: 'List item added.'});
     });
   }
@@ -55,7 +55,7 @@ export class ItemController {
         console.error(error.message);
         return res.status(500).end();
       }
-      emit(ListItemEvents.DELETE_ITEM, id);
+      Sockets.emit(ListItemEvents.DELETE_ITEM, id);
       return res.send({message: 'Item Deleted'}).status(202);
     });
   }
@@ -66,7 +66,7 @@ export class ItemController {
         console.error(err);
         return res.status(500).end();
       }
-      emit(ListItemEvents.COMPLETE_ITEM, listItem);
+      Sockets.emit(ListItemEvents.COMPLETE_ITEM, listItem);
       return res.status(201).send({ message: "Updated Item Status" }).end();
     })
   }
@@ -79,7 +79,7 @@ export class ItemController {
           console.error(updateErr)
           return res.status(500).end();
         }
-        emit(ListItemEvents.UPDATE_ITEM, listItem);
+        Sockets.emit(ListItemEvents.UPDATE_ITEM, listItem);
         return res.status(201).send({ message: "Item Updated" }).end();
       });
   }
