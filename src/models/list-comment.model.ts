@@ -2,9 +2,10 @@ export interface ListCommentModel {
   id?: number;
   author_id: number;
   comment: string;
-  creation_date: Date;
+  creation_date: Date | string;
   date_updated?: Date;
-  parent_id: number;
+  parent_id?: number;
+  is_owner?: boolean;
 }
 
 export interface ListCommentQueryModel {
@@ -12,7 +13,7 @@ export interface ListCommentQueryModel {
   slug: string;
 }
 
-export interface ListCommentEmitter {
+export interface ListCommentEmitter extends Partial<ListCommentModel>{
   id?: number;
   comment: string;
   creation_date: Date | string;

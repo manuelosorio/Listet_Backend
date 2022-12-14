@@ -9,7 +9,7 @@ export function isAuth(req: Request, res: Response, next: NextFunction): void | 
 }
 
 export const isVerified = async (req: Request, res: Response, next: NextFunction): Promise<void | Response> => {
-  return await userService.isUserVerified(req.session.user[0].username).then(verified => {
+  return await userService.isUserVerified(req.session.user.id).then(verified => {
     if (!verified) {
       return res.status(403).send({ message: "Your account must be verified to send create a new list." }).end();
     }

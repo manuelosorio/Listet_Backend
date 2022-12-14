@@ -2,37 +2,40 @@ import mysql, { MysqlError, Query } from 'mysql';
 import { DB_CONFIG } from '../../environments/variables';
 import { NextFunction, Request, Response } from 'express';
 import { ListDb } from '../../database/list/list.db';
-import { ListModel } from '../../models/list.model';
+import { ListModel, ListOwnerModel } from '../../models/list.model';
 import { UserDb } from '../../database/user/user.db';
 import { Sockets } from '../../utilities/sockets';
 import { ListEvents } from '../../helper/events/list.events';
 import { ListService } from '../../services/list.service';
+import { UserService } from '../../services/user.service';
+import { UserModel } from '../../models/user.model';
 
 export class ListController {
   private readonly db: ListDb;
   private userDB: UserDb;
   private listService: ListService;
+  private readonly userService;
   constructor() {
     this.db = new ListDb(mysql.createPool(DB_CONFIG));
     this.userDB = new UserDb(mysql.createPool(DB_CONFIG));
     this.listService = new ListService();
+    this.userService = new UserService();
   }
-  getAll = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
-    return await this.db.findAllLists((err, results)  => {
+  getAll = async (req: Request, res: Response, _next: NextFunction): Promise<Query | void> => {
+    return await this.db.findAllLists(async (err, results: ListOwnerModel[]) => {
       if (err) {
         const errorMessage = `We failed to query lists ${err}`;
         console.error(errorMessage);
         return res.sendStatus(500).end();
       }
-      const updatedResults = results.map((result) => {
-        return result;
-      });
-      return res.status(200).send(updatedResults).end();
+      return res.status(200).send(results).end();
     });
   }
   getAuthUserLists = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
-    const userID = req.session.user[0].id;
-    return await this.db.findAuthenticatedUserLists(userID, (err: MysqlError, results) => {
+    const user = await this.userService.getCurrentUser(req).catch((err) => {
+      console.error(err);
+    });
+    return await this.db.findAuthenticatedUserLists(user.id, (err: MysqlError, results) => {
       if (err) {
         console.error(err.message);
       }
@@ -45,22 +48,35 @@ export class ListController {
         console.error(err)
         return res.status(500).end();
       }
-      return !results.length ? res.status(404).send("List Doesn't Exist.").end() : res.status(200).send(results).end();
+      if (!results.length) return res.status(404).send("List Doesn't Exist.").end()
+      const updatedResults = results.map((result: ListOwnerModel) => {
+        if (!req.session.user) {
+          return {
+            ...result,
+            is_owner: false
+          }
+        }
+        return {
+          ...result,
+          is_owner: result.owner_id === req.session.user.id
+        }
+      });
+      return res.status(200).send(updatedResults).end();
     });
   }
 
   post = async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-    const username = req.session.user[0].username;
+    const user: UserModel= await this.userService.getCurrentUser(req);
     const url = req.body.title.toLowerCase().replace(/[^a-zA-Z ]/g, "").split(' ').join('-');
     const list: ListModel = {
-      slug: `${username}-${url}`,
+      slug: `${user.username}-${url}`,
       name: req.body.title,
       description: req.body.description,
       creation_date: new Date(),
       deadline: new Date(req.body.deadline),
       visibility: req.body.visibility ?? 2,
       allow_comments: req.body.allow_comments === true ? 1 : 0,
-      author_id: req.session.user[0].id as unknown as number
+      author_id: req.session.user.id as unknown as number
     }
     this.listService.testSlug(list.slug).then((r) => {
       if (r) {
@@ -70,13 +86,13 @@ export class ListController {
     });
   }
   update = async (req: Request, res: Response): Promise<any> => {
-    const username = req.session.user[0].username;
+    const user: UserModel = await this.userService.getCurrentUser(req);
     const url = req.body.title.toLowerCase()
       .replace(/[^a-zA-Z ]/g, "").split(' ').join('-');
     const listUpdate: ListModel = {
       id: req.params.id as unknown as number,
       name: req.body.title,
-      slug: `${username}-${url}`,
+      slug: `${user.username}-${url}`,
       prevSlug: req.body.prevSlug,
       description: req.body.description,
       deadline: new Date(req.body.deadline),

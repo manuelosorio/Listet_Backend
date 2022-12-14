@@ -32,7 +32,7 @@ export class Crypto {
    * Decrypt and parse token data
    * @param encryptedToken
    */
-  decipher(encryptedToken: string): void {
+  decipher(encryptedToken: string): string {
     try {
       const tokenParts = encryptedToken.split(':');
       const iv = Buffer.from(tokenParts.shift(), 'hex');
@@ -40,9 +40,10 @@ export class Crypto {
       const decipher = createDecipheriv('aes-256-cbc', Buffer.from(this.secret), iv)
       let decrypted = decipher.update(encryptedText);
       decrypted = Buffer.concat([decrypted, decipher.final()]);
-      return JSON.parse(decrypted.toString());
+        return JSON.parse(decrypted.toString());
     } catch (err) {
       console.error(chalk.red(err));
+      // throw new Error(err.message);
     }
   }
 }

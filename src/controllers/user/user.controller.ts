@@ -13,6 +13,7 @@ import { VerificationTokenDb } from '../../database/token/verification-token.db'
 import { ResetTokenDb } from '../../database/token/reset-token.db';
 import { TokenModel } from '../../models/token.model';
 import { NewPasswordModel } from '../../models/new-password.model';
+import { UserService } from '../../services/user.service';
 
 export class UserController {
   private readonly crypto;
@@ -21,12 +22,14 @@ export class UserController {
   private readonly resetTokenDb: ResetTokenDb;
   private readonly mailer;
   private responseMessage;
+  private userService;
   constructor() {
     this.db = new UserDb(mysql.createPool(DB_CONFIG));
     this.verifyTokenDb = new VerificationTokenDb(mysql.createPool(DB_CONFIG));
     this.resetTokenDb = new ResetTokenDb(mysql.createPool(DB_CONFIG));
     this.mailer = new Mailer(smtp)
     this.crypto = new Crypto();
+    this.userService = new UserService();
     this.responseMessage = {
       message: ''
     }
@@ -137,9 +140,9 @@ export class UserController {
           console.error(error);
           return res.status(500).send(error.message).end();
         }
-        this.db.userSession(req, results);
         this.responseMessage.message = 'Login Successful';
         const user: UserModel = results[0];
+        this.db.userSession(req, {id: user.id});
         return res.status(200).send({
           response: this.responseMessage,
           email: user.email,
@@ -217,26 +220,27 @@ export class UserController {
     if (!req.session.user) {
       return res.status(200).send({authenticated: false}).end();
     }
-    const sessionData = req.session.user.map((result: UserModel) => {
-      return {verified: result.verification_status === 1}
+    const user = await this.userService.getCurrentUser(req).catch((err) => {
+      console.error(err);
     });
-    const user = req.session.user[0];
-    return res.status(200).send({
-      authenticated: true,
-      verified: sessionData[0].verified,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email
-    });
+      const data = {
+        authenticated: true,
+        verified: user.verification_status,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      }
+      return res.status(200).send(data);
   }
 
   updateAccountInfo = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
     const accountInfo: UserModel = req.body;
-    const currentUser = req.session.user[0];
-    accountInfo.id = currentUser.id;
-    console.log(accountInfo);
-    return this.db.updateAccountInfo(accountInfo, (err, _results) => {
+    const currentUser = await this.userService.getCurrentUser(req);
+    currentUser.email = accountInfo.email;
+    currentUser.firstName = accountInfo.firstName;
+    currentUser.lastName = accountInfo.lastName;
+    return this.db.updateAccountInfo(currentUser, (err, _results) => {
       if (err) {
         console.error(err.message);
         return res.status(500);
@@ -244,7 +248,6 @@ export class UserController {
       currentUser.firstName = accountInfo.firstName;
       currentUser.lastName = accountInfo.lastName;
       currentUser.email = accountInfo.email;
-      console.log(req.session.user);
       return res.status(200).send(
         {
           message: "Your account info has been updated."
@@ -253,6 +256,9 @@ export class UserController {
     });
   }
   changePassword = async (req: Request, res: Response, _next: NextFunction): Promise<Query | void> => {
+    const user = await this.userService.getCurrentUser(req).catch((err) => {
+      console.error(err);
+    });
     const password: NewPasswordModel = req.body;
     if (!password.newPassword.match(/^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/)) {
       return res.status(422).send(
@@ -264,7 +270,7 @@ export class UserController {
     }
     if (password.newPassword === password.confirmPassword) {
       const queryData = {
-        userID: req.session.user[0].id,
+        userID: user.id,
         password: hashPassword(password.newPassword)
       }
       return this.db.updatePassword(queryData, (error, _results) => {
@@ -282,13 +288,13 @@ export class UserController {
     }).end();
   }
   deactivateUser = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
-    const user: UserModel = req.session.user[0];
+    const user = await this.userService.getCurrentUser(req);
     return this.db.deactivate(user, (error: MysqlError, results) => {
       if (error) {
         console.error(error.message);
         return res.status(500).end();
       }
-      return results.changedRows === 1 ?     req.session.destroy((err) => {
+      return results.changedRows === 1 ? req.session.destroy((err) => {
         err ? res.status(500).send({ message: 'Could not logout.' }).end() :
         res.status(200).send({
           message: "Your account has been deactivated."
@@ -300,7 +306,7 @@ export class UserController {
     });
   }
   reactivateUser = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
-    const user: UserModel = req.session.user[0];
+    const user: UserModel = await this.userService.getCurrentUser(req);
     return this.db.reactivate(user, (error: MysqlError, results) => {
       if (error) {
         console.error(error.message);
@@ -314,13 +320,12 @@ export class UserController {
     });
   }
   deleteUser = async (req: Request, res: Response, _next: NextFunction): Promise<Query> => {
-    const user: UserModel = req.session.user[0];
+    const user: UserModel = await this.userService.getCurrentUser(req);
     return this.db.delete(user, (error: MysqlError, results) => {
       if (error) {
         console.error(error.message);
         return res.status(500).end();
       }
-      console.log(results)
       return results.affectedRows > 0 ? req.session.destroy((err) => {
         err ? res.status(500).send({ message: 'Could not logout.' }).end() :
         res.status(200).send({
