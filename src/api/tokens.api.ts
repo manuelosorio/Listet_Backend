@@ -9,8 +9,5 @@ const verifyToken = new VerificationTokenController()
 tokensApi.get('/reset-password/:tokenStore', resetToken.checkToken);
 tokensApi.put('/reset-password/:tokenStore', resetToken.resetPassword);
 
-tokensApi.get('/verify-account', (req, res) => {
-  res.send('test');
-});
 tokensApi.get('/verify-account/:tokenStore', verifyToken.verifyAccount);
 export default tokensApi;

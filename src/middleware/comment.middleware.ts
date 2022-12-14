@@ -1,12 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { CommentService } from '../services/comment.service';
 import { ListService } from '../services/list.service';
+import { UserService } from '../services/user.service';
 
+const userService = new UserService();
 const commentService = new CommentService();
 const listService = new ListService();
 
 export const canDeleteComment = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-  return commentService.isCommentDeletionPermissible(req.params.id as unknown as number, req.session.user[0].id).then((isPermissible): Response | void => {
+  return commentService.isCommentDeletionPermissible(req.params.id as unknown as number, req.session.user.id).then((isPermissible): Response | void => {
     if (!isPermissible) {
       return res.status(403).send({message: "You do not have permission to delete this comment."});
     }
@@ -36,10 +38,9 @@ export function commentNotLargerThanMaxCharacters(req: Request, res: Response, n
 
 
 export const isCommentOwner = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-  const userID = req.session.user[0].id;
+  const userID = (await userService.getCurrentUser(req)).id;
   const commentId = req.params.id as unknown as number;
   const isCommentOwner = await listService.isCommentOwner(userID, commentId);
-  console.log('Is Comment Owner:', isCommentOwner)
   if (!isCommentOwner) {
     return res.status(409).send({message: "You must be the comment owner to complete this action"}).end();
   }

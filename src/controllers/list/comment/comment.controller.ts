@@ -7,25 +7,34 @@ import { CommentDb } from '../../../database/list/comment/comment.db';
 import { ListCommentEmitter, ListCommentModel } from '../../../models/list-comment.model';
 import { ListDb } from '../../../database/list/list.db';
 import { ListService } from '../../../services/list.service';
+import { UserService } from '../../../services/user.service';
+import { UserModel } from '../../../models/user.model';
 
 
 export class CommentController {
   private readonly db: CommentDb;
   private readonly listDb: ListDb;
   private readonly listService: ListService;
-
+  private readonly userService = new UserService();
   constructor() {
     this.db = new CommentDb(mysql.createPool(DB_CONFIG));
     this.listDb = new ListDb(mysql.createPool(DB_CONFIG));
     this.listService = new ListService();
   }
-  get = (req: Request, res: Response): Promise<Query> => {
-    return this.db.findListComments(req.params.slug, (err: MysqlError, results) => {
+  get = async (req: Request, res: Response): Promise<Query> => {
+    return this.db.findListComments(req.params.slug, async (err: MysqlError, results) => {
+      const user: Partial<UserModel> = await this.userService.getCurrentUser(req).catch((err) => {
+        console.log(err);
+        return {};
+      }).then((user) => {
+        return user;
+      });
       if (err) {
         console.error(err);
         return res.sendStatus(500).end();
       }
-      const updatedResults = results.map((result) => {
+      const updatedResults:ListCommentModel = results.map((result: ListCommentModel) => {
+        result.is_owner = result.author_id === user.id ?? false;
         return result;
       });
       return res.status(200).send(updatedResults).end();
@@ -37,8 +46,11 @@ export class CommentController {
    *    - Comment must be at least 160 characters long.
    *    - List must have comments enabled.
    */
-  post = (req: Request, res: Response): Promise<any> | Response => {
-    const user = req.session.user[0];
+  post = async (req: Request, res: Response): Promise<any| Response> => {
+    const user: Partial<UserModel> = await this.userService.getCurrentUser(req).catch((err) => {
+      console.error(err);
+      return {};
+    })
     const listComment: ListCommentModel = {
       author_id: Number(user.id),
       comment: req.body.comment.trim(),
@@ -67,7 +79,9 @@ export class CommentController {
             firstName: user.firstName,
             lastName: user.lastName,
             creation_date: listComment.creation_date,
+            is_owner: user.id === listComment.author_id,
           };
+          console.log(commentData);
           commentData.listInfo = slug;
           Sockets.emit(CommentEvents.CREATE_COMMENT, commentData);
           return res.status(201).send({ message: 'Comment created.' }).end();
@@ -99,5 +113,9 @@ export class CommentController {
       Sockets.emit(CommentEvents.DELETE_COMMENT, commentID);
       return res.status(200).send({message: 'Comment Deleted'}).end();
     });
+  }
+
+  getDeletePermissible = async (_req: Request, res: Response): Promise<unknown> => {
+    return res.status(200).send({can_delete: true}).end();
   }
 }

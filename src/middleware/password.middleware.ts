@@ -6,8 +6,9 @@ const userService = new UserService();
 /*
  * Checks if the inputted password matches the current account password.
  */
-export const matchesAccountPassword = async (req: Request, res: Response, next: NextFunction) => {
-  const accountPassword = await userService.accountPassword(req.session.user[0].email);
+export const matchesAccountPassword = async (req: Request, res: Response, next: NextFunction): Promise<boolean | void> => {
+  const user = await userService.getCurrentUser(req);
+  const accountPassword = await userService.accountPassword(user.email);
   const password = req.body.currentPassword || req.body.password;
   const doesPasswordMatch = comparePassword(password, accountPassword);
   return doesPasswordMatch ? next() : res.status(401).send({

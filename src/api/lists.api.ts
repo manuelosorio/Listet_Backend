@@ -17,7 +17,6 @@ const listController = new ListController();
 const itemController= new ItemController();
 const commentController = new CommentController();
 
-
 /********** List **************/
 listApi.get('/lists', listController.getAll);
 listApi.get('/your-lists', isAuth, listController.getAuthUserLists);
@@ -33,6 +32,7 @@ listApi.put('/update-item-status', isAuth, isListOwner, itemController.updateSta
 listApi.put('/update-item/:id', isAuth, isListOwner, isItemEmpty, itemController.update);
 /********** Comments **********/
 listApi.get('/list/:slug/comments', isListPrivate, commentController.get);
+listApi.get('/comment/:id/delete-permissible', isAuth, canDeleteComment, commentController.getDeletePermissible);
 listApi.post('/create-comment', isAuth, isCommentBodyEmpty, commentHasMinCharacters, commentNotLargerThanMaxCharacters, commentController.post);
 listApi.put('/update-comment/:id', isAuth, isCommentOwner, isCommentBodyEmpty, commentHasMinCharacters, commentNotLargerThanMaxCharacters, commentController.update);
 listApi.delete('/delete-comment/:id', isAuth, canDeleteComment,commentController.delete);

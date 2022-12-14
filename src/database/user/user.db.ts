@@ -25,6 +25,9 @@ export class UserDb extends Db{
   findUserFromUsername = async (username: string, next: queryCallback): Promise<Query> => {
     return this.db.query('Select id, email, username, firstName, lastName, verification_status FROM users WHERE username= ?', username, next)
   }
+  findUserFromId = async (id: number, next: queryCallback): Promise<Query> => {
+    return this.db.query('Select id, email, username, firstName, lastName, verification_status FROM users WHERE id= ?', id, next)
+  }
 
   /**
    * Retrieve userdata [id, email, username, firstName, lastName] from email.
@@ -99,8 +102,8 @@ export class UserDb extends Db{
    * @param req
    * @param sessionData
    */
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  userSession(req: Request, sessionData): Promise<Query> {
+
+  userSession(req: Request, sessionData: { id: number }): { id: number } {
     return req.session.user = sessionData;
   }
 }
