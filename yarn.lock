@@ -194,13 +194,12 @@
   resolved "https://registry.yarnpkg.com/@socket.io/base64-arraybuffer/-/base64-arraybuffer-1.0.2.tgz#568d9beae00b0d835f4f8c53fd55714986492e61"
   integrity sha512-dOlCBKnDw4iShaIsH/bxujKTM18+2TOAsYz+KSc11Am38H4q5Xw8Bbz97ZYdrVNM+um3p7w86Bvvmcn9q+5+eQ==
 
-"@socket.io/cluster-adapter@^0.5.0":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@socket.io/cluster-adapter/-/cluster-adapter-0.2.1.tgz#e18d55da5e873f0eede8d24f074f7b43b73e982c"
-  integrity sha512-6PBOgghZJccrSs8ISEt8jJDuHRpNMvO+VZ7cHfkraFSoo1+2VS+p8QMiJ6p5ty+yGgEENgRo7jWdamupC1foJw==
+"@socket.io/cluster-adapter@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@socket.io/cluster-adapter/-/cluster-adapter-0.2.2.tgz#2b070774d3c157b4a4a33cde21ae0c624a4cec93"
+  integrity sha512-/tNcY6qQx0BOgjl4mFk3YxX6pjaPdEyeWhP88Ea9gTlISY4SfA7t8VxbryeAs5/9QgXzChlvSN/i37Gog3kWag==
   dependencies:
     debug "~4.3.1"
-    socket.io-adapter "~2.4.0"
 
 "@socket.io/component-emitter@~3.1.0":
   version "3.1.0"
@@ -2960,11 +2959,6 @@ slick@^1.12.2:
   version "1.12.2"
   resolved "https://registry.yarnpkg.com/slick/-/slick-1.12.2.tgz#bd048ddb74de7d1ca6915faa4a57570b3550c2d7"
   integrity sha1-vQSN23TefRymkV+qSldXCzVQwtc=
-
-socket.io-adapter@~2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/socket.io-adapter/-/socket.io-adapter-2.4.0.tgz#b50a4a9ecdd00c34d4c8c808224daa1a786152a6"
-  integrity sha512-W4N+o69rkMEGVuk2D/cvca3uYsvGlMwsySWV447y99gUPghxq42BxqLNMndb+a1mm/5/7NeXVQS7RLa2XyXvYg==
 
 socket.io-adapter@~2.5.2:
   version "2.5.2"
