@@ -259,3 +259,13 @@ ssl/*.srl
 /emails/reset-password/html.html
 /emails/verify-email/html.html
 /emails/prepros.config
+
+
+### yarn berry ###
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
