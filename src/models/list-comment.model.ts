@@ -13,7 +13,7 @@ export interface ListCommentQueryModel {
   slug: string;
 }
 
-export interface ListCommentEmitter extends Partial<ListCommentModel>{
+export interface ListCommentEmitter extends Partial<ListCommentModel> {
   id?: number;
   comment: string;
   creation_date: Date | string;

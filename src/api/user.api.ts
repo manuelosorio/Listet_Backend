@@ -3,7 +3,8 @@ import { UserController } from '../controllers/user/user.controller';
 import {
   containsFirstName,
   containsLastName,
-  containsUsername, containsEmail,
+  containsUsername,
+  containsEmail,
   isEmailValid,
   isPasswordValid,
 } from '../middleware/registration.middleware';
@@ -11,24 +12,61 @@ import { containsPassword, isAuth } from '../middleware/auth.middleware';
 import { matchesAccountPassword } from '../middleware/password.middleware';
 
 const userApi = Router();
-const userController = new UserController()
+const userController = new UserController();
 
 userApi.get('/user/:username', userController.getUser);
 
-userApi.post('/register', containsFirstName,
-  containsLastName, containsUsername, containsEmail,
-  isEmailValid, isPasswordValid, userController.register);
+userApi.post(
+  '/register',
+  containsFirstName,
+  containsLastName,
+  containsUsername,
+  containsEmail,
+  isEmailValid,
+  isPasswordValid,
+  userController.register
+);
 userApi.post('/login', containsEmail, containsPassword, userController.login);
 userApi.post('/logout', userController.logout);
 userApi.post('/reset-password', containsEmail, userController.resetPassword);
 userApi.get('/session', userController.session);
 
-userApi.put('/update-password', isAuth, containsPassword, matchesAccountPassword, userController.changePassword);
-userApi.put('/update-account-info', isAuth, containsFirstName, containsLastName,
-  containsEmail, isEmailValid, userController.updateAccountInfo);
-userApi.put('/deactivate-account', isAuth, containsPassword, matchesAccountPassword, userController.deactivateUser);
-userApi.put('/reactivate-account', isAuth, containsPassword, matchesAccountPassword, userController.reactivateUser);
-userApi.delete('/delete-account', isAuth, containsPassword, matchesAccountPassword, userController.deleteUser)
-
+userApi.put(
+  '/update-password',
+  isAuth,
+  containsPassword,
+  matchesAccountPassword,
+  userController.changePassword
+);
+userApi.put(
+  '/update-account-info',
+  isAuth,
+  containsFirstName,
+  containsLastName,
+  containsEmail,
+  isEmailValid,
+  userController.updateAccountInfo
+);
+userApi.put(
+  '/deactivate-account',
+  isAuth,
+  containsPassword,
+  matchesAccountPassword,
+  userController.deactivateUser
+);
+userApi.put(
+  '/reactivate-account',
+  isAuth,
+  containsPassword,
+  matchesAccountPassword,
+  userController.reactivateUser
+);
+userApi.delete(
+  '/delete-account',
+  isAuth,
+  containsPassword,
+  matchesAccountPassword,
+  userController.deleteUser
+);
 
 export default userApi;

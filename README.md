@@ -7,6 +7,3 @@ Throughout this project I have learned a lot in having to do with JavaScript (no
 Live site can be found at https://listet.app/
 
 Frontend Repo: [manuelosorio/Listet_Backend: NodeJS Backend for Listet (github.com)](https://github.com/manuelosorio/Listet_Frontend/)
-
-
-

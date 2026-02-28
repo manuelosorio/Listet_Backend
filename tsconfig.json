@@ -2,12 +2,11 @@
   "compilerOptions": {
     "module": "CommonJS",
     "esModuleInterop": true,
-    "target": "es6",
+    "target": "es2022",
     "moduleResolution": "Node",
     "sourceMap": false,
     "outDir": "dist",
-    "watch": false,
-    "pretty": true,
+    "pretty": true
   },
-  "lib": ["es2015"]
+  "include": ["src/**/*"]
 }

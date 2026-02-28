@@ -1,9 +1,7 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint"
-  ],
+  "plugins": ["@typescript-eslint"],
   "env": {
     "node": true,
     "es6": true
@@ -15,18 +13,25 @@
   ],
   "rules": {
     "no-empty-function": "off",
-    "@typescript-eslint/no-empty-function": ["error", { "allow": ["constructors"] }],
+    "@typescript-eslint/no-empty-function": [
+      "error",
+      { "allow": ["constructors"] }
+    ],
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_" }
+    ],
     "prefer-const": "warn",
     "@typescript-eslint/no-explicit-any": "off",
     "camelcase": [
-      2, {
+      2,
+      {
         "properties": "never",
         "ignoreDestructuring": true,
         "ignoreGlobals": true
       }
-   ]
+    ]
   },
   "overrides": [
     {

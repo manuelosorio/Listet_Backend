@@ -4,7 +4,7 @@ import { VerificationTokenController } from '../controllers/token/verification-t
 const tokensApi = Router();
 
 const resetToken = new ResetTokenController();
-const verifyToken = new VerificationTokenController()
+const verifyToken = new VerificationTokenController();
 
 tokensApi.get('/reset-password/:tokenStore', resetToken.checkToken);
 tokensApi.put('/reset-password/:tokenStore', resetToken.resetPassword);

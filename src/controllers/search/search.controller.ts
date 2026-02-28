@@ -1,6 +1,6 @@
-import { SearchDb } from "../../database/search/search.db";
-import mysql from "mysql";
-import { DB_CONFIG } from "../../environments/variables";
+import { SearchDb } from '../../database/search/search.db';
+import mysql from 'mysql';
+import { DB_CONFIG } from '../../environments/variables';
 
 export class SearchController {
   private searchDb: SearchDb;
@@ -15,7 +15,7 @@ export class SearchController {
       }
       res.status(200).send(results).end();
     });
-  }
+  };
   user = async (req, res) => {
     return this.searchDb.searchUser(req.params.query, (err, results) => {
       if (err) {
@@ -24,5 +24,5 @@ export class SearchController {
       }
       res.status(200).send(results).end();
     });
-  }
+  };
 }

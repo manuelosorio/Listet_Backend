@@ -5,5 +5,5 @@ export interface UserModel {
   email: string;
   username: string;
   password: string;
-  verification_status ?: number;
+  verification_status?: number;
 }

@@ -6,8 +6,8 @@
  */
 
 export interface EmailDataModel {
-  firstName: string,
-  lastName: string,
-  email: string,
-  token: string | '',
+  firstName: string;
+  lastName: string;
+  email: string;
+  token: string | '';
 }

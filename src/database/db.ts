@@ -20,7 +20,8 @@ export class Db {
    */
   getConnection(): Pool {
     this.db.getConnection((err: MysqlError, connection: PoolConnection) => {
-      const errMessage = 'Connection to database base refused. ' +
+      const errMessage =
+        'Connection to database base refused. ' +
         'Please check that connection details are correct and that the database is running.';
       if (err) return console.error(chalk.red(errMessage));
       console.log('Connected to Database');
@@ -38,11 +39,13 @@ export class Db {
    * @param params
    * @param next (MysqlError, fields, results)
    */
-  async query(query: string, params: any | null, next: queryCallback): Promise<Query> {
-    console.log("Fetching data");
+  async query(
+    query: string,
+    params: any | null,
+    next: queryCallback
+  ): Promise<Query> {
+    console.log('Fetching data');
     if (!params) return this.getConnection().query(query, next);
     else return this.getConnection().query(query, params, next);
   }
-
 }
-

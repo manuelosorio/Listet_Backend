@@ -1,0 +1,5 @@
+dist
+emails
+node_modules
+.yarn
+.github

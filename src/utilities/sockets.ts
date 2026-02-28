@@ -14,15 +14,15 @@ export class Sockets {
   private static ioInstance: SocketIO.Server;
   private readonly io: Server;
   constructor(server: http.Server) {
-    this.io = new SocketIO.Server(server, ({
+    this.io = new SocketIO.Server(server, {
       cors: {
         origin: CORS.origin,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        credentials: CORS.credentials
+        credentials: CORS.credentials,
       },
       path: '/socket-io',
-      transports: ['polling']
-    }));
+      transports: ['polling'],
+    });
     console.log(chalk.bgYellow.black('Websocket Initialized!'));
     Sockets.setIoInstance(this.io);
   }
@@ -41,21 +41,29 @@ export class Sockets {
   }
   public connect(): void {
     this.io.on('connection', async (socket: Socket) => {
-      console.log(chalk.bgYellow.black(`Client #${socket.id} Connected.`))
+      console.log(chalk.bgYellow.black(`Client #${socket.id} Connected.`));
       Sockets.setSocketInstance(socket);
 
-      socket.on('join', (res) => {
-        console.log(chalk.bgYellow.black(`Client #${socket.id} joined: ${res}  \n`));
+      socket.on('join', res => {
+        console.log(
+          chalk.bgYellow.black(`Client #${socket.id} joined: ${res}  \n`)
+        );
         return socket.join(res);
       });
       socket.on('disconnect', reason => {
-        console.log(chalk.bgYellow.black(`Client #${socket.id} Disconnected: ${reason}. \n`))
+        console.log(
+          chalk.bgYellow.black(
+            `Client #${socket.id} Disconnected: ${reason}. \n`
+          )
+        );
       });
-    })
+    });
   }
 
-
-  public static emit = (event: string | ListEvents | CommentEvents | ListItemEvents, data: Partial<number | ListModel | ListCommentEmitter | ListItemModel> | any): void => {
+  public static emit = (
+    event: string | ListEvents | CommentEvents | ListItemEvents,
+    data: Partial<number | ListModel | ListCommentEmitter | ListItemModel> | any
+  ): void => {
     const io: SocketIO.Server = Sockets.ioInstance;
     try {
       switch (event) {
@@ -82,7 +90,7 @@ export class Sockets {
         case ListEvents.DELETE_LIST:
         case CommentEvents.DELETE_COMMENT: {
           console.log(chalk.bgCyan.black(event, 'emitted'));
-          io.sockets.emit(event, data)
+          io.sockets.emit(event, data);
           break;
         }
         default: {
@@ -96,7 +104,7 @@ export class Sockets {
         }
       }
     } catch (e) {
-      console.error(chalk.red(e))
+      console.error(chalk.red(e));
     }
-  }
+  };
 }

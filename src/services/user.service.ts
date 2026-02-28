@@ -1,27 +1,26 @@
-import mysql from 'mysql'
+import mysql from 'mysql';
 import { UserDb } from '../database/user/user.db';
 import { DB_CONFIG } from '../environments/variables';
-import { Request} from 'express';
+import { Request } from 'express';
 import { UserModel } from '../models/user.model';
-
 
 export class UserService {
   private userDB: UserDb;
   constructor() {
-    this.userDB =  new UserDb(mysql.createPool(DB_CONFIG));
+    this.userDB = new UserDb(mysql.createPool(DB_CONFIG));
   }
-  public isUserVerified = async(id: number): Promise<boolean> => {
+  public isUserVerified = async (id: number): Promise<boolean> => {
     return new Promise((resolve, reject) => {
       return this.userDB.findUserFromId(id, async (error, results) => {
         if (error) {
           reject(error);
         }
         const verified = results[0].verification_status;
-        if (!verified) return resolve(false)
+        if (!verified) return resolve(false);
         return resolve(true);
       });
-    })
-  }
+    });
+  };
   /*
    * @param options (email)
    * @returns A promise string containing hashed account password
@@ -35,7 +34,7 @@ export class UserService {
         return resolve(results[0].password);
       });
     });
-  }
+  };
   public getCurrentUser = async (req: Request): Promise<UserModel> => {
     return new Promise((resolve, reject) => {
       if (!req.session.user) {
@@ -49,5 +48,5 @@ export class UserService {
         return resolve(results[0]);
       });
     });
-  }
+  };
 }

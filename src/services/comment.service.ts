@@ -15,31 +15,48 @@ export class CommentService {
     this.listDb = new ListDb(mysql.createPool(DB_CONFIG));
   }
 
-  public isCommentDeletionPermissible = async (commentID: number, userID: number): Promise<boolean> => {
+  public isCommentDeletionPermissible = async (
+    commentID: number,
+    userID: number
+  ): Promise<boolean> => {
     return new Promise((resolve, reject) => {
-      return this.getListId(commentID).then(async (value) => {
-        const listID = value.list_id;
-        const isListOwner = await this.listService.isListOwner(userID, listID);
-        const isCommentOwner = await this.listService.isCommentOwner(userID, commentID);
-        if (isListOwner || isCommentOwner) {
-          return resolve(true);
+      return this.getListId(commentID).then(
+        async value => {
+          const listID = value.list_id;
+          const isListOwner = await this.listService.isListOwner(
+            userID,
+            listID
+          );
+          const isCommentOwner = await this.listService.isCommentOwner(
+            userID,
+            commentID
+          );
+          if (isListOwner || isCommentOwner) {
+            return resolve(true);
+          }
+          return resolve(false);
+        },
+        (reason: MysqlError) => {
+          reject(reason);
         }
-        return resolve(false);
-      }, ((reason: MysqlError) => {
-        reject(reason);
-      }))
+      );
     });
-  }
+  };
   // eslint-disable-next-line camelcase
-  private getListId = async (commentID: number): Promise<{ list_id: number }> => {
+  private getListId = async (
+    commentID: number
+  ): Promise<{ list_id: number }> => {
     return new Promise((resolve, reject): Promise<Query> => {
-      return this.commentDb.query(`SELECT list_id FROM list_comments WHERE id = ?`,
-        commentID, (err, results) => {
+      return this.commentDb.query(
+        `SELECT list_id FROM list_comments WHERE id = ?`,
+        commentID,
+        (err, results) => {
           if (err) {
-            return reject(err)
+            return reject(err);
           }
           return resolve(results[0]);
-        })
-    })
-  }
+        }
+      );
+    });
+  };
 }

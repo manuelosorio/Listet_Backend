@@ -10,7 +10,7 @@ import { ListService } from '../../../services/list.service';
 
 export class ItemController {
   private readonly db: ListItemDb;
-  private readonly listDb: ListDb
+  private readonly listDb: ListDb;
   private readonly listService: ListService;
   constructor() {
     this.db = new ListItemDb(mysql.createPool(DB_CONFIG));
@@ -21,13 +21,16 @@ export class ItemController {
   get = (req: Request, res: Response): Promise<Query> => {
     return this.db.findListItems(req.params.slug, (err, results) => {
       if (err) {
-        console.error(err)
+        console.error(err);
         return res.sendStatus(500).end();
       }
       return res.status(200).send(results).end();
     });
-  }
-  post = async (req: Request, res: Response): Promise<Query | void | Response> => {
+  };
+  post = async (
+    req: Request,
+    res: Response
+  ): Promise<Query | void | Response> => {
     const id = Number(req.body.list_id);
     const date = req.body.deadline ? req.body.deadline : null;
     const listItem: ListItemModel = {
@@ -36,8 +39,8 @@ export class ItemController {
       deadline: date,
       completed: 0,
       list_id: id,
-      slug: req.body.slug
-    }
+      slug: req.body.slug,
+    };
     return this.db.addListItem(listItem, (err, results, _fields) => {
       if (err) {
         console.error(err);
@@ -45,10 +48,10 @@ export class ItemController {
       }
       listItem.id = results.insertId;
       Sockets.emit(ListItemEvents.ADD_ITEM, listItem);
-      return res.status(201).send({message: 'List item added.'});
+      return res.status(201).send({ message: 'List item added.' });
     });
-  }
-  delete = (req: Request, res: Response): Promise<Query> =>  {
+  };
+  delete = (req: Request, res: Response): Promise<Query> => {
     const id = req.params.id as unknown as number;
     return this.db.deleteListItem(id, (error: MysqlError) => {
       if (error) {
@@ -56,9 +59,9 @@ export class ItemController {
         return res.status(500).end();
       }
       Sockets.emit(ListItemEvents.DELETE_ITEM, id);
-      return res.send({message: 'Item Deleted'}).status(202);
+      return res.send({ message: 'Item Deleted' }).status(202);
     });
-  }
+  };
   updateStatus = (req: Request, res: Response): Promise<Query> | Response => {
     const listItem: ListItemModel = req.body;
     return this.db.updateListItemStatus(listItem, (err, _) => {
@@ -67,20 +70,24 @@ export class ItemController {
         return res.status(500).end();
       }
       Sockets.emit(ListItemEvents.COMPLETE_ITEM, listItem);
-      return res.status(201).send({ message: "Updated Item Status" }).end();
-    })
-  }
-  update = async (req: Request, res: Response, _next: NextFunction): Promise<Query | Response | void> => {
+      return res.status(201).send({ message: 'Updated Item Status' }).end();
+    });
+  };
+  update = async (
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ): Promise<Query | Response | void> => {
     const listItem: ListItemModel = req.body;
     listItem.deadline = new Date(req.body.deadline);
     listItem.id = req.params.id as unknown as number;
-      return this.db.updateListItem(listItem, (updateErr: MysqlError, _) => {
-        if (updateErr) {
-          console.error(updateErr)
-          return res.status(500).end();
-        }
-        Sockets.emit(ListItemEvents.UPDATE_ITEM, listItem);
-        return res.status(201).send({ message: "Item Updated" }).end();
-      });
-  }
+    return this.db.updateListItem(listItem, (updateErr: MysqlError, _) => {
+      if (updateErr) {
+        console.error(updateErr);
+        return res.status(500).end();
+      }
+      Sockets.emit(ListItemEvents.UPDATE_ITEM, listItem);
+      return res.status(201).send({ message: 'Item Updated' }).end();
+    });
+  };
 }

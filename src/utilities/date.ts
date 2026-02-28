@@ -1,10 +1,22 @@
-export class DateUtil{
+export class DateUtil {
   date: any;
   constructor(date: Date) {
     this.date = date;
   }
-  months = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"];
+  months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
 
   format(): string {
     const date = new Date(this.date);
