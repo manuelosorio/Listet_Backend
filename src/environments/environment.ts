@@ -1,27 +1,44 @@
-import { Router } from 'express'
-import bodyParser from "body-parser";
+import express from 'express';
+import session from 'express-session';
+import * as expressSession from 'express-session';
+import morgan from 'morgan';
+import cors from 'cors';
+import helmet from 'helmet';
+import MySQLSession from 'express-mysql-session';
+import * as vars from './variables';
 
-import {variables} from './variables';
-import development from './environment.dev';
-import production from './environment.prod';
+const isProd = vars.variables.nodeEnv === 'production';
 
+const MySQLStore = MySQLSession(expressSession);
+const sessionStore = new MySQLStore(vars.DB_CONFIG);
 
-const environment = Router();
-const env = variables.nodeEnv;
+const environment = express();
 
-environment.use(bodyParser.json());
-environment.use(bodyParser.urlencoded({extended: false}))
+environment.use(morgan(isProd ? 'combined' : 'tiny'));
 
-switch (env) {
-  case 'Development':
-  case 'development':
-    environment.use(development)
-  break;
+environment.use(cors(vars.CORS));
 
-  case 'Production':
-  case 'production':
-    environment.use(production)
-  break;
+if (isProd) {
+  environment.use(helmet());
+  environment.set('trust proxy', true);
 }
 
-export = environment;
+environment.use(
+  session({
+    name: vars.SESSION.id,
+    secret: vars.SESSION.secret,
+    resave: true,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+      secure: isProd,
+      sameSite: isProd ? true : undefined,
+      httpOnly: isProd,
+      domain: isProd ? vars.variables.hostname : undefined,
+      maxAge: vars.SESSION.maxAge || 30 * 60 * 1000,
+      signed: true,
+    },
+  }) as any
+);
+
+export default environment;

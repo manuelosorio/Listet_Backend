@@ -1,11 +1,11 @@
-import {createCipheriv, createDecipheriv, randomBytes} from 'crypto'
-import {Buffer} from 'buffer';
-import {token} from '../environments/variables';
-import chalk from "chalk";
+import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+import { Buffer } from 'buffer';
+import { TOKEN } from '../environments/variables';
+import chalk from 'chalk';
 export class Crypto {
   secret;
   constructor() {
-    this.secret = token.secret;
+    this.secret = TOKEN.secret;
   }
 
   /**
@@ -37,10 +37,14 @@ export class Crypto {
       const tokenParts = encryptedToken.split(':');
       const iv = Buffer.from(tokenParts.shift(), 'hex');
       const encryptedText = Buffer.from(tokenParts.shift(), 'hex');
-      const decipher = createDecipheriv('aes-256-cbc', Buffer.from(this.secret), iv)
+      const decipher = createDecipheriv(
+        'aes-256-cbc',
+        Buffer.from(this.secret),
+        iv
+      );
       let decrypted = decipher.update(encryptedText);
       decrypted = Buffer.concat([decrypted, decipher.final()]);
-        return JSON.parse(decrypted.toString());
+      return JSON.parse(decrypted.toString());
     } catch (err) {
       console.error(chalk.red(err));
       // throw new Error(err.message);
