@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { SmtpModel } from '../models/smtp.model';
+import { ConnectionConfig } from 'mysql';
 dotenv.config();
 
 export const variables: any = {
@@ -8,13 +9,14 @@ export const variables: any = {
   httpsPort: process.env.HTTPS_PORT,
   hostname: process.env.HOSTNAME,
 };
-export const DB_CONFIG = {
+export const DB_CONFIG: ConnectionConfig = {
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT) || undefined,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   debug: (process.env.DB_DEBUG ?? '').trim() === 'true',
+  charset: 'utf8mb4',
 };
 const corsOrigin: string[] = [];
 const appURL = process.env.APP_URL.split(' ');
