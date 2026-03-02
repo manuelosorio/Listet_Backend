@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 import { SmtpModel } from '../models/smtp.model';
 import { ConnectionConfig } from 'mysql';
+import { readFileSync } from 'node:fs';
+import { join, resolve } from 'path';
+const root = join(__dirname, '..', '..');
 dotenv.config();
 
 export const variables: any = {
@@ -9,6 +12,10 @@ export const variables: any = {
   httpsPort: process.env.HTTPS_PORT,
   hostname: process.env.HOSTNAME,
 };
+
+
+const sslEnabled = (process.env.SSL_ENABLED ?? '').trim().toLowerCase() === 'true';
+
 export const DB_CONFIG: ConnectionConfig = {
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT) || undefined,
@@ -17,7 +24,12 @@ export const DB_CONFIG: ConnectionConfig = {
   database: process.env.DB_NAME,
   debug: (process.env.DB_DEBUG ?? '').trim() === 'true',
   charset: 'utf8mb4',
+  ssl: sslEnabled ? {
+    ca: readFileSync(resolve(root, process.env.DB_SSL_CA!), "utf8"),
+    rejectUnauthorized: true
+  } : undefined,
 };
+
 const corsOrigin: string[] = [];
 const appURL = process.env.APP_URL.split(' ');
 
