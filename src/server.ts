@@ -28,23 +28,25 @@ app.use(userApi);
 app.use(listApi);
 app.use(tokensApi);
 app.use('/search', searchApi);
-
-app.get('/', (req, res) => {
-  res.status(200).send('');
-  //   if (!req.session) {
-  //     return res.send('There is no session');
-  //   }
-  //   if (!req.session.user) {
-  //     return res.send('You are not logged in');
-  //   } else {
-  //     const user = req.session.user;
-  //     const firstName = user.firstName;
-  //     const lastName = user.lastName;
-  //     return res.send(`Hello ${firstName} ${lastName}`);
-  //   }
-});
+app.use(errorHandler);
 
 new Sockets(server).connect();
 server.listen(app.get('port'), () => {
   console.log('Server listening on port ' + app.get('port'));
 });
+
+
+export function errorHandler(err: any, req: any, res: any, _next: any) {
+  console.error('🔥 API ERROR:', {
+    method: req.method,
+    url: req.originalUrl,
+    message: err?.message,
+    stack: err?.stack,
+  });
+
+  if (res.headersSent) return;
+
+  res.status(err?.statusCode ?? 500).json({
+    message: err?.message ?? 'Internal Server Error',
+  });
+}
