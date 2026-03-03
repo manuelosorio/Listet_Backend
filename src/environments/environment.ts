@@ -13,7 +13,9 @@ const isProd = vars.variables.nodeEnv === 'production';
 
 const MySQLStore = MySQLSession(expressSession);
 const db = mysql.createPool(vars.DB_CONFIG);
-const sessionStore = new MySQLStore({}, db);
+const sessionStore = new MySQLStore({
+    ...vars.DB_CONFIG,
+}, db);
 
 const environment = express();
 
