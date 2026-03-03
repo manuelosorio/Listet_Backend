@@ -22,19 +22,28 @@ const server = new http.Server(app);
 app.set('port', variables.port || 3000);
 app.use(helmet());
 app.use(express.json());
+app.get('/health', (req, res) => {
+  const data = {
+    uptime: process.uptime(),
+    message: 'Ok',
+    date: new Date()
+  }
+
+  res.status(200).send(data);
+});
 app.use(environment);
 app.use(Flash() as any);
 app.use(userApi);
 app.use(listApi);
 app.use(tokensApi);
 app.use('/search', searchApi);
+
 app.use(errorHandler);
 
 new Sockets(server).connect();
 server.listen(app.get('port'), () => {
   console.log('Server listening on port ' + app.get('port'));
 });
-
 
 export function errorHandler(err: any, req: any, res: any, _next: any) {
   console.error('🔥 API ERROR:', {
