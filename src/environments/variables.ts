@@ -25,13 +25,6 @@ export const DB_CONFIG: ConnectionConfig = {
   debug: (process.env.DB_DEBUG ?? '').trim() === 'true',
   charset: 'utf8mb4',
 };
-if (sslEnabled) {
-  DB_CONFIG.ssl = {
-    ca: readFileSync(resolve(root, process.env.DB_SSL_CA!), "utf8"),
-    minVersion: 'TLSv1.2',
-    rejectUnauthorized: true
-  };
-}
 
 const corsOrigin: string[] = [];
 const appURL = process.env.APP_URL.split(' ');

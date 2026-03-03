@@ -6,16 +6,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import MySQLSession from 'express-mysql-session';
 import * as vars from './variables';
-import { Db } from '../database/db';
-import mysql from 'mysql';
 
 const isProd = vars.variables.nodeEnv === 'production';
 
 const MySQLStore = MySQLSession(expressSession);
-const db = mysql.createPool(vars.DB_CONFIG);
-const sessionStore = new MySQLStore({
-    ...vars.DB_CONFIG,
-}, db);
+const sessionStore = new MySQLStore(vars.DB_CONFIG);
 
 const environment = express();
 
