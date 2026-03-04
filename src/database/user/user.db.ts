@@ -154,7 +154,6 @@ export class UserDb extends Db {
    * @param req
    * @param sessionData
    */
-
   userSession(req: Request, sessionData: { id: number }): { id: number } {
     return (req.session.user = sessionData);
   }

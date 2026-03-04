@@ -3,6 +3,8 @@ import { SmtpModel } from '../models/smtp.model';
 import { ConnectionConfig } from 'mysql';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'path';
+import { hashPassword } from '../utilities/bcrypt';
+import crypto from 'node:crypto';
 const root = join(__dirname, '..', '..');
 dotenv.config();
 
@@ -77,3 +79,7 @@ export const SSL = {
   cert: process.env.SSL_CERT,
   key: process.env.SSL_KEY,
 };
+
+export const DUMMY_HASH = hashPassword(
+  process.env.DUMMY_PASSWORD || crypto.randomBytes(32).toString('hex')
+);

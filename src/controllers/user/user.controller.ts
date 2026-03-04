@@ -1,7 +1,13 @@
 import chalk from 'chalk';
 import mysql, { MysqlError, Query } from 'mysql';
 import { NextFunction, Request, Response } from 'express';
-import { APP, DB_CONFIG, SMTP, TOKEN } from '../../environments/variables';
+import {
+  APP,
+  DB_CONFIG,
+  DUMMY_HASH,
+  SMTP,
+  TOKEN,
+} from '../../environments/variables';
 import { Mailer } from '../../utilities/nodemailer';
 import { Crypto } from '../../utilities/crypto';
 import { DateUtil } from '../../utilities/date';
@@ -93,7 +99,8 @@ export class UserController {
             };
             return this.db.newUser(user, (err, _results) => {
               if (err) {
-                return err;
+                console.error(chalk.bgRed.white(err));
+                return res.status(500).end();
               }
               const num = parseInt(TOKEN.verify_expire_time, 0);
               const expireDate = date.setExpire(num);
@@ -171,12 +178,10 @@ export class UserController {
         console.error(err.message);
         return res.status(500).end();
       }
-      if (!result.length) {
-        this.responseMessage.message =
-          'Login Details Incorrect. Please Try Again.';
-        return res.status(403).send(this.responseMessage).end();
-      }
-      if (comparePassword(password, result[0].password) === false) {
+
+      const hash = result.length ? result[0].password : DUMMY_HASH;
+
+      if (comparePassword(password, hash) === false) {
         this.responseMessage.message =
           'Login Details Incorrect. Please Try Again.';
         return res.status(403).send(this.responseMessage).end();
@@ -320,7 +325,12 @@ export class UserController {
     return this.db.updateAccountInfo(currentUser, (err, _results) => {
       if (err) {
         console.error(err.message);
-        return res.status(500);
+        return res
+          .status(500)
+          .send({
+            message: 'An error occurred while updating your account info.',
+          })
+          .end();
       }
       currentUser.firstName = accountInfo.firstName;
       currentUser.lastName = accountInfo.lastName;
