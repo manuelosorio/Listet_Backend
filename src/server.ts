@@ -32,11 +32,6 @@ app.get('/health', (req, res) => {
 
   res.status(200).send(data);
 });
-app.use((req, res, next) => {
-  console.log('proto:', req.headers['x-forwarded-proto']);
-  console.log('secure:', req.secure);
-  next();
-});
 app.use(environment);
 app.use(Flash() as any);
 app.use(userApi);
