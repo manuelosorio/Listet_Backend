@@ -10,11 +10,11 @@ import userApi from './api/user.api';
 import searchApi from './api/search.api';
 import { Sockets } from './utilities/sockets';
 
-if (variables.nodeEnv === 'production') {
-  console.log = () => {
-    return;
-  };
-}
+// if (variables.nodeEnv === 'production') {
+//   console.log = () => {
+//     return;
+//   };
+// }
 const app = express();
 
 const server = new http.Server(app);
@@ -31,6 +31,11 @@ app.get('/health', (req, res) => {
   }
 
   res.status(200).send(data);
+});
+app.use((req, res, next) => {
+  console.log('proto:', req.headers['x-forwarded-proto']);
+  console.log('secure:', req.secure);
+  next();
 });
 app.use(environment);
 app.use(Flash() as any);
