@@ -36,6 +36,9 @@ export const APP = {
   hostname: process.env.APP_HOSTNAME,
   // url: process.env.APP_URL.split,
   path: process.env.APP_PATH ?? '',
+  trustProxy: parseInt(process.env.APP_TRUST_PROXY_LEVEL)
+    ? parseInt(process.env.APP_TRUST_PROXY_LEVEL)
+    : process.env.APP_TRUST_PROXY_LEVEL === 'true',
 };
 export const CORS = {
   origin: corsOrigin,

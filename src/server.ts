@@ -3,7 +3,7 @@ import Flash from 'express-flash';
 import http from 'http';
 import helmet from 'helmet';
 import environment from './environments/environment';
-import { variables } from './environments/variables';
+import { APP, variables } from './environments/variables';
 import listApi from './api/lists.api';
 import tokensApi from './api/tokens.api';
 import userApi from './api/user.api';
@@ -20,7 +20,7 @@ const app = express();
 const server = new http.Server(app);
 
 app.set('port', variables.port || 3000);
-app.set('trust proxy', true);
+app.set('trust proxy', APP.trustProxy);
 app.use(helmet());
 app.use(express.json());
 app.get('/health', (req, res) => {
