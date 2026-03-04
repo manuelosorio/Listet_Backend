@@ -1,5 +1,5 @@
 import express from 'express';
-import session from 'express-session';
+import session, { SessionOptions } from 'express-session';
 import * as expressSession from 'express-session';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -15,7 +15,6 @@ const sessionStore = new MySQLStore(vars.DB_CONFIG);
 const environment = express();
 
 environment.use(morgan(isProd ? 'combined' : 'tiny'));
-
 environment.use(cors(vars.CORS));
 
 if (isProd) {
@@ -23,22 +22,23 @@ if (isProd) {
   environment.set('trust proxy', true);
 }
 
-environment.use(
-  session({
-    name: vars.SESSION.id,
-    secret: vars.SESSION.secret,
-    resave: true,
-    saveUninitialized: false,
-    store: sessionStore,
-    cookie: {
-      secure: isProd,
-      sameSite: isProd ? true : undefined,
-      httpOnly: isProd,
-      domain: isProd ? vars.variables.hostname : undefined,
-      maxAge: vars.SESSION.maxAge || 30 * 60 * 1000,
-      signed: true,
-    },
-  }) as any
-);
+const sess: SessionOptions = {
+  name: vars.SESSION.id,
+  secret: vars.SESSION.secret as string,
+  resave: true,
+  saveUninitialized: true,
+  store: sessionStore,
+  rolling: true,
+  cookie: {
+    secure: isProd,
+    sameSite: isProd,
+    httpOnly: isProd,
+    domain: vars.variables.hostname,
+    maxAge: vars.SESSION.maxAge,
+    signed: isProd,
+  },
+};
+
+environment.use(session(sess) as any);
 
 export default environment;
