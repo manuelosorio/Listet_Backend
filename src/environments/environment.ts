@@ -17,11 +17,6 @@ const environment = express();
 environment.use(morgan(isProd ? 'combined' : 'tiny'));
 environment.use(cors(vars.CORS));
 
-if (isProd) {
-  environment.use(helmet());
-  environment.set('trust proxy', true);
-}
-
 const sess: SessionOptions = {
   name: vars.SESSION.id,
   secret: vars.SESSION.secret as string,
