@@ -12,8 +12,8 @@ export const variables: any = {
   httpsPort: process.env.HTTPS_PORT,
 };
 
-
-const sslEnabled = (process.env.SSL_ENABLED ?? '').trim().toLowerCase() === 'true';
+const sslEnabled =
+  (process.env.DB_SSL_ENABLED ?? '').trim().toLowerCase() === 'true';
 
 export const DB_CONFIG: ConnectionConfig = {
   host: process.env.DB_HOST,
@@ -24,6 +24,12 @@ export const DB_CONFIG: ConnectionConfig = {
   debug: (process.env.DB_DEBUG ?? '').trim() === 'true',
   charset: 'utf8mb4',
 };
+if (sslEnabled) {
+  DB_CONFIG.ssl = {
+    ca: readFileSync(resolve(root, process.env.DB_SSL_CA!), 'utf8'),
+    rejectUnauthorized: true,
+  };
+}
 
 const corsOrigin: string[] = [];
 const appURL = process.env.APP_URL.split(' ');

@@ -5,11 +5,14 @@ import morgan from 'morgan';
 import cors from 'cors';
 import MySQLSession from 'express-mysql-session';
 import * as vars from './variables';
+import mysql from 'mysql';
 
 const isProd = vars.variables.nodeEnv === 'production';
 
 const MySQLStore = MySQLSession(expressSession);
-const sessionStore = new MySQLStore(vars.DB_CONFIG);
+
+const db = mysql.createPool(vars.DB_CONFIG);
+const sessionStore = new MySQLStore({}, db);
 
 const environment = express();
 
