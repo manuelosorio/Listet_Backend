@@ -3,7 +3,6 @@ import session, { SessionOptions } from 'express-session';
 import * as expressSession from 'express-session';
 import morgan from 'morgan';
 import cors from 'cors';
-import helmet from 'helmet';
 import MySQLSession from 'express-mysql-session';
 import * as vars from './variables';
 
@@ -20,16 +19,15 @@ environment.use(cors(vars.CORS));
 const sess: SessionOptions = {
   name: vars.SESSION.id,
   secret: vars.SESSION.secret as string,
-  resave: true,
-  saveUninitialized: true,
+  resave: false,
+  saveUninitialized: false,
   store: sessionStore,
   rolling: true,
   cookie: {
     secure: isProd,
-    sameSite: isProd,
-    httpOnly: isProd,
+    sameSite: isProd ? 'strict' : undefined,
+    httpOnly: true,
     maxAge: vars.SESSION.maxAge,
-    signed: isProd,
   },
 };
 

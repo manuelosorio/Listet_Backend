@@ -20,8 +20,8 @@ const app = express();
 const server = new http.Server(app);
 
 app.set('port', variables.port || 3000);
-app.use(helmet());
 app.set('trust proxy', true);
+app.use(helmet());
 app.use(express.json());
 app.get('/health', (req, res) => {
   const data = {
