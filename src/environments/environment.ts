@@ -28,7 +28,6 @@ const sess: SessionOptions = {
     secure: isProd,
     sameSite: isProd,
     httpOnly: isProd,
-    domain: vars.variables.hostname,
     maxAge: vars.SESSION.maxAge,
     signed: isProd,
   },
