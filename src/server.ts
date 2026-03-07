@@ -9,6 +9,7 @@ import tokensApi from './api/tokens.api';
 import userApi from './api/user.api';
 import searchApi from './api/search.api';
 import { Sockets } from './utilities/sockets';
+import { ok } from './utilities/response';
 
 // if (variables.nodeEnv === 'production') {
 //   console.log = () => {
@@ -30,7 +31,7 @@ app.get('/health', (req, res) => {
     date: new Date(),
   };
 
-  res.status(200).send(data);
+  ok(res, data);
 });
 app.use(environment);
 app.use(Flash() as any);
