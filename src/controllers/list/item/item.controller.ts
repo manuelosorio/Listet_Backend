@@ -79,7 +79,7 @@ export class ItemController {
     _next: NextFunction
   ): Promise<Query | Response | void> => {
     const listItem: ListItemModel = req.body;
-    listItem.deadline = new Date(req.body.deadline);
+    listItem.deadline = req.body.deadline ? req.body.deadline : null;
     listItem.id = req.params.id as unknown as number;
     return this.db.updateListItem(listItem, (updateErr: MysqlError, _) => {
       if (updateErr) {
