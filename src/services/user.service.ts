@@ -2,7 +2,8 @@ import mysql from 'mysql';
 import { UserDb } from '../database/user/user.db';
 import { DB_CONFIG } from '../environments/variables';
 import { Request } from 'express';
-import { UserModel } from '../models/user.model';
+import { UserPasswordRow, UserModel } from '../models/user.model';
+import { promisify } from '../utilities/promise';
 
 export class UserService {
   private userDB: UserDb;
@@ -21,20 +22,31 @@ export class UserService {
       });
     });
   };
-  /*
-   * @param options (email)
+
+  /**
+   * @param email - email of user whose password is being retrieved
    * @returns A promise string containing hashed account password
    */
-  public accountPassword = async (email: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      return this.userDB.getPassword(email, async (error, results) => {
-        if (error) {
-          return reject(error.message);
-        }
-        return resolve(results[0].password);
-      });
+  public async accountPassword(email: string): Promise<string | null> {
+    const users = await promisify<UserPasswordRow[], [string]>(
+      this.userDB.getPassword.bind(this.userDB),
+      email
+    );
+
+    if (!users.length) {
+      return null;
+    }
+
+    return users[0].password;
+  }
+  public findUserFromEmail(email: string): Promise<UserModel | null> {
+    return promisify<UserModel[], [string]>(
+      this.userDB.findUserFromEmail.bind(this.userDB),
+      email
+    ).then(results => {
+      return results[0] ?? null;
     });
-  };
+  }
   public getCurrentUser = async (req: Request): Promise<UserModel> => {
     return new Promise((resolve, reject) => {
       if (!req.session.user) {

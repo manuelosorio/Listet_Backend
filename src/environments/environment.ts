@@ -28,7 +28,7 @@ const sess: SessionOptions = {
   rolling: true,
   cookie: {
     secure: isProd,
-    sameSite: isProd ? 'strict' : undefined,
+    sameSite: isProd ? 'strict' : 'lax',
     httpOnly: true,
     maxAge: vars.SESSION.maxAge,
   },

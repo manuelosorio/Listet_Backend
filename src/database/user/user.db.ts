@@ -66,7 +66,6 @@ export class UserDb extends Db {
    * @param next
    */
   getPassword = async (email: string, next: queryCallback): Promise<Query> => {
-    console.log('Fetching User Data');
     return this.db.query(
       'Select password FROM users Where email= ?',
       email,

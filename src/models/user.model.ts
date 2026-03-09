@@ -7,3 +7,7 @@ export interface UserModel {
   password: string;
   verification_status?: number;
 }
+
+export interface UserPasswordRow {
+  password: string;
+}

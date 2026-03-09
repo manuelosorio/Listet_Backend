@@ -5,6 +5,7 @@ import {
   APP,
   DB_CONFIG,
   DUMMY_HASH,
+  SESSION,
   SMTP,
   TOKEN,
 } from '../../environments/variables';
@@ -20,6 +21,7 @@ import { ResetTokenDb } from '../../database/token/reset-token.db';
 import { TokenModel } from '../../models/token.model';
 import { NewPasswordModel } from '../../models/new-password.model';
 import { UserService } from '../../services/user.service';
+import { ok, serverError, unauthorized } from '../../utilities/response';
 
 export class UserController {
   private readonly crypto: Crypto;
@@ -166,47 +168,55 @@ export class UserController {
     );
   };
 
-  login = async (
-    req: Request,
-    res: Response,
-    _next: NextFunction
-  ): Promise<Query> => {
-    const email: string = req.body.email;
-    const password: string = req.body.password;
-    return await this.db.getPassword(email, (err, result) => {
-      if (err) {
-        console.error(err.message);
-        return res.status(500).end();
+  login = async (req: Request, res: Response, _next: NextFunction) => {
+    try {
+      const email: string = req.body.email;
+      const password: string = req.body.password;
+      const remember = [true, 'true'].includes(req.body.remember);
+
+      const accountPassword = await this.userService.accountPassword(email);
+      const hash = accountPassword ?? DUMMY_HASH;
+      const passwordMatch = comparePassword(password, hash);
+
+      if (!accountPassword || !passwordMatch) {
+        return unauthorized(res, 'Login Details Incorrect. Please Try Again.');
       }
 
-      const hash = result.length ? result[0].password : DUMMY_HASH;
+      const user = await this.userService.findUserFromEmail(email);
 
-      if (comparePassword(password, hash) === false) {
-        this.responseMessage.message =
-          'Login Details Incorrect. Please Try Again.';
-        return res.status(403).send(this.responseMessage).end();
-      }
-      return this.db.findUserFromEmail(email, (error, results) => {
-        if (error) {
-          console.error(error);
-          return res.status(500).send(error.message).end();
+      req.session.regenerate(regenError => {
+        if (regenError) {
+          console.error('Session Regeneration Error:', regenError);
+          return serverError(res);
         }
-        this.responseMessage.message = 'Login Successful';
-        const user: UserModel = results[0];
+
         this.db.userSession(req, { id: user.id });
-        return res
-          .status(200)
-          .send({
-            response: this.responseMessage,
+        if (remember) {
+          req.session.cookie.maxAge = SESSION.maxAgeRememberMe;
+        } else {
+          req.session.cookie.maxAge = SESSION.maxAge;
+        }
+
+        req.session.save(saveErr => {
+          if (saveErr) {
+            console.error('Session Save Error:', saveErr);
+            return serverError(res);
+          }
+
+          return ok(res, {
+            response: { message: 'Login successful.' },
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
             username: user.username,
-            verified: results[0].verification_status,
-          })
-          .end();
+            verified: user.verification_status,
+          });
+        });
       });
-    });
+    } catch (error) {
+      console.error('Login Error:', error);
+      return serverError(res);
+    }
   };
 
   logout = async (
