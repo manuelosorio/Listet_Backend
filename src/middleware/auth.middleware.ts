@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { UserService } from '../services/user.service';
+import { unprocessable } from '../utilities/response';
 const userService = new UserService();
 export function isAuth(
   req: Request,
@@ -40,7 +41,8 @@ export function containsPassword(
   res: Response,
   next: NextFunction
 ): void | Response {
-  if (!(req.body.password || req.body.currentPassword))
-    return res.status(422).send({ message: 'Password is required' }).end();
+  if (!(req.body.password || req.body.currentPassword)) {
+    return unprocessable(res, 'Password is required');
+  }
   return next();
 }

@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router } from 'express';
 import session, { SessionOptions } from 'express-session';
 import * as expressSession from 'express-session';
 import morgan from 'morgan';
@@ -14,7 +14,7 @@ const MySQLStore = MySQLSession(expressSession);
 const db = mysql.createPool(vars.DB_CONFIG);
 const sessionStore = new MySQLStore({}, db);
 
-const environment = express();
+const environment = Router();
 
 environment.use(morgan(isProd ? 'combined' : 'tiny'));
 environment.use(cors(vars.CORS));
@@ -28,7 +28,7 @@ const sess: SessionOptions = {
   rolling: true,
   cookie: {
     secure: isProd,
-    sameSite: isProd ? 'strict' : undefined,
+    sameSite: isProd ? 'strict' : 'lax',
     httpOnly: true,
     maxAge: vars.SESSION.maxAge,
   },

@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { unprocessable } from '../utilities/response';
 
 export function containsFirstName(
   req: Request,
@@ -41,8 +42,9 @@ export function containsEmail(
   res: Response,
   next: NextFunction
 ): void | Response {
-  if (!req.body.email)
-    return res.status(422).send({ message: 'Email is required' }).end();
+  if (!req.body.email) {
+    return unprocessable(res, 'Email is required');
+  }
   next();
 }
 export function isEmailValid(

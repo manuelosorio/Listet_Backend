@@ -42,11 +42,11 @@ for (let i = 0; i < appURL.length; i++) {
 }
 export const APP = {
   hostname: process.env.APP_HOSTNAME,
-  // url: process.env.APP_URL.split,
   path: process.env.APP_PATH ?? '',
   trustProxy: parseInt(process.env.APP_TRUST_PROXY_LEVEL)
     ? parseInt(process.env.APP_TRUST_PROXY_LEVEL)
     : process.env.APP_TRUST_PROXY_LEVEL === 'true',
+  requestLimit: process.env.APP_REQUEST_LIMIT || '100kb',
 };
 export const CORS = {
   origin: corsOrigin,
@@ -67,7 +67,8 @@ export const SMTP: SmtpModel = {
 export const SESSION = {
   id: process.env.SESSION_ID,
   secret: process.env.SESSION_SECRET,
-  maxAge: parseInt(process.env.MAX_AGE || '7200000'),
+  maxAge: parseInt(process.env.MAX_AGE || '1800000'),
+  maxAgeRememberMe: parseInt(process.env.MAX_AGE_REMEMBER_ME || '72000000'),
 };
 export const TOKEN = {
   secret: process.env.TOKEN_SECRET,
