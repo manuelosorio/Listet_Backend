@@ -41,6 +41,7 @@ for (let i = 0; i < appURL.length; i++) {
   corsOrigin.push(`https://${appURL[i]}`);
 }
 export const APP = {
+  debug: (process.env.APP_DEBUG ?? '').trim().toLowerCase() === 'true' || false,
   hostname: process.env.APP_HOSTNAME,
   path: process.env.APP_PATH ?? '',
   trustProxy: parseInt(process.env.APP_TRUST_PROXY_LEVEL)

@@ -45,6 +45,19 @@ app.use(listApi);
 app.use(tokensApi);
 app.use('/search', searchApi);
 
+if (APP.debug) {
+  app.get('/debug/proxy', (req, res) => {
+    ok(res, {
+      protocol: req.protocol,
+      secure: req.secure,
+      host: req.get('host'),
+      xForwardedProto: req.get('x-forwarded-proto'),
+      xForwardedPort: req.get('x-forwarded-port'),
+      xForwardedFor: req.get('x-forwarded-for'),
+    });
+  });
+}
+
 app.use(errorHandler);
 
 new Sockets(server).connect();
