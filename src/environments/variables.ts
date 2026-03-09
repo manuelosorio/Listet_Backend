@@ -46,6 +46,7 @@ export const APP = {
   trustProxy: parseInt(process.env.APP_TRUST_PROXY_LEVEL)
     ? parseInt(process.env.APP_TRUST_PROXY_LEVEL)
     : process.env.APP_TRUST_PROXY_LEVEL === 'true',
+  requestLimit: process.env.APP_REQUEST_LIMIT || '100kb',
 };
 export const CORS = {
   origin: corsOrigin,

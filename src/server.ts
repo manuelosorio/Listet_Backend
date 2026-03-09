@@ -23,7 +23,12 @@ const server = new http.Server(app);
 app.set('port', variables.port || 3000);
 app.set('trust proxy', APP.trustProxy);
 app.use(helmet());
-app.use(express.json());
+app.use(
+  express.json({
+    limit: APP.requestLimit,
+    strict: true,
+  })
+);
 app.get('/health', (req, res) => {
   const data = {
     uptime: process.uptime(),
