@@ -1,5 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { unprocessable } from '../utilities/response';
+import {
+  emailPattern,
+  emailRequirements,
+  passwordPattern,
+  passwordRequirements,
+  usernamePattern,
+  usernameRequirements,
+} from '../utilities/regex-patterns';
+import { Buffer } from 'node:buffer';
 
 export function containsFirstName(
   req: Request,
@@ -28,12 +37,9 @@ export function containsUsername(
 ): void | Response {
   if (!req.body.username)
     return res.status(422).send({ message: 'Username is required' }).end();
-  if (
-    !req.body.username.match(
-      /^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/
-    )
-  )
-    return res.status(422).send({ message: '' }).end();
+  if (!req.body.username.match(usernamePattern)) {
+    return unprocessable(res, usernameRequirements);
+  }
   return next();
 }
 
@@ -52,12 +58,9 @@ export function isEmailValid(
   res: Response,
   next: NextFunction
 ): void | Response {
-  if (
-    !req.body.email.match(
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]{2,4}$/
-    )
-  )
-    return res.status(422).send({ message: 'Email is invalid' }).end();
+  if (!req.body.email.match(emailPattern)) {
+    return unprocessable(res, emailRequirements);
+  }
   return next();
 }
 
@@ -66,19 +69,12 @@ export function isPasswordValid(
   res: Response,
   next: NextFunction
 ): void | Response {
-  if (
-    !req.body.password.match(
-      /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/
-    )
-  ) {
-    return res
-      .status(422)
-      .send({
-        message:
-          'passwords must be at least 8 characters long, contain 1 capital letter, ' +
-          'a special character (@ $ ! % * # ? &), and at least one number.',
-      })
-      .end();
+  const password: string = req.body.password;
+  if (Buffer.byteLength(password, 'utf8') > 72) {
+    return unprocessable(res, 'Password must be 72 bytes or fewer.');
+  }
+  if (!password.match(passwordPattern)) {
+    return unprocessable(res, passwordRequirements);
   }
   next();
 }

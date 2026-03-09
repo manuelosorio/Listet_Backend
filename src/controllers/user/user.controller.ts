@@ -21,7 +21,16 @@ import { ResetTokenDb } from '../../database/token/reset-token.db';
 import { TokenModel } from '../../models/token.model';
 import { NewPasswordModel } from '../../models/new-password.model';
 import { UserService } from '../../services/user.service';
-import { ok, serverError, unauthorized } from '../../utilities/response';
+import {
+  ok,
+  serverError,
+  unauthorized,
+  unprocessable,
+} from '../../utilities/response';
+import {
+  passwordPattern,
+  passwordRequirements,
+} from '../../utilities/regex-patterns';
 
 export class UserController {
   private readonly crypto: Crypto;
@@ -365,22 +374,11 @@ export class UserController {
         return null;
       });
     if (!user) {
-      return res.status(401).send({ message: 'Unauthorized' }).end();
+      return unauthorized(res);
     }
     const password: NewPasswordModel = req.body;
-    if (
-      !password.newPassword.match(
-        /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@$!%*#?&])([a-zA-Z0-9\d@$!%*#?&]+){8,}/
-      )
-    ) {
-      return res
-        .status(422)
-        .send({
-          message:
-            'passwords must be at least 8 characters long, contain 1 capital letter, ' +
-            'a special character (@ $ ! % * # ? &), and at least one number.',
-        })
-        .end();
+    if (!password.newPassword.match(passwordPattern)) {
+      return unprocessable(res, passwordRequirements);
     }
     if (password.newPassword === password.confirmPassword) {
       const queryData = {
@@ -390,19 +388,12 @@ export class UserController {
       return this.db.updatePassword(queryData, (error, _results) => {
         if (error) {
           console.error(error.message);
-          res.status(500);
+          return serverError(res);
         }
-        res.status(200).send({
-          message: 'Your password has been changed.',
-        });
+        ok(res, { message: 'Your password has been changed.' });
       });
     }
-    res
-      .status(401)
-      .send({
-        message: 'Password does not match.',
-      })
-      .end();
+    return unprocessable(res, 'Password confirmation does not match.');
   };
   deactivateUser = async (
     req: Request,

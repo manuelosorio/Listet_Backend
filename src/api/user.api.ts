@@ -9,7 +9,10 @@ import {
   isPasswordValid,
 } from '../middleware/registration.middleware';
 import { containsPassword, isAuth } from '../middleware/auth.middleware';
-import { matchesAccountPassword } from '../middleware/password.middleware';
+import {
+  containsNewPassword,
+  matchesAccountPassword,
+} from '../middleware/password.middleware';
 
 const userApi = Router();
 const userController = new UserController();
@@ -34,6 +37,7 @@ userApi.get('/session', userController.session);
 userApi.put(
   '/update-password',
   isAuth,
+  containsNewPassword,
   containsPassword,
   matchesAccountPassword,
   userController.changePassword

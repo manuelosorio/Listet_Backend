@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { UserService } from '../services/user.service';
 import { comparePassword } from '../utilities/bcrypt';
+import { unprocessable } from '../utilities/response';
 
 const userService = new UserService();
 /*
@@ -23,4 +24,20 @@ export const matchesAccountPassword = async (
           message: 'The password is incorrect. Please try again.',
         })
         .end();
+};
+
+export const containsNewPassword = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const newPassword: string = req.body.newPassword;
+  const confirmPassword: string = req.body.confirmPassword;
+  if (!newPassword) {
+    return unprocessable(res, 'New password is required');
+  }
+  if (!confirmPassword) {
+    return unprocessable(res, 'Confirm password is required');
+  }
+  return next();
 };
