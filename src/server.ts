@@ -48,6 +48,7 @@ app.use('/search', searchApi);
 if (APP.debug) {
   app.get('/debug/proxy', (req, res) => {
     ok(res, {
+      trustProxy: app.get('trust proxy'),
       protocol: req.protocol,
       secure: req.secure,
       host: req.get('host'),
