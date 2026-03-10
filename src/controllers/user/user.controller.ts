@@ -1,6 +1,6 @@
 import chalk from 'chalk';
-import mysql, { MysqlError, Query } from 'mysql';
 import { NextFunction, Request, Response } from 'express';
+import mysql, { MysqlError, Query } from 'mysql';
 import {
   APP,
   DB_CONFIG,
@@ -8,29 +8,29 @@ import {
   SESSION,
   SMTP,
   TOKEN,
-} from '../../environments/variables';
-import { Mailer } from '../../utilities/nodemailer';
-import { Crypto } from '../../utilities/crypto';
-import { DateUtil } from '../../utilities/date';
-import { UserModel } from '../../models/user.model';
-import { comparePassword, hashPassword } from '../../utilities/bcrypt';
-import { EmailDataModel } from '../../models/email-data.model';
-import { UserDb } from '../../database/user/user.db';
-import { VerificationTokenDb } from '../../database/token/verification-token.db';
-import { ResetTokenDb } from '../../database/token/reset-token.db';
-import { TokenModel } from '../../models/token.model';
-import { NewPasswordModel } from '../../models/new-password.model';
-import { UserService } from '../../services/user.service';
+} from '#environments/variables';
+import { Mailer } from '#utilities/nodemailer';
+import { Crypto } from '#utilities/crypto';
+import { DateUtil } from '#utilities/date';
+import { UserModel } from '#models/user.model';
+import { comparePassword, hashPassword } from '#utilities/bcrypt';
+import { EmailDataModel } from '#models/email-data.model';
+import { UserDb } from '#database/user/user.db';
+import { VerificationTokenDb } from '#database/token/verification-token.db';
+import { ResetTokenDb } from '#database/token/reset-token.db';
+import { TokenModel } from '#models/token.model';
+import { NewPasswordModel } from '#models/new-password.model';
+import { UserService } from '#services/user.service';
 import {
   ok,
   serverError,
   unauthorized,
   unprocessable,
-} from '../../utilities/response';
+} from '#utilities/response';
 import {
   passwordPattern,
   passwordRequirements,
-} from '../../utilities/regex-patterns';
+} from '#utilities/regex-patterns';
 
 export class UserController {
   private readonly crypto: Crypto;

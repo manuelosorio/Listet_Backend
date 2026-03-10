@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { CommentService } from '../services/comment.service';
-import { ListService } from '../services/list.service';
-import { UserService } from '../services/user.service';
-import { unprocessable } from '../utilities/response';
+import { CommentService } from '#services/comment.service';
+import { ListService } from '#services/list.service';
+import { UserService } from '#services/user.service';
+import { unprocessable } from '#utilities/response';
 
 const userService = new UserService();
 const commentService = new CommentService();

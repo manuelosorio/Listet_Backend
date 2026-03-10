@@ -1,7 +1,7 @@
-import { Db } from '../db';
 import { Pool, Query, queryCallback } from 'mysql';
-import { UserModel } from '../../models/user.model';
-import { TokenModel } from '../../models/token.model';
+import { Db } from '#database/db';
+import { UserModel } from '#models/user.model';
+import { TokenModel } from '#models/token.model';
 
 export class VerificationTokenDb extends Db {
   constructor(db: Pool) {

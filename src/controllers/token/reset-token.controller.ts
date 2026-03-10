@@ -1,11 +1,11 @@
-import { DateUtil } from '../../utilities/date';
 import { Response, Request } from 'express';
 import mysql, { Query } from 'mysql';
-import { DB_CONFIG } from '../../environments/variables';
-import { hashPassword } from '../../utilities/bcrypt';
-import { Crypto } from '../../utilities/crypto';
-import { ResetTokenDb } from '../../database/token/reset-token.db';
-import { ResetPasswordModel } from '../../models/reset-password.model';
+import { DateUtil } from '#utilities/date';
+import { DB_CONFIG } from '#environments/variables';
+import { hashPassword } from '#utilities/bcrypt';
+import { Crypto } from '#utilities/crypto';
+import { ResetTokenDb } from '#database/token/reset-token.db';
+import { ResetPasswordModel } from '#models/reset-password.model';
 
 export class ResetTokenController {
   private readonly db: ResetTokenDb;

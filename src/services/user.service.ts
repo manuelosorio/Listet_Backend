@@ -1,9 +1,9 @@
-import mysql from 'mysql';
-import { UserDb } from '../database/user/user.db';
-import { DB_CONFIG } from '../environments/variables';
 import { Request } from 'express';
-import { UserPasswordRow, UserModel } from '../models/user.model';
-import { promisify } from '../utilities/promise';
+import mysql from 'mysql';
+import { UserDb } from '#database/user/user.db';
+import { DB_CONFIG } from '#environments/variables';
+import { UserPasswordRow, UserModel } from '#models/user.model';
+import { promisify } from '#utilities/promise';
 
 export class UserService {
   private userDB: UserDb;

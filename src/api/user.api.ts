@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { UserController } from '../controllers/user/user.controller';
+import { UserController } from '#controllers/user/user.controller';
 import {
   containsFirstName,
   containsLastName,
@@ -7,12 +7,12 @@ import {
   containsEmail,
   isEmailValid,
   isPasswordValid,
-} from '../middleware/registration.middleware';
-import { containsPassword, isAuth } from '../middleware/auth.middleware';
+} from '#middleware/registration.middleware';
+import { containsPassword, isAuth } from '#middleware/auth.middleware';
 import {
   containsNewPassword,
   matchesAccountPassword,
-} from '../middleware/password.middleware';
+} from '#middleware/password.middleware';
 
 const userApi = Router();
 const userController = new UserController();

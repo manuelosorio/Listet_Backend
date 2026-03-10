@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { UserService } from '../services/user.service';
-import { comparePassword } from '../utilities/bcrypt';
-import { unprocessable } from '../utilities/response';
+import { UserService } from '#services/user.service';
+import { comparePassword } from '#utilities/bcrypt';
+import { unprocessable } from '#utilities/response';
 
 const userService = new UserService();
 /*

@@ -1,20 +1,20 @@
-import SocketIO, { Server, Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import http from 'http';
 import chalk from 'chalk';
-import { CORS } from '../environments/variables';
-import { CommentEvents } from '../helper/events/comment.events';
-import { ListItemEvents } from '../helper/events/list-item.events';
-import { ListCommentEmitter } from '../models/list-comment.model';
-import { ListItemModel } from '../models/list-item.model';
-import { ListEvents } from '../helper/events/list.events';
-import { ListModel } from '../models/list.model';
+import { CORS } from '#environments/variables';
+import { CommentEvents } from '#helper/events/comment.events';
+import { ListItemEvents } from '#helper/events/list-item.events';
+import { ListCommentEmitter } from '#models/list-comment.model';
+import { ListItemModel } from '#models/list-item.model';
+import { ListEvents } from '#helper/events/list.events';
+import { ListModel } from '#models/list.model';
 
 export class Sockets {
-  private static socketInstance: SocketIO.Socket;
-  private static ioInstance: SocketIO.Server;
+  private static socketInstance: Socket;
+  private static ioInstance: Server;
   private readonly io: Server;
   constructor(server: http.Server) {
-    this.io = new SocketIO.Server(server, {
+    this.io = new Server(server, {
       cors: {
         origin: CORS.origin,
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -26,17 +26,17 @@ export class Sockets {
     console.log(chalk.bgYellow.black('Websocket Initialized!'));
     Sockets.setIoInstance(this.io);
   }
-  private static setSocketInstance(socket: SocketIO.Socket): void {
+  private static setSocketInstance(socket: Socket): void {
     this.socketInstance = socket;
   }
 
-  public static getSocketInstance(): SocketIO.Socket {
+  public static getSocketInstance(): Socket {
     return this.socketInstance;
   }
-  private static setIoInstance(io: SocketIO.Server): void {
+  private static setIoInstance(io: Server): void {
     this.ioInstance = io;
   }
-  public static getIoInstance(): SocketIO.Server {
+  public static getIoInstance(): Server {
     return this.ioInstance;
   }
   public connect(): void {
@@ -64,7 +64,7 @@ export class Sockets {
     event: string | ListEvents | CommentEvents | ListItemEvents,
     data: Partial<number | ListModel | ListCommentEmitter | ListItemModel> | any
   ): void => {
-    const io: SocketIO.Server = Sockets.ioInstance;
+    const io: Server = Sockets.ioInstance;
     try {
       switch (event) {
         case ListItemEvents.ADD_ITEM: {

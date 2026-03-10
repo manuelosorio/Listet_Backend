@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { ResetTokenController } from '../controllers/token/reset-token.controller';
-import { VerificationTokenController } from '../controllers/token/verification-token.controller';
+import { ResetTokenController } from '#controllers/token/reset-token.controller';
+import { VerificationTokenController } from '#controllers/token/verification-token.controller';
 const tokensApi = Router();
 
 const resetToken = new ResetTokenController();

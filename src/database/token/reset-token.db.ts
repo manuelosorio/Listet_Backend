@@ -1,7 +1,7 @@
-import { Db } from '../db';
 import { Pool, Query, queryCallback } from 'mysql';
-import { ResetPasswordModel } from '../../models/reset-password.model';
-import { TokenModel } from '../../models/token.model';
+import { Db } from '#database/db';
+import { ResetPasswordModel } from '#models/reset-password.model';
+import { TokenModel } from '#models/token.model';
 
 export class ResetTokenDb extends Db {
   constructor(db: Pool) {

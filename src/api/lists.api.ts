@@ -1,15 +1,15 @@
 import { Router } from 'express';
-import { ItemController } from '../controllers/list/item/item.controller';
-import { CommentController } from '../controllers/list/comment/comment.controller';
-import { ListController } from '../controllers/list/list.controller';
-import { isAuth, isVerified } from '../middleware/auth.middleware';
+import { ItemController } from '#controllers/list/item/item.controller';
+import { CommentController } from '#controllers/list/comment/comment.controller';
+import { ListController } from '#controllers/list/list.controller';
+import { isAuth, isVerified } from '#middleware/auth.middleware';
 import {
   checkListTitle,
   isItemEmpty,
   isListItemOwner,
   isListOwner,
   isListPrivate,
-} from '../middleware/list.middleware';
+} from '#middleware/list.middleware';
 import {
   canDeleteComment,
   isCommentBodyEmpty,
@@ -17,7 +17,7 @@ import {
   commentHasMinCharacters,
   commentNotLargerThanMaxCharacters,
   isIdValid,
-} from '../middleware/comment.middleware';
+} from '#middleware/comment.middleware';
 
 const listApi = Router();
 const listController = new ListController();

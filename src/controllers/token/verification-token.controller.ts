@@ -1,10 +1,10 @@
-import mysql from 'mysql';
 import { Request, Response } from 'express';
 import chalk from 'chalk';
-import { DateUtil } from '../../utilities/date';
-import { Crypto } from '../../utilities/crypto';
-import { DB_CONFIG } from '../../environments/variables';
-import { VerificationTokenDb } from '../../database/token/verification-token.db';
+import mysql from 'mysql';
+import { DateUtil } from '#utilities/date';
+import { Crypto } from '#utilities/crypto';
+import { DB_CONFIG } from '#environments/variables';
+import { VerificationTokenDb } from '#database/token/verification-token.db';
 
 export class VerificationTokenController {
   private readonly db: VerificationTokenDb;

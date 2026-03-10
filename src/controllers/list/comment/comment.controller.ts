@@ -1,17 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
 import mysql, { MysqlError, Query } from 'mysql';
-import { DB_CONFIG } from '../../../environments/variables';
-import { Sockets } from '../../../utilities/sockets';
-import { CommentEvents } from '../../../helper/events/comment.events';
-import { CommentDb } from '../../../database/list/comment/comment.db';
+import { DB_CONFIG } from '#environments/variables';
+import { Sockets } from '#utilities/sockets';
+import { CommentEvents } from '#helper/events/comment.events';
+import { CommentDb } from '#database/list/comment/comment.db';
 import {
   ListCommentEmitter,
   ListCommentModel,
-} from '../../../models/list-comment.model';
-import { ListDb } from '../../../database/list/list.db';
-import { ListService } from '../../../services/list.service';
-import { UserService } from '../../../services/user.service';
-import { UserModel } from '../../../models/user.model';
+} from '#models/list-comment.model';
+import { ListDb } from '#database/list/list.db';
+import { ListService } from '#services/list.service';
+import { UserService } from '#services/user.service';
+import { UserModel } from '#models/user.model';
 
 export class CommentController {
   private readonly db: CommentDb;

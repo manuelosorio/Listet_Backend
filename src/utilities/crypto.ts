@@ -1,7 +1,7 @@
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 import { Buffer } from 'buffer';
-import { TOKEN } from '../environments/variables';
 import chalk from 'chalk';
+import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+import { TOKEN } from '#environments/variables';
 export class Crypto {
   secret;
   constructor() {

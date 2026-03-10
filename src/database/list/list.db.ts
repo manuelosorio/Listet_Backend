@@ -1,6 +1,6 @@
-import { Db } from '../db';
 import { Pool, Query, queryCallback } from 'mysql';
-import { ListModel } from '../../models/list.model';
+import { Db } from '#database/db';
+import { ListModel } from '#models/list.model';
 
 export class ListDb extends Db {
   constructor(db: Pool) {
@@ -48,7 +48,7 @@ export class ListDb extends Db {
     );
   };
   async findAuthenticatedUserLists(
-    ownerID: string,
+    ownerID: number,
     next: queryCallback
   ): Promise<Query> {
     return this.db.query(

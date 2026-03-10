@@ -1,8 +1,8 @@
-import { CommentDb } from '../database/list/comment/comment.db';
-import { ListDb } from '../database/list/list.db';
 import mysql, { MysqlError } from 'mysql';
-import { DB_CONFIG } from '../environments/variables';
-import { promisify } from '../utilities/promise';
+import { CommentDb } from '#database/list/comment/comment.db';
+import { ListDb } from '#database/list/list.db';
+import { DB_CONFIG } from '#environments/variables';
+import { promisify } from '#utilities/promise';
 
 export class ListService {
   private readonly commentDb: CommentDb;

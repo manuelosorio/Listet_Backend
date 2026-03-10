@@ -1,20 +1,20 @@
-import mysql, { MysqlError, Query } from 'mysql';
-import { DB_CONFIG } from '../../environments/variables';
 import { NextFunction, Request, Response } from 'express';
-import { ListDb } from '../../database/list/list.db';
-import { ListModel, ListOwnerModel } from '../../models/list.model';
-import { UserDb } from '../../database/user/user.db';
-import { Sockets } from '../../utilities/sockets';
-import { ListEvents } from '../../helper/events/list.events';
-import { ListService } from '../../services/list.service';
-import { UserService } from '../../services/user.service';
-import { UserModel } from '../../models/user.model';
+import mysql, { MysqlError, Query } from 'mysql';
+import { DB_CONFIG } from '#environments/variables';
+import { ListDb } from '#database/list/list.db';
+import { ListModel, ListOwnerModel } from '#models/list.model';
+import { UserDb } from '#database/user/user.db';
+import { Sockets } from '#utilities/sockets';
+import { ListEvents } from '#helper/events/list.events';
+import { ListService } from '#services/list.service';
+import { UserService } from '#services/user.service';
+import { UserModel } from '#models/user.model';
 
 export class ListController {
   private readonly db: ListDb;
   private userDB: UserDb;
   private listService: ListService;
-  private readonly userService;
+  private readonly userService: UserService;
   constructor() {
     this.db = new ListDb(mysql.createPool(DB_CONFIG));
     this.userDB = new UserDb(mysql.createPool(DB_CONFIG));
@@ -42,9 +42,8 @@ export class ListController {
     res: Response,
     _next: NextFunction
   ): Promise<Query> => {
-    const user = await this.userService.getCurrentUser(req).catch(err => {
-      console.error(err);
-    });
+    const user: UserModel = await this.userService.getCurrentUser(req);
+
     return await this.db.findAuthenticatedUserLists(
       user.id,
       (err: MysqlError, results) => {

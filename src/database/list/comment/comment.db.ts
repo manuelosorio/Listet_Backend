@@ -1,6 +1,6 @@
-import { Db } from '../../db';
+import { Db } from '#database/db';
 import { Pool, Query, queryCallback } from 'mysql';
-import { ListCommentModel } from '../../../models/list-comment.model';
+import { ListCommentModel } from '#models/list-comment.model';
 
 export class CommentDb extends Db {
   constructor(db: Pool) {

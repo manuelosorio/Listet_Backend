@@ -1,7 +1,7 @@
-import { Db } from '../db';
-import { Pool, Query, queryCallback } from 'mysql';
 import { Request } from 'express';
-import { UserModel } from '../../models/user.model';
+import { Pool, Query, queryCallback } from 'mysql';
+import { Db } from '#database/db';
+import { UserModel } from '#models/user.model';
 
 export class UserDb extends Db {
   constructor(db: Pool) {

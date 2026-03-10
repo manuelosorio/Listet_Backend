@@ -2,14 +2,14 @@ import express from 'express';
 import Flash from 'express-flash';
 import http from 'http';
 import helmet from 'helmet';
-import environment from './environments/environment';
-import { APP, variables } from './environments/variables';
-import listApi from './api/lists.api';
-import tokensApi from './api/tokens.api';
-import userApi from './api/user.api';
-import searchApi from './api/search.api';
-import { Sockets } from './utilities/sockets';
-import { ok } from './utilities/response';
+import environment from '#environments/environment';
+import { APP, variables } from '#environments/variables';
+import listApi from '#api/lists.api';
+import tokensApi from '#api/tokens.api';
+import userApi from '#api/user.api';
+import searchApi from '#api/search.api';
+import { Sockets } from '#utilities/sockets';
+import { ok } from '#utilities/response';
 
 // if (variables.nodeEnv === 'production') {
 //   console.log = () => {

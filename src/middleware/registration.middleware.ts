@@ -1,5 +1,6 @@
+import { Buffer } from 'node:buffer';
 import { NextFunction, Request, Response } from 'express';
-import { unprocessable } from '../utilities/response';
+import { unprocessable } from '#utilities/response';
 import {
   emailPattern,
   emailRequirements,
@@ -7,8 +8,7 @@ import {
   passwordRequirements,
   usernamePattern,
   usernameRequirements,
-} from '../utilities/regex-patterns';
-import { Buffer } from 'node:buffer';
+} from '#utilities/regex-patterns';
 
 export function containsFirstName(
   req: Request,

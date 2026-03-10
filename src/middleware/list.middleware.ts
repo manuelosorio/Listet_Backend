@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { ListService } from '../services/list.service';
-import { ListVisibility } from '../helper/list-visibility';
+import { ListService } from '#services/list.service';
+import { ListVisibility } from '#helper/list-visibility';
 const listService = new ListService();
 export function checkListTitle(
   req: Request,

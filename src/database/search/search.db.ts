@@ -1,4 +1,4 @@
-import { Db } from '../db';
+import { Db } from '#database/db';
 import { Pool, Query, queryCallback } from 'mysql';
 
 export class SearchDb extends Db {

@@ -1,17 +1,22 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import EmailTemplate, {
   EmailConfig,
   NodeMailerTransportOptions,
 } from 'email-templates';
-import { SmtpModel } from '../models/smtp.model';
-import { EmailDataModel } from '../models/email-data.model';
+import { SmtpModel } from '#models/smtp.model';
+import { EmailDataModel } from '#models/email-data.model';
 import { join } from 'path';
 
 export class Mailer {
   smtp: SmtpModel;
-  transporter;
+  transporter: NodeMailerTransportOptions;
   email: EmailTemplate;
 
-  private emailsRoot = join(__dirname, '..', '..', 'emails');
+  readonly filename = fileURLToPath(import.meta.url);
+  readonly dirname = path.dirname(this.filename);
+
+  private emailsRoot = join(this.dirname, '..', '..');
   private cssRoot = join(this.emailsRoot, 'css');
   constructor(smtp: SmtpModel) {
     this.transporter = {
@@ -57,7 +62,7 @@ export class Mailer {
           relativeTo: this.cssRoot,
         },
       },
-    });
+    } as EmailConfig);
     this.email
       .send({
         template,

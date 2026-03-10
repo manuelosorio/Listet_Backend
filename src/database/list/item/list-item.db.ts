@@ -1,7 +1,7 @@
-import { Db } from '../../db';
+import { Db } from '#database/db';
 import { Pool, Query, queryCallback } from 'mysql';
-import { ListItemModel } from '../../../models/list-item.model';
-import { ListQueryModel } from '../../../models/list.model';
+import { ListItemModel } from '#models/list-item.model';
+import { ListQueryModel } from '#models/list.model';
 
 export class ListItemDb extends Db {
   constructor(db: Pool) {

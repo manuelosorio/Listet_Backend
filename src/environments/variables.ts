@@ -1,10 +1,13 @@
 import dotenv from 'dotenv';
-import { SmtpModel } from '../models/smtp.model';
 import { ConnectionConfig } from 'mysql';
-import { readFileSync } from 'node:fs';
-import { join, resolve } from 'path';
-import { hashPassword } from '../utilities/bcrypt';
 import crypto from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import path, { join, resolve } from 'path';
+import { SmtpModel } from '#models/smtp.model';
+import { hashPassword } from '#utilities/bcrypt';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const root = join(__dirname, '..', '..');
 dotenv.config();
 

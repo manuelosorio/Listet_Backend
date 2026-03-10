@@ -4,7 +4,7 @@ import * as expressSession from 'express-session';
 import morgan from 'morgan';
 import cors from 'cors';
 import MySQLSession from 'express-mysql-session';
-import * as vars from './variables';
+import * as vars from '#environments/variables';
 import mysql from 'mysql';
 
 const isProd = vars.variables.nodeEnv === 'production';

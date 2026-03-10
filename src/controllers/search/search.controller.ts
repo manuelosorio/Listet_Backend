@@ -1,6 +1,6 @@
-import { SearchDb } from '../../database/search/search.db';
+import { SearchDb } from '#database/search/search.db';
 import mysql from 'mysql';
-import { DB_CONFIG } from '../../environments/variables';
+import { DB_CONFIG } from '#environments/variables';
 
 export class SearchController {
   private searchDb: SearchDb;

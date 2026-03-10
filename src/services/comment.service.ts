@@ -1,8 +1,8 @@
-import { ListService } from './list.service';
 import mysql, { MysqlError, Query } from 'mysql';
-import { CommentDb } from '../database/list/comment/comment.db';
-import { DB_CONFIG } from '../environments/variables';
-import { ListDb } from '../database/list/list.db';
+import { ListService } from '#services/list.service';
+import { CommentDb } from '#database/list/comment/comment.db';
+import { DB_CONFIG } from '#environments/variables';
+import { ListDb } from '#database/list/list.db';
 
 export class CommentService {
   private listService: ListService;

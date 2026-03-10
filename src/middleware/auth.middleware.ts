@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { UserService } from '../services/user.service';
-import { unprocessable } from '../utilities/response';
+import { UserService } from '#services/user.service';
+import { unprocessable } from '#utilities/response';
 const userService = new UserService();
 export function isAuth(
   req: Request,
