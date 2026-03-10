@@ -2,6 +2,7 @@ import { CommentDb } from '../database/list/comment/comment.db';
 import { ListDb } from '../database/list/list.db';
 import mysql, { MysqlError } from 'mysql';
 import { DB_CONFIG } from '../environments/variables';
+import { promisify } from '../utilities/promise';
 
 export class ListService {
   private readonly commentDb: CommentDb;
@@ -48,11 +49,15 @@ export class ListService {
     userID: number,
     commentID: number
   ): Promise<boolean> {
-    return new Promise(resolve => {
-      return this.commentDb.getCommentOwner(commentID, (_, results) => {
-        const ownerID = results[0].user_id as unknown as number;
-        return resolve(ownerID === userID);
-      });
+    return promisify<{ user_id: number }[], [number]>(
+      this.commentDb.getCommentOwner.bind(this.commentDb),
+      commentID
+    ).then(results => {
+      if (!results.length) {
+        return false;
+      }
+      const ownerID = results[0].user_id;
+      return ownerID === userID;
     });
   }
   public async testSlug(slug: string): Promise<boolean> {

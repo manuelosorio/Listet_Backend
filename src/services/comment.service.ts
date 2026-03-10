@@ -42,7 +42,6 @@ export class CommentService {
       );
     });
   };
-  // eslint-disable-next-line camelcase
   private getListId = async (
     commentID: number
   ): Promise<{ list_id: number }> => {

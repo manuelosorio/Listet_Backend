@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { CommentService } from '../services/comment.service';
 import { ListService } from '../services/list.service';
 import { UserService } from '../services/user.service';
+import { unprocessable } from '../utilities/response';
 
 const userService = new UserService();
 const commentService = new CommentService();
@@ -13,10 +14,7 @@ export const canDeleteComment = async (
   next: NextFunction
 ): Promise<Response | void> => {
   return commentService
-    .isCommentDeletionPermissible(
-      req.params.id as unknown as number,
-      req.session.user.id
-    )
+    .isCommentDeletionPermissible(res.locals.id as number, req.session.user.id)
     .then((isPermissible): Response | void => {
       if (!isPermissible) {
         return res.status(403).send({
@@ -63,13 +61,26 @@ export function commentNotLargerThanMaxCharacters(
     .send({ message: "Comments can't exceed 500 characters" });
 }
 
+export const isIdValid = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void | Response => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id) || id <= 0) {
+    return unprocessable(res, 'Comment ID must be a positive integer');
+  }
+  res.locals.id = id;
+  return next();
+};
+
 export const isCommentOwner = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<Response | void> => {
   const userID = (await userService.getCurrentUser(req)).id;
-  const commentId = req.params.id as unknown as number;
+  const commentId = res.locals.id;
   const isCommentOwner = await listService.isCommentOwner(userID, commentId);
   if (!isCommentOwner) {
     return res

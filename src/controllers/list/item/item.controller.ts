@@ -52,7 +52,7 @@ export class ItemController {
     });
   };
   delete = (req: Request, res: Response): Promise<Query> => {
-    const id = req.params.id as unknown as number;
+    const id = res.locals.id as unknown as number;
     return this.db.deleteListItem(id, (error: MysqlError) => {
       if (error) {
         console.error(error.message);

@@ -96,7 +96,6 @@ export class CommentController {
               creation_date: listComment.creation_date,
               is_owner: user.id === listComment.author_id,
             };
-            console.log(commentData);
             commentData.listInfo = slug;
             Sockets.emit(CommentEvents.CREATE_COMMENT, commentData);
             return res.status(201).send({ message: 'Comment created.' }).end();
@@ -111,10 +110,9 @@ export class CommentController {
     _next: NextFunction
   ): Promise<Query | Response | void> => {
     const commentModel: ListCommentModel = req.body;
-    commentModel.id = req.params.id as unknown as number;
+    commentModel.id = res.locals.id;
     commentModel.date_updated = new Date();
     commentModel.comment = commentModel.comment.trim();
-    console.log(commentModel);
     return this.db.update(commentModel, (err, _) => {
       if (err) {
         console.error(err.message);

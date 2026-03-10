@@ -125,7 +125,7 @@ export class ListController {
       .split(' ')
       .join('-');
     const listUpdate: ListModel = {
-      id: req.params.id as unknown as number,
+      id: res.locals.id,
       name: req.body.title,
       slug: `${user.username}-${url}`,
       prevSlug: req.body.prevSlug,
@@ -149,7 +149,7 @@ export class ListController {
     res: Response,
     _next: NextFunction
   ): Promise<any> => {
-    const listId = req.params.id as unknown as number;
+    const listId = res.locals.id as unknown as number;
     return this.db.deleteList(listId, (listErr, _) => {
       if (listErr) {
         console.error(listErr.message);

@@ -30,7 +30,7 @@ export const isListOwner = async (
 ): Promise<void | Response> => {
   const isOwner = await listService.isListOwner(
     req.session.user.id,
-    req.body.list_id ?? req.params.id
+    req.body.list_id ?? res.locals.id
   );
   if (isOwner) {
     return next();
@@ -45,7 +45,7 @@ export const isListItemOwner = async (
   res: Response,
   next: NextFunction
 ): Promise<void | Response> => {
-  const itemID = req.params.id as unknown as number;
+  const itemID = res.locals.id;
   const isOwner = await listService.isListItemOwner(
     req.session.user.id,
     itemID

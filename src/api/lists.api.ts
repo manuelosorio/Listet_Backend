@@ -16,12 +16,16 @@ import {
   isCommentOwner,
   commentHasMinCharacters,
   commentNotLargerThanMaxCharacters,
+  isIdValid,
 } from '../middleware/comment.middleware';
 
 const listApi = Router();
 const listController = new ListController();
 const itemController = new ItemController();
 const commentController = new CommentController();
+
+/******** Global Middleware **********/
+listApi.param('id', isIdValid);
 
 /********** List **************/
 listApi.get('/lists', listController.getAll);
