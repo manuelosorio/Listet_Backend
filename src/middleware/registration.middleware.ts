@@ -15,8 +15,9 @@ export function containsFirstName(
   res: Response,
   next: NextFunction
 ): void | Response {
-  if (!req.body.firstName)
-    return res.status(422).send({ message: 'First Name is required' }).end();
+  if (!req.body.firstName) {
+    return unprocessable(res, 'First Name is required');
+  }
   return next();
 }
 
@@ -25,8 +26,7 @@ export function containsLastName(
   res: Response,
   next: NextFunction
 ): void | Response {
-  if (!req.body.lastName)
-    return res.status(422).send({ message: 'Last Name is required' }).end();
+  if (!req.body.lastName) return unprocessable(res, 'Last Name is required');
   return next();
 }
 
@@ -35,8 +35,7 @@ export function containsUsername(
   res: Response,
   next: NextFunction
 ): void | Response {
-  if (!req.body.username)
-    return res.status(422).send({ message: 'Username is required' }).end();
+  if (!req.body.username) return unprocessable(res, 'Username is required');
   if (!req.body.username.match(usernamePattern)) {
     return unprocessable(res, usernameRequirements);
   }
