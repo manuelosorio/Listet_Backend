@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { UserService } from '#services/user.service';
-import { unprocessable } from '#utilities/response';
+import { forbidden, unauthorized, unprocessable } from '#utilities/response';
 const userService = new UserService();
 export function isAuth(
   req: Request,
@@ -10,10 +10,7 @@ export function isAuth(
   if (req.session.user) {
     return next();
   }
-  return res
-    .status(403)
-    .send({ message: 'You must be authenticated to complete that action.' })
-    .end();
+  return unauthorized(res, 'You must be logged in to access this resource.');
 }
 
 export const isVerified = async (
@@ -25,12 +22,10 @@ export const isVerified = async (
     .isUserVerified(req.session.user.id)
     .then(verified => {
       if (!verified) {
-        return res
-          .status(403)
-          .send({
-            message: 'Your account must be verified to send create a new list.',
-          })
-          .end();
+        return forbidden(
+          res,
+          'Your account must be verified to send create a new list.'
+        );
       }
       return next();
     });
