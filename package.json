@@ -15,6 +15,7 @@
     "test:unit": "NODE_ENV=test jest tests/unit",
     "test:e2e": "NODE_ENV=test jest tests/e2e",
     "test:watch": "NODE_ENV=test jest --watch",
+    "typecheck": "tsc --project tsconfig.test.json --noEmit",
     "snyk:protect": "snyk-protect",
     "snyk:test": "snyk test",
     "prepare": "npm run snyk:protect"
@@ -58,6 +59,9 @@
     "socket.io": "^4.6.2"
   },
   "devDependencies": {
+    "@jest/globals": "^30.3.0",
+    "@swc/core": "^1.15.18",
+    "@swc/jest": "^0.2.39",
     "@types/bcrypt": "^6.0.0",
     "@types/chalk": "^2.2.0",
     "@types/cors": "^2.8.13",
@@ -81,7 +85,6 @@
     "nodemon": "^3.0.0",
     "prettier": "^2.5.1",
     "supertest": "^7.2.2",
-    "ts-jest": "^29.4.6",
     "typescript": "^4.9.5"
   },
   "imports": {

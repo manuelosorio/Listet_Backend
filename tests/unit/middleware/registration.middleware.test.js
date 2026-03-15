@@ -12,13 +12,7 @@ import {
   passwordRequirements,
   usernameRequirements,
 } from '#utilities/regex-patterns';
-const mockRes = () => {
-  const res = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
-  return res;
-};
+
 describe('Contains first Name', () => {
   it('returns 422 if firstName is missing', () => {
     const req = { body: {} };
