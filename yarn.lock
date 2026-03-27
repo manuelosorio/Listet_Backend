@@ -3076,7 +3076,7 @@ __metadata:
     helmet: "npm:^4.6.0"
     morgan: "npm:^1.10.1"
     mysql: "npm:^2.18.1"
-    nodemailer: "npm:^7.0.11"
+    nodemailer: "npm:^8.0.4"
     nodemon: "npm:^3.0.0"
     prettier: "npm:^2.5.1"
     pug: "npm:^3.0.2"
@@ -3546,10 +3546,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:^7.0.11, nodemailer@npm:^7.0.12":
+"nodemailer@npm:^7.0.12":
   version: 7.0.13
   resolution: "nodemailer@npm:7.0.13"
   checksum: 10/4ae37bfb6896f1555de150c1098a7c1b28eb1da240a4c7adede81a8af0dcc184298cfbf804930599c076ea574428e0c18c6b28f0dc2072cebb30c1da5fd0b688
+  languageName: node
+  linkType: hard
+
+"nodemailer@npm:^8.0.4":
+  version: 8.0.4
+  resolution: "nodemailer@npm:8.0.4"
+  checksum: 10/b396d52b1faf3ee73a6eca1b7febdb8ea16df50d6c41efbf0f1e500e6a42a73cea5e0db9e52d64b34f509ac3dbf4c10fe828de6cb3f66899b493be38b8abe926
   languageName: node
   linkType: hard
 
