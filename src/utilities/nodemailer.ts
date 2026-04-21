@@ -16,7 +16,7 @@ export class Mailer {
   readonly filename = fileURLToPath(import.meta.url);
   readonly dirname = path.dirname(this.filename);
 
-  private emailsRoot = join(this.dirname, '..', '..');
+  private emailsRoot = join(this.dirname, '..', '..', 'emails');
   private cssRoot = join(this.emailsRoot, 'css');
   constructor(smtp: SmtpModel) {
     this.transporter = {
