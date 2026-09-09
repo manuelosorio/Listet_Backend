@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { UserService } from '#services/user.service';
 import { comparePassword } from '#utilities/bcrypt';
-import { unprocessable } from '#utilities/response';
+import { unauthorized, unprocessable } from '#utilities/response';
 
 const userService = new UserService();
 /*
@@ -16,14 +16,10 @@ export const matchesAccountPassword = async (
   const accountPassword = await userService.accountPassword(user.email);
   const password = req.body.currentPassword || req.body.password;
   const doesPasswordMatch = comparePassword(password, accountPassword);
-  return doesPasswordMatch
-    ? next()
-    : res
-        .status(401)
-        .send({
-          message: 'The password is incorrect. Please try again.',
-        })
-        .end();
+  if (!doesPasswordMatch) {
+    return unauthorized(res, 'The password is incorrect. Please try again.');
+  }
+  return next();
 };
 
 export const containsNewPassword = (
@@ -34,10 +30,10 @@ export const containsNewPassword = (
   const newPassword: string = req.body.newPassword;
   const confirmPassword: string = req.body.confirmPassword;
   if (!newPassword) {
-    return unprocessable(res, 'New password is required');
+    return unprocessable(res, 'New password is required.');
   }
   if (!confirmPassword) {
-    return unprocessable(res, 'Confirm password is required');
+    return unprocessable(res, 'Confirm password is required.');
   }
   return next();
 };
