@@ -4,12 +4,9 @@ import http from 'http';
 import helmet from 'helmet';
 import environment from '#environments/environment';
 import { APP, variables } from '#environments/variables';
-import listApi from '#api/lists.api';
-import tokensApi from '#api/tokens.api';
-import userApi from '#api/user.api';
-import searchApi from '#api/search.api';
 import { Sockets } from '#utilities/sockets';
 import { ok } from '#utilities/response';
+import { connectRedis } from '#utilities/redis-client';
 
 // if (variables.nodeEnv === 'production') {
 //   console.log = () => {
@@ -29,41 +26,67 @@ app.use(
     strict: true,
   })
 );
-app.get('/health', (req, res) => {
-  const data = {
+
+app.get('/health', (_req, res) => {
+  ok(res, {
     uptime: process.uptime(),
     message: 'Ok',
     date: new Date(),
-  };
-
-  ok(res, data);
+  });
 });
+
 app.use(environment);
 app.use(Flash() as any);
-app.use(userApi);
-app.use(listApi);
-app.use(tokensApi);
-app.use('/search', searchApi);
 
-if (APP.debug) {
-  app.get('/debug/proxy', (req, res) => {
-    ok(res, {
-      trustProxy: app.get('trust proxy'),
-      protocol: req.protocol,
-      secure: req.secure,
-      host: req.get('host'),
-      xForwardedProto: req.get('x-forwarded-proto'),
-      xForwardedPort: req.get('x-forwarded-port'),
-      xForwardedFor: req.get('x-forwarded-for'),
+async function bootstrap(): Promise<void> {
+  await connectRedis();
+
+  const [
+    { globalApiLimiter },
+    { default: userApi },
+    { default: listApi },
+    { default: tokensApi },
+    { default: searchApi },
+  ] = await Promise.all([
+    import('#middleware/rate-limit.middleware'),
+    import('#api/user.api'),
+    import('#api/lists.api'),
+    import('#api/tokens.api'),
+    import('#api/search.api'),
+  ]);
+
+  app.use(globalApiLimiter);
+  app.use(userApi);
+  app.use(listApi);
+  app.use(tokensApi);
+  app.use('/search', searchApi);
+
+  if (APP.debug) {
+    app.get('/debug/proxy', (req, res) => {
+      ok(res, {
+        trustProxy: app.get('trust proxy'),
+        protocol: req.protocol,
+        secure: req.secure,
+        host: req.get('host'),
+        xForwardedProto: req.get('x-forwarded-proto'),
+        xForwardedPort: req.get('x-forwarded-port'),
+        xForwardedFor: req.get('x-forwarded-for'),
+      });
     });
+  }
+
+  app.use(errorHandler);
+
+  new Sockets(server).connect();
+
+  server.listen(app.get('port'), () => {
+    console.log('Server listening on port ' + app.get('port'));
   });
 }
 
-app.use(errorHandler);
-
-new Sockets(server).connect();
-server.listen(app.get('port'), () => {
-  console.log('Server listening on port ' + app.get('port'));
+bootstrap().catch(err => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
 });
 
 export function errorHandler(err: any, req: any, res: any, _next: any) {

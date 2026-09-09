@@ -26,5 +26,10 @@ export const conflict = (res: Response, message: string) =>
 export const unprocessable = (res: Response, message: string) =>
   res.status(422).json({ message });
 
+export const tooManyRequests = (
+  res: Response,
+  message = 'Too many requests. Please try again later.'
+) => res.status(429).json({ message });
+
 export const serverError = (res: Response, message = 'Internal server error') =>
   res.status(500).json({ message });

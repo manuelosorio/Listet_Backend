@@ -88,3 +88,85 @@ export const SSL = {
 export const DUMMY_HASH = hashPassword(
   process.env.DUMMY_PASSWORD || crypto.randomBytes(32).toString('hex')
 );
+
+// Rate Limit Variables
+export const GLOBAL_RATE_LIMIT = {
+  max: Number.parseInt(process.env.GLOBAL_RATE_LIMIT_MAX ?? '200'),
+  windowMs: Number.parseInt(
+    process.env.GLOBAL_RATE_LIMIT_TIME ?? `${15 * 60 * 1000}`
+  ),
+};
+
+export const GLOBAL_REGISTRATION_RATE_LIMIT = {
+  max: Number.parseInt(process.env.GLOBAL_REGISTRATION_RATE_LIMIT_MAX ?? '10'),
+  windowMs: Number.parseInt(
+    process.env.GLOBAL_REGISTRATION_RATE_LIMIT_TIME ?? `${10 * 60 * 1000}`
+  ),
+};
+
+export const AUTH_RATE_LIMIT = {
+  max: Number.parseInt(process.env.AUTH_RATE_LIMIT_MAX ?? '10'),
+  windowMs: Number.parseInt(
+    process.env.AUTH_RATE_LIMIT_TIME ?? `${15 * 60 * 1000}`
+  ),
+};
+
+export const REGISTRATION_RATE_LIMIT = {
+  max: Number.parseInt(process.env.REGISTRATION_RATE_LIMIT_MAX ?? '3'),
+  windowMs: Number.parseInt(
+    process.env.REGISTRATION_RATE_LIMIT_TIME ?? `${15 * 60 * 1000}`
+  ),
+};
+
+export const REGISTRATION_DAILY_RATE_LIMIT = {
+  max: Number.parseInt(process.env.REGISTRATION_DAILY_RATE_LIMIT_MAX ?? '10'),
+  windowMs: Number.parseInt(
+    process.env.REGISTRATION_DAILY_RATE_LIMIT_TIME ?? `${24 * 60 * 60 * 1000}`
+  ),
+};
+
+export const IP_RATE_LIMIT = {
+  max: Number.parseInt(process.env.IP_RATE_LIMIT_MAX ?? '5'),
+  windowMs: Number.parseInt(
+    process.env.IP_RATE_LIMIT_TIME ?? `${15 * 60 * 1000}`
+  ),
+};
+
+export const EMAIL_RATE_LIMIT = {
+  max: Number.parseInt(process.env.EMAIL_RATE_LIMIT_MAX ?? '2'),
+  windowMs: Number.parseInt(
+    process.env.EMAIL_RATE_LIMIT_TIME ?? `${60 * 60 * 1000}`
+  ),
+};
+
+export const PASSWORD_RESET_RATE_LIMIT = {
+  max: Number.parseInt(process.env.PASSWORD_RESET_RATE_LIMIT_MAX ?? '2'),
+  windowMs: Number.parseInt(
+    process.env.PASSWORD_RESET_RATE_LIMIT_TIME ?? `${60 * 60 * 1000}`
+  ),
+};
+
+export const VERIFICATION_RATE_LIMIT = {
+  max: Number.parseInt(process.env.VERIFICATION_RATE_LIMIT_MAX ?? '2'),
+  windowMs: Number.parseInt(
+    process.env.VERIFICATION_RATE_LIMIT_TIME ?? `${60 * 60 * 1000}`
+  ),
+};
+
+export const MUTATION_RATE_LIMIT = {
+  max: Number.parseInt(process.env.MUTATION_RATE_LIMIT_MAX ?? '20'),
+  windowMs: Number.parseInt(
+    process.env.MUTATION_RATE_LIMIT_TIME ?? `${15 * 60 * 1000}`
+  ),
+};
+
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+  throw new Error('REDIS_URL is required');
+}
+
+export const REDIS = {
+  url: redisUrl,
+  cacheTimeout: Number.parseInt(process.env.REDIS_CACHE_TIMEOUT ?? `${5 * 60}`),
+};

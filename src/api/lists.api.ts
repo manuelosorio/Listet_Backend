@@ -18,6 +18,7 @@ import {
   commentNotLargerThanMaxCharacters,
   isIdValid,
 } from '#middleware/comment.middleware';
+import { mutationApiLimiter } from '#middleware/rate-limit.middleware';
 
 const listApi = Router();
 const listController = new ListController();
@@ -33,6 +34,7 @@ listApi.get('/your-lists', isAuth, listController.getAuthUserLists);
 listApi.get('/list/:slug', isListPrivate, listController.getSingle);
 listApi.post(
   '/create-list',
+  mutationApiLimiter,
   isAuth,
   isVerified,
   checkListTitle,
@@ -40,16 +42,24 @@ listApi.post(
 );
 listApi.put(
   '/update-list/:id',
+  mutationApiLimiter,
   isAuth,
   isListOwner,
   checkListTitle,
   listController.update
 );
-listApi.delete('/delete-list/:id', isAuth, isListOwner, listController.delete);
+listApi.delete(
+  '/delete-list/:id',
+  mutationApiLimiter,
+  isAuth,
+  isListOwner,
+  listController.delete
+);
 /********** Items *************/
 listApi.get('/list/:slug/items', isListPrivate, itemController.get);
 listApi.post(
   '/add-item',
+  mutationApiLimiter,
   isAuth,
   isListOwner,
   isItemEmpty,
@@ -57,18 +67,21 @@ listApi.post(
 );
 listApi.delete(
   '/delete-item/:id',
+  mutationApiLimiter,
   isAuth,
   isListItemOwner,
   itemController.delete
 );
 listApi.put(
   '/update-item-status',
+  mutationApiLimiter,
   isAuth,
   isListOwner,
   itemController.updateStatus
 );
 listApi.put(
   '/update-item/:id',
+  mutationApiLimiter,
   isAuth,
   isListOwner,
   isItemEmpty,
@@ -84,6 +97,7 @@ listApi.get(
 );
 listApi.post(
   '/create-comment',
+  mutationApiLimiter,
   isAuth,
   isCommentBodyEmpty,
   commentHasMinCharacters,
@@ -92,6 +106,7 @@ listApi.post(
 );
 listApi.put(
   '/update-comment/:id',
+  mutationApiLimiter,
   isAuth,
   isCommentOwner,
   isCommentBodyEmpty,
@@ -101,6 +116,7 @@ listApi.put(
 );
 listApi.delete(
   '/delete-comment/:id',
+  mutationApiLimiter,
   isAuth,
   canDeleteComment,
   commentController.delete
