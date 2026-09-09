@@ -14,6 +14,15 @@ import {
 } from '#environments/variables';
 import { tooManyRequests } from '#utilities/response';
 
+import { RedisStore } from 'rate-limit-redis';
+import { redisClient } from '#utilities/redis-client';
+
+const createRedisStore = (prefix: string) =>
+  new RedisStore({
+    sendCommand: (...args: string[]) => redisClient.sendCommand(args),
+    prefix,
+  });
+
 const rateLimitHandler = (_req: Request, res: Response) => tooManyRequests(res);
 
 export const globalApiLimiter = rateLimit({
@@ -21,6 +30,7 @@ export const globalApiLimiter = rateLimit({
   max: GLOBAL_RATE_LIMIT.max,
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRedisStore('ratelimit:global:'),
   handler: rateLimitHandler,
 });
 
@@ -30,6 +40,7 @@ export const globalRegistrationApiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: () => 'registration-global',
+  store: createRedisStore('ratelimit:registration-global:'),
   handler: rateLimitHandler,
 });
 
@@ -38,6 +49,7 @@ export const ipApiLimiter = rateLimit({
   max: IP_RATE_LIMIT.max,
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRedisStore('ratelimit:ip:'),
   handler: rateLimitHandler,
 });
 
@@ -50,9 +62,9 @@ export const emailApiLimiter = rateLimit({
     const email = String(req.body?.email ?? '')
       .trim()
       .toLowerCase();
-
     return email || ipKeyGenerator(req.ip);
   },
+  store: createRedisStore('ratelimit:email:'),
   handler: rateLimitHandler,
 });
 
@@ -62,6 +74,7 @@ export const authApiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
+  store: createRedisStore('ratelimit:auth:'),
   handler: rateLimitHandler,
 });
 
@@ -70,6 +83,7 @@ export const registrationApiLimiter = rateLimit({
   max: REGISTRATION_RATE_LIMIT.max,
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRedisStore('ratelimit:registration:'),
   handler: rateLimitHandler,
 });
 
@@ -78,6 +92,7 @@ export const registrationDailyApiLimiter = rateLimit({
   max: REGISTRATION_DAILY_RATE_LIMIT.max,
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRedisStore('ratelimit:registration-daily:'),
   handler: rateLimitHandler,
 });
 
@@ -86,6 +101,7 @@ export const passwordResetApiLimiter = rateLimit({
   max: PASSWORD_RESET_RATE_LIMIT.max,
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRedisStore('ratelimit:password-reset:'),
   handler: rateLimitHandler,
 });
 
@@ -94,6 +110,7 @@ export const verificationApiLimiter = rateLimit({
   max: VERIFICATION_RATE_LIMIT.max,
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRedisStore('ratelimit:verification:'),
   handler: rateLimitHandler,
 });
 
@@ -102,5 +119,6 @@ export const mutationApiLimiter = rateLimit({
   max: MUTATION_RATE_LIMIT.max,
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRedisStore('ratelimit:mutation:'),
   handler: rateLimitHandler,
 });

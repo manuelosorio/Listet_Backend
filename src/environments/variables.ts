@@ -159,3 +159,14 @@ export const MUTATION_RATE_LIMIT = {
     process.env.MUTATION_RATE_LIMIT_TIME ?? `${15 * 60 * 1000}`
   ),
 };
+
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+  throw new Error('REDIS_URL is required');
+}
+
+export const REDIS = {
+  url: redisUrl,
+  cacheTimeout: Number.parseInt(process.env.REDIS_CACHE_TIMEOUT ?? `${5 * 60}`),
+};
