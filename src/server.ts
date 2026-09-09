@@ -10,6 +10,7 @@ import userApi from '#api/user.api';
 import searchApi from '#api/search.api';
 import { Sockets } from '#utilities/sockets';
 import { ok } from '#utilities/response';
+import { globalApiLimiter } from '#middleware/rate-limit.middleware';
 
 // if (variables.nodeEnv === 'production') {
 //   console.log = () => {
@@ -39,6 +40,7 @@ app.get('/health', (req, res) => {
   ok(res, data);
 });
 app.use(environment);
+app.use(globalApiLimiter);
 app.use(Flash() as any);
 app.use(userApi);
 app.use(listApi);
