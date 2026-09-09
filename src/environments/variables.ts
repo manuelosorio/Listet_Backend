@@ -152,3 +152,10 @@ export const VERIFICATION_RATE_LIMIT = {
     process.env.VERIFICATION_RATE_LIMIT_TIME ?? `${60 * 60 * 1000}`
   ),
 };
+
+export const MUTATION_RATE_LIMIT = {
+  max: Number.parseInt(process.env.MUTATION_RATE_LIMIT_MAX ?? '20'),
+  windowMs: Number.parseInt(
+    process.env.MUTATION_RATE_LIMIT_TIME ?? `${15 * 60 * 1000}`
+  ),
+};

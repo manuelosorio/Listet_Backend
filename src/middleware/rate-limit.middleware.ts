@@ -6,6 +6,7 @@ import {
   GLOBAL_RATE_LIMIT,
   GLOBAL_REGISTRATION_RATE_LIMIT,
   IP_RATE_LIMIT,
+  MUTATION_RATE_LIMIT,
   PASSWORD_RESET_RATE_LIMIT,
   REGISTRATION_DAILY_RATE_LIMIT,
   REGISTRATION_RATE_LIMIT,
@@ -91,6 +92,14 @@ export const passwordResetApiLimiter = rateLimit({
 export const verificationApiLimiter = rateLimit({
   windowMs: VERIFICATION_RATE_LIMIT.windowMs,
   max: VERIFICATION_RATE_LIMIT.max,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: rateLimitHandler,
+});
+
+export const mutationApiLimiter = rateLimit({
+  windowMs: MUTATION_RATE_LIMIT.windowMs,
+  max: MUTATION_RATE_LIMIT.max,
   standardHeaders: true,
   legacyHeaders: false,
   handler: rateLimitHandler,
