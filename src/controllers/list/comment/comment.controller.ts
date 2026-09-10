@@ -42,7 +42,7 @@ export class CommentController {
         }
         const updatedResults: ListCommentModel = results.map(
           (result: ListCommentModel) => {
-            result.is_owner = result.author_id === user.id ?? false;
+            result.is_owner = result.author_id === user.id;
             return result;
           }
         );
