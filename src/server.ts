@@ -34,7 +34,19 @@ app.get('/health', (_req, res) => {
     date: new Date(),
   });
 });
-
+if (APP.debug) {
+  app.get('/debug/proxy', (req, res) => {
+    ok(res, {
+      trustProxy: app.get('trust proxy'),
+      protocol: req.protocol,
+      secure: req.secure,
+      host: req.get('host'),
+      xForwardedProto: req.get('x-forwarded-proto'),
+      xForwardedPort: req.get('x-forwarded-port'),
+      xForwardedFor: req.get('x-forwarded-for'),
+    });
+  });
+}
 app.use(environment);
 app.use(Flash() as any);
 
@@ -60,20 +72,6 @@ async function bootstrap(): Promise<void> {
   app.use(listApi);
   app.use(tokensApi);
   app.use('/search', searchApi);
-
-  if (APP.debug) {
-    app.get('/debug/proxy', (req, res) => {
-      ok(res, {
-        trustProxy: app.get('trust proxy'),
-        protocol: req.protocol,
-        secure: req.secure,
-        host: req.get('host'),
-        xForwardedProto: req.get('x-forwarded-proto'),
-        xForwardedPort: req.get('x-forwarded-port'),
-        xForwardedFor: req.get('x-forwarded-for'),
-      });
-    });
-  }
 
   app.use(errorHandler);
 
