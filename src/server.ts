@@ -42,8 +42,13 @@ if (APP.debug) {
       secure: req.secure,
       host: req.get('host'),
       xForwardedProto: req.get('x-forwarded-proto'),
-      xForwardedPort: req.get('x-forwarded-port'),
+      ip: req.ip,
+      ips: req.ips,
+      remoteAddress: req.socket.remoteAddress,
       xForwardedFor: req.get('x-forwarded-for'),
+      xRealIp: req.get('x-real-ip'),
+      cfConnectingIp: req.get('cf-connecting-ip'),
+      cfRay: req.get('cf-ray'),
     });
   });
 }
